@@ -64,7 +64,7 @@
                                 <button class="btn btn-sm btn-outline-danger delete-jenis" data-id="{{ $jenis->id }}">
                                     <i class="bi bi-trash"></i>
                                 </button>
-                            </tr>
+                            </td>
                         </tr>
                         @empty
                         <tr>
@@ -958,7 +958,7 @@
             </div>
             <div style="margin-top:50px; text-align:right;">
                 <p>Bandung, {tanggal_surat}</p>
-                <p>Dekan,</p>
+                <p>Wakil Dekan Bidang Pembelajaran dan Kemahasiswaan,</p>
                 <br><br>
                 <p><strong><u>{dekan}</u></strong></p>
                 <p>{nip_dekan}</p>
