@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\JenisSurat;
+use App\Models\Surat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -93,5 +94,23 @@ class JenisSuratController extends Controller
         
         return redirect()->route('admin.jenis-surat.index')
             ->with('success', 'Jenis surat berhasil dihapus');
+    }
+
+    public function getSuratJson($id)
+    {
+        $surat = Surat::with(['mahasiswa', 'jenisSurat', 'approvedBy'])->findOrFail($id);
+        
+        return response()->json([
+            'id' => $surat->id,
+            'mahasiswa' => $surat->mahasiswa->nama_lengkap ?? '-',
+            'npm' => $surat->mahasiswa->npm ?? '-',
+            'jenis_surat' => $surat->jenisSurat->nama_surat ?? '-',
+            'keperluan' => $surat->keperluan,
+            'status' => $surat->status == 'approved' ? 'disetujui' : 'ditolak',
+            'created_at' => $surat->created_at->format('d/m/Y H:i'),
+            'approved_at' => $surat->approved_at ? $surat->approved_at->format('d/m/Y H:i') : null,
+            'alasan_reject' => $surat->alasan_reject,
+            'content' => $surat->content
+        ]);
     }
 }

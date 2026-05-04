@@ -32,7 +32,7 @@ class LoginController extends Controller
             
             // Update last login
             $user = Auth::user();
-            $user->update(['last_login' => now()]);
+            // $user->update(['last_login' => now()]);
             
             // Redirect based on role
             if ($user->role == 'admin') {

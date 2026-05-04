@@ -118,6 +118,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::get('/surat/{id}/pdf', [JenisSuratController::class, 'exportPdf'])
         ->name('surat.pdf');
+    Route::get('/surat/{id}/json', [JenisSuratController::class, 'getSuratJson'])->name('surat.json');
 });
 
 // =============== PETUGAS ROUTES ===============

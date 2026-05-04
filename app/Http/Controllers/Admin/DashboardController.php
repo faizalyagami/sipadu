@@ -29,6 +29,14 @@ class DashboardController extends Controller
         $totalPending = Surat::where('status', 'pending')->count();
         $aktifCount = Mahasiswa::where('status_mahasiswa', 'Aktif')->count();
 
+        // Debug - cek apakah ada data
+        \Log::info('Dashboard Data:', [
+            'totalMahasiswa' => $totalMahasiswa,
+            'totalPetugas' => $totalPetugas,
+            'totalFakultas' => $totalFakultas,
+            'totalPending' => $totalPending,
+        ]);
+
         // Data chart surat per bulan
         $months = [];
         $suratCounts = [];
@@ -43,13 +51,35 @@ class DashboardController extends Controller
             $suratCounts[] = $count;
         }
 
-        // Data kategori surat
-        $kategoriData = JenisSurat::select('kategori', DB::raw('count(*) as total'))
-            ->groupBy('kategori')
-            ->get();
+        // Data kategori surat - PERBAIKAN: gunakan 'kategori_surat' bukan 'kategori'
+        // Cek kolom yang tersedia di tabel jenis_surats
+        $kategoriLabels = [];
+        $kategoriCounts = [];
         
-        $kategoriLabels = $kategoriData->pluck('kategori')->toArray();
-        $kategoriCounts = $kategoriData->pluck('total')->toArray();
+        try {
+            // Coba dengan 'kategori_surat'
+            $kategoriData = JenisSurat::select('kategori_surat', DB::raw('count(*) as total'))
+                ->groupBy('kategori_surat')
+                ->get();
+            
+            if ($kategoriData->isNotEmpty()) {
+                $kategoriLabels = $kategoriData->pluck('kategori_surat')->toArray();
+                $kategoriCounts = $kategoriData->pluck('total')->toArray();
+            } else {
+                // Fallback: ambil dari surat langsung
+                $kategoriData = Surat::select('jenis_surats.kategori_surat', DB::raw('count(*) as total'))
+                    ->join('jenis_surats', 'surats.jenis_surat_id', '=', 'jenis_surats.id')
+                    ->groupBy('jenis_surats.kategori_surat')
+                    ->get();
+                
+                if ($kategoriData->isNotEmpty()) {
+                    $kategoriLabels = $kategoriData->pluck('kategori_surat')->toArray();
+                    $kategoriCounts = $kategoriData->pluck('total')->toArray();
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error getting kategori data: ' . $e->getMessage());
+        }
 
         // Jika tidak ada data kategori, beri data default
         if (empty($kategoriLabels)) {
