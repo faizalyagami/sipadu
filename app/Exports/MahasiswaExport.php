@@ -62,11 +62,28 @@ class MahasiswaExport implements FromCollection, WithHeadings, WithMapping, With
 
     public function map($mahasiswa): array
     {
-        // Hitung SKS (contoh: 144 total SKS untuk S1)
         $totalSKS = 144;
         $sksTempuh = $mahasiswa->sks_tempuh ?? 0;
         $sksLulus = $sksTempuh;
         $sksSisa = $totalSKS - $sksTempuh;
+
+        $tanggalLahir = '-';
+        if ($mahasiswa->tanggal_lahir) {
+            try {
+                $tanggalLahir = date('d/m/Y', strtotime($mahasiswa->tanggal_lahir));
+            } catch (\Exception $e) {
+                $tanggalLahir = '-';
+            }
+        }
+
+        $tanggalMasuk = '-';
+        if ($mahasiswa->tanggal_masuk) {
+            try {
+                $tanggalMasuk = date('d/m/Y', strtotime($mahasiswa->tanggal_masuk));
+            } catch (\Exception $e) {
+                $tanggalMasuk = '-';
+            }
+        }
         
         return [
             $mahasiswa->npm,
@@ -79,7 +96,7 @@ class MahasiswaExport implements FromCollection, WithHeadings, WithMapping, With
             $mahasiswa->ipk ? number_format($mahasiswa->ipk, 2, ',', '') : '-',
             $mahasiswa->ipk ? number_format($mahasiswa->ipk, 3, ',', '') : '-',
             $mahasiswa->tempat_lahir,
-            $mahasiswa->tanggal_lahir ? $mahasiswa->tanggal_lahir->format('d/m/Y') : '-',
+            $tanggalLahir,
             $mahasiswa->jenis_kelamin ?? '-',
             $mahasiswa->no_hp ?? '-',
             $mahasiswa->user->email ?? '-',
@@ -87,7 +104,7 @@ class MahasiswaExport implements FromCollection, WithHeadings, WithMapping, With
             $mahasiswa->prodi->nama_prodi ?? '-',
             $mahasiswa->prodi->jenjang ?? '-',
             $mahasiswa->status_mahasiswa,
-            $mahasiswa->tanggal_masuk ? $mahasiswa->tanggal_masuk->format('d/m/Y') : '-',
+            $tanggalMasuk,
             $mahasiswa->alamat,
         ];
     }

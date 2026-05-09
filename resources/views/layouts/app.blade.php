@@ -1,4 +1,3 @@
-{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -40,7 +39,7 @@
             overflow-x: hidden;
         }
         
-        /* Navbar Styles - Lebih ringkas */
+        /* Navbar Styles */
         .navbar {
             background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-purple) 100%);
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
@@ -84,7 +83,7 @@
             color: white;
         }
         
-        /* Sidebar Styles - Lebih rapi */
+        /* Sidebar Styles */
         .sidebar {
             background: white;
             width: 260px;
@@ -178,7 +177,7 @@
             color: #a0aec0;
         }
         
-        /* Main Content - Lebih lega */
+        /* Main Content */
         .main-content {
             margin-left: 260px;
             margin-top: 56px;
@@ -232,7 +231,7 @@
             font-size: 0.75rem;
         }
         
-        /* Table Styles - Lebih rapi */
+        /* Table Styles */
         .table {
             margin-bottom: 0;
         }
@@ -551,18 +550,6 @@
                 }
             });
             
-            // Initialize DataTables
-            if ($('.datatable').length) {
-                $('.datatable').DataTable({
-                    responsive: true,
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
-                    },
-                    pageLength: 10,
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]]
-                });
-            }
-            
             // Auto hide alerts after 4 seconds
             setTimeout(function() {
                 $('.alert').fadeOut('slow');
@@ -570,7 +557,7 @@
         });
         
         // SweetAlert delete confirmation
-        function confirmDelete(url, title = 'Yakin hapus?') {
+        window.confirmDelete = function(url, title = 'Yakin hapus?') {
             Swal.fire({
                 title: title,
                 text: "Data akan dihapus secara permanen!",
@@ -586,10 +573,10 @@
                     window.location.href = url;
                 }
             });
-        }
+        };
         
         // Show loading
-        function showLoading() {
+        window.showLoading = function() {
             Swal.fire({
                 title: 'Loading...',
                 text: 'Mohon tunggu',
@@ -598,10 +585,10 @@
                     Swal.showLoading();
                 }
             });
-        }
+        };
         
         // Show toast notification
-        function showToast(message, type = 'success') {
+        window.showToast = function(message, type = 'success') {
             Swal.fire({
                 icon: type,
                 title: message,
@@ -611,7 +598,7 @@
                 timer: 3000,
                 timerProgressBar: true
             });
-        }
+        };
     </script>
     
     @stack('scripts')

@@ -90,10 +90,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/prodi/{prodi}', [FakultasController::class, 'destroyProdi'])->name('prodi.destroy');
 
     // Mahasiswa Management
-    Route::resource('mahasiswa', MahasiswaController::class);
     Route::get('/mahasiswa/export', [MahasiswaController::class, 'export'])->name('mahasiswa.export');
+    Route::get('/mahasiswa/export/{status}', [MahasiswaController::class, 'export'])->name('mahasiswa.export.status'); // Tambahan
     Route::get('/mahasiswa/export-template', [MahasiswaController::class, 'exportTemplate'])->name('mahasiswa.export-template');
     Route::post('/mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
+    Route::get('/mahasiswa/import-progress/{batchId}', [MahasiswaController::class, 'checkProgress'])->name('mahasiswa.import-progress'); // TAMBAHKAN INI
+    Route::resource('mahasiswa', MahasiswaController::class)->except(['show']);
 
     // Jenis Surat Management
     Route::resource('jenis-surat', JenisSuratController::class)->except(['show']);
