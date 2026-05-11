@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FakultasController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\JenisSuratController;
+use App\Http\Controllers\Admin\KategoriSuratController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
 use App\Http\Controllers\Petugas\ApprovalController;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
@@ -94,13 +95,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/mahasiswa/export/{status}', [MahasiswaController::class, 'export'])->name('mahasiswa.export.status'); // Tambahan
     Route::get('/mahasiswa/export-template', [MahasiswaController::class, 'exportTemplate'])->name('mahasiswa.export-template');
     Route::post('/mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
-    Route::get('/mahasiswa/import-progress/{batchId}', [MahasiswaController::class, 'checkProgress'])->name('mahasiswa.import-progress'); // TAMBAHKAN INI
+    Route::get('/mahasiswa/import-progress/{batchId}', [MahasiswaController::class, 'checkProgress'])->name('mahasiswa.import-progress');
     Route::resource('mahasiswa', MahasiswaController::class)->except(['show']);
+    Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'show'])->name('mahasiswa.show');
 
     // Jenis Surat Management
     Route::resource('jenis-surat', JenisSuratController::class)->except(['show']);
+    Route::get('kategori-surat', [KategoriSuratController::class, 'index'])->name('kategori-surat.index');
     Route::post('/jenis-surat/{jenisSurat}/template', [JenisSuratController::class, 'updateTemplate'])->name('jenis-surat.template');
-
+    Route::resource('kategori-surat', KategoriSuratController::class);
     // Surat
     Route::get('/surat/{id}/pdf', [JenisSuratController::class, 'exportPdf'])->name('surat.pdf');
     Route::get('/surat/{id}/json', [JenisSuratController::class, 'getSuratJson'])->name('surat.json');

@@ -1,3 +1,4 @@
+{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -8,28 +9,23 @@
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- DataTables -->
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <!-- SweetAlert2 -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         :root {
             --primary-purple: #6f42c1;
             --secondary-purple: #8b5cf6;
             --dark-purple: #5a32a3;
             --light-purple: #e9d5ff;
-            --bg-purple: #f3e8ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
@@ -39,7 +35,7 @@
             overflow-x: hidden;
         }
         
-        /* Navbar Styles */
+        /* Navbar */
         .navbar {
             background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-purple) 100%);
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
@@ -83,7 +79,7 @@
             color: white;
         }
         
-        /* Sidebar Styles */
+        /* Sidebar */
         .sidebar {
             background: white;
             width: 260px;
@@ -91,10 +87,12 @@
             top: 56px;
             left: 0;
             bottom: 0;
-            box-shadow: 1px 0 10px rgba(0,0,0,0.03);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
             z-index: 1020;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         
         .sidebar-header {
@@ -131,7 +129,6 @@
             color: #718096;
         }
         
-        /* Navigation */
         .nav-section {
             padding: 0.75rem 1.25rem 0.25rem;
             font-size: 0.65rem;
@@ -186,7 +183,7 @@
             transition: all 0.3s ease;
         }
         
-        /* Card Styles */
+        /* Cards */
         .card {
             border: none;
             border-radius: 12px;
@@ -210,7 +207,7 @@
             color: #2d3748;
         }
         
-        /* Button Styles */
+        /* Buttons */
         .btn-primary {
             background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
             border: none;
@@ -231,7 +228,7 @@
             font-size: 0.75rem;
         }
         
-        /* Table Styles */
+        /* Tables */
         .table {
             margin-bottom: 0;
         }
@@ -258,7 +255,7 @@
             background: #faf5ff;
         }
         
-        /* Status Badge */
+        /* Badges */
         .badge {
             padding: 0.25rem 0.6rem;
             border-radius: 20px;
@@ -266,25 +263,7 @@
             font-weight: 500;
         }
         
-        /* Page Title */
-        .page-title {
-            margin-bottom: 1.25rem;
-        }
-        
-        .page-title h4 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 0.25rem;
-        }
-        
-        .page-title p {
-            font-size: 0.85rem;
-            color: #718096;
-            margin-bottom: 0;
-        }
-        
-        /* Alert */
+        /* Alerts */
         .alert {
             border: none;
             border-radius: 10px;
@@ -293,27 +272,7 @@
             font-size: 0.85rem;
         }
         
-        /* Modal */
-        .modal-content {
-            border: none;
-            border-radius: 16px;
-        }
-        
-        .modal-header {
-            border-bottom-color: #edf2f7;
-            padding: 1rem 1.25rem;
-        }
-        
-        .modal-body {
-            padding: 1.25rem;
-        }
-        
-        .modal-footer {
-            border-top-color: #edf2f7;
-            padding: 1rem 1.25rem;
-        }
-        
-        /* Form */
+        /* Forms */
         .form-label {
             font-size: 0.85rem;
             font-weight: 500;
@@ -331,6 +290,26 @@
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-purple);
             box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+        }
+        
+        /* Modals */
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+        }
+        
+        .modal-header {
+            border-bottom-color: #edf2f7;
+            padding: 1rem 1.25rem;
+        }
+        
+        .modal-body {
+            padding: 1.25rem;
+        }
+        
+        .modal-footer {
+            border-top-color: #edf2f7;
+            padding: 1rem 1.25rem;
         }
         
         /* Mobile Responsive */
@@ -388,7 +367,7 @@
                 </button>
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <i class="bi bi-envelope-paper-fill"></i>
-                    <span>Sistem Surat Unisba</span>
+                    <span>Sistem Pelayanan Surat Terpadu</span>
                 </a>
             </div>
             <div class="dropdown">
@@ -414,88 +393,7 @@
     </nav>
     
     <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-wrapper">
-                <i class="bi bi-building"></i>
-            </div>
-            <h5>Universitas Islam Bandung</h5>
-            <small>Sistem Informasi Surat</small>
-        </div>
-        
-        <ul class="nav flex-column">
-            @if(auth()->user()->isAdmin())
-                <li class="nav-section">MAIN</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-section">MASTER DATA</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
-                        <i class="bi bi-people"></i> Data Petugas
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.fakultas.*') ? 'active' : '' }}" href="{{ route('admin.fakultas.index') }}">
-                        <i class="bi bi-building"></i> Data Fakultas
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}" href="{{ route('admin.mahasiswa.index') }}">
-                        <i class="bi bi-mortarboard"></i> Data Mahasiswa
-                    </a>
-                </li>
-                <li class="nav-section">SURAT</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.jenis-surat.*') ? 'active' : '' }}" href="{{ route('admin.jenis-surat.index') }}">
-                        <i class="bi bi-file-text"></i> Jenis Surat
-                    </a>
-                </li>
-            @elseif(auth()->user()->isPetugas())
-                <li class="nav-section">MAIN</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('petugas.dashboard') ? 'active' : '' }}" href="{{ route('petugas.dashboard') }}">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-section">APPROVAL</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('petugas.approval.index') ? 'active' : '' }}" href="{{ route('petugas.approval.index') }}">
-                        <i class="bi bi-check2-circle"></i> Approve Surat
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('petugas.history') ? 'active' : '' }}" href="{{ route('petugas.history') }}">
-                        <i class="bi bi-clock-history"></i> Riwayat Approve
-                    </a>
-                </li>
-            @elseif(auth()->user()->isMahasiswa())
-                <li class="nav-section">MAIN</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}" href="{{ route('mahasiswa.dashboard') }}">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-section">PENGAJUAN</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('mahasiswa.pengajuan.*') ? 'active' : '' }}" href="{{ route('mahasiswa.pengajuan.index') }}">
-                        <i class="bi bi-send"></i> Buat Surat Baru
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('mahasiswa.riwayat') ? 'active' : '' }}" href="{{ route('mahasiswa.riwayat') }}">
-                        <i class="bi bi-archive"></i> Riwayat Surat
-                    </a>
-                </li>
-            @endif
-        </ul>
-        
-        <div class="sidebar-footer">
-            <small>© {{ date('Y') }} Unisba | v1.0</small>
-        </div>
-    </div>
+    @include('components.sidebar')
     
     <!-- Main Content -->
     <div class="main-content fade-in-up">
@@ -509,13 +407,6 @@
         @if(session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-        
-        @if(session('warning'))
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('warning') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -550,6 +441,18 @@
                 }
             });
             
+            // Initialize DataTables
+            if ($('.datatable').length) {
+                $('.datatable').DataTable({
+                    responsive: true,
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+                    },
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]]
+                });
+            }
+            
             // Auto hide alerts after 4 seconds
             setTimeout(function() {
                 $('.alert').fadeOut('slow');
@@ -572,31 +475,6 @@
                 if (result.isConfirmed) {
                     window.location.href = url;
                 }
-            });
-        };
-        
-        // Show loading
-        window.showLoading = function() {
-            Swal.fire({
-                title: 'Loading...',
-                text: 'Mohon tunggu',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-        };
-        
-        // Show toast notification
-        window.showToast = function(message, type = 'success') {
-            Swal.fire({
-                icon: type,
-                title: message,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
             });
         };
     </script>

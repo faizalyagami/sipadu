@@ -10,7 +10,6 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        // Admin
         User::create([
             'name' => 'Administrator',
             'email' => 'admin@unisba.ac.id',

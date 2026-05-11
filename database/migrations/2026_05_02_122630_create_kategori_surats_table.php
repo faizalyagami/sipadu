@@ -11,16 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jenis_surats', function (Blueprint $table) {
+        Schema::create('kategori_surats', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_surat');
-            $table->foreignId('kategori_surat_id')->constrained('kategori_surats')->cascadeOnDelete();
-            $table->string('kode_surat')->unique()->nullable();
+            $table->string('nama_kategori');
+            $table->string('slug');
             $table->text('deskripsi')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->integer('processing_time')->default(1);
-            $table->text('syarat_surat')->nullable();
-            $table->longText('template_content')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jenis_surats');
+        Schema::dropIfExists('kategori_surats');
     }
 };

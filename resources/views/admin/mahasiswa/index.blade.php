@@ -104,6 +104,9 @@
                             </td>
                             <td>{{ $mhs->ipk ?? '-' }}</td>
                             <td>
+                                <a href="{{ route('admin.mahasiswa.show', $mhs->id) }}" class="btn btn-sm btn-info" title="Detail Mahasiswa">
+                                    <i class="bi bi-eye"></i>
+                                </a>
                                 <a href="{{ route('admin.mahasiswa.edit', $mhs->id) }}" class="btn btn-sm btn-warning">
                                     <i class="bi bi-pencil"></i>
                                 </a>

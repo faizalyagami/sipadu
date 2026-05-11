@@ -143,6 +143,12 @@ class MahasiswaController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        $mahasiswa = Mahasiswa::with(['user', 'prodi.fakultas'])->findOrFail($id);
+        return view('admin.mahasiswa.show', compact('mahasiswa'));
+    }
+
     public function destroy(Mahasiswa $mahasiswa)
     {
         DB::beginTransaction();

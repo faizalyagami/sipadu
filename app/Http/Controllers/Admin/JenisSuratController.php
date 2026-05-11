@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\JenisSurat;
+use App\Models\KategoriSurat;
 use App\Models\Surat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,20 +13,22 @@ class JenisSuratController extends Controller
 {
     public function index()
     {
-        $jenisSurats = JenisSurat::all();
-        return view('admin.jenis_surat.index', compact('jenisSurats'));
+        $jenisSurats = JenisSurat::with('kategoriSurat')->get();
+        $kategoris = KategoriSurat::active()->get();
+        
+        return view('admin.jenis_surat.index', compact('jenisSurats', 'kategoris'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'nama_surat' => 'required|string|max:255',
-            'kategori' => 'required|string'
+            'kategori_surat_id' => 'required|exists:kategori_surats,id'
         ]);
 
         JenisSurat::create([
             'nama_surat' => $request->nama_surat,
-            'kategori_surat' => $request->kategori,
+            'kategori_surat_id' => $request->kategori_surat_id,
             'is_active' => true
         ]);
 
@@ -37,12 +40,12 @@ class JenisSuratController extends Controller
     {
         $request->validate([
             'nama_surat' => 'required|string|max:255',
-            'kategori' => 'required|string'
+            'kategori_surat_id' => 'required|exists:kategori_surats,id'
         ]);
 
         $jenisSurat->update([
             'nama_surat' => $request->nama_surat,
-            'kategori_surat' => $request->kategori
+            'kategori_surat_id' => $request->kategori_surat_id
         ]);
 
         return redirect()->route('admin.jenis-surat.index')

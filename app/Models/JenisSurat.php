@@ -10,13 +10,12 @@ class JenisSurat extends Model
     
     protected $fillable = [
         'nama_surat',
-        'kategori_surat',
+        'kategori_surat_id',
         'kode_surat',
         'deskripsi',
         'is_active',
         'processing_time',
         'syarat_surat',
-        'urut',
         'template_content',
         'logo_path',
         'kop_surat_path'
@@ -25,6 +24,11 @@ class JenisSurat extends Model
     protected $casts = [
         'is_active' => 'boolean'
     ];
+
+    public function kategoriSurat()
+    {
+        return $this->belongsTo(KategoriSurat::class, 'kategori_surat_id');
+    }
 
     public static function generateNomorSurat($kode = 'M.10/Dek.Psi-k')
     {
