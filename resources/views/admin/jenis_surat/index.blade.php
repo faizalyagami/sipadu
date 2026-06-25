@@ -255,7 +255,7 @@
     <!-- ============================================ -->
     <!-- MODAL EDIT TEMPLATE (Fullscreen) -->
     <!-- ============================================ -->
-    <div class="modal fade" id="editTemplateModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <<div class="modal fade" id="editTemplateModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
                 <form id="editTemplateForm" method="POST" enctype="multipart/form-data">
@@ -269,9 +269,10 @@
                     </div>
                     <div class="modal-body p-0">
                         <div class="row g-0 h-100">
-                            <!-- Sidebar Kiri -->
+                            <!-- Sidebar Kiri (kolom 2) -->
                             <div class="col-md-2 bg-light p-3"
                                 style="border-right: 1px solid #dee2e6; height: calc(100vh - 130px); overflow-y: auto;">
+
                                 <!-- Upload Logo -->
                                 <div class="mb-4">
                                     <label class="fw-bold mb-2"><i class="bi bi-image"></i> Logo Universitas</label>
@@ -437,9 +438,54 @@
                                         <code>{nip_dekan}</code> - NIP Dekan
                                     </button>
                                 </div>
+
+                                <hr>
+
+                                <!-- Format Paragraf -->
+                                <h6 class="fw-bold mb-2">
+                                    <i class="bi bi-text-paragraph"></i> Format Paragraf
+                                </h6>
+                                <div class="card mb-3">
+                                    <div class="card-body p-2">
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Left Margin</label>
+                                            <input type="number" id="leftMargin" class="form-control form-control-sm"
+                                                value="0">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Left Indent</label>
+                                            <input type="number" id="leftIndent" class="form-control form-control-sm"
+                                                value="0">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">First Line Indent</label>
+                                            <input type="number" id="firstLineIndent"
+                                                class="form-control form-control-sm" value="48">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Line Spacing</label>
+                                            <select id="lineSpacing" class="form-select form-select-sm">
+                                                <option value="1">1.0</option>
+                                                <option value="1.15">1.15</option>
+                                                <option value="1.5" selected>1.5</option>
+                                                <option value="2">2.0</option>
+                                            </select>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                id="formatSuratResmi">
+                                                <i class="bi bi-file-earmark-text"></i> Format Surat Resmi
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                id="applyParagraphStyle">
+                                                <i class="bi bi-check-circle"></i> Terapkan ke Paragraf
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Editor Area -->
+                            <!-- Editor Area (kolom 10) -->
                             <div class="col-md-10 p-0 d-flex flex-column">
                                 <textarea id="templateEditor" name="template_content" style="width:100%; height:600px;"></textarea>
                             </div>
@@ -456,252 +502,308 @@
                 </form>
             </div>
         </div>
-    </div>
+        </div>
 
-    <!-- ============================================ -->
-    <!-- MODAL PREVIEW -->
-    <!-- ============================================ -->
-    <div class="modal fade" id="previewModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
-        <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1, #8b5cf6);">
-                    <h5 class="modal-title text-white">
-                        <i class="bi bi-eye me-2"></i>Preview Template Surat
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" style="background:#e5e5e5; overflow:auto;">
-                    <div id="previewPaper"
-                        style="width:210mm; min-height:297mm; margin:0 auto; background:white; padding:20mm; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+        <!-- ============================================ -->
+        <!-- MODAL PREVIEW -->
+        <!-- ============================================ -->
+        <div class="modal fade" id="previewModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1, #8b5cf6);">
+                        <h5 class="modal-title text-white">
+                            <i class="bi bi-eye me-2"></i>Preview Template Surat
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn btn-primary" id="printPreviewBtn"><i
-                            class="bi bi-printer me-1"></i> Print</button>
+                    <div class="modal-body" style="background:#e5e5e5; overflow:auto;">
+                        <div id="previewPaper"
+                            style="width:210mm; min-height:297mm; margin:0 auto; background:white; padding:20mm; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn btn-primary" id="printPreviewBtn"><i
+                                class="bi bi-printer me-1"></i> Print</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection
 
-@push('styles')
-    <style>
-        .table> :not(caption)>*>* {
-            vertical-align: middle;
-        }
-
-        /* CKEditor Styling */
-        .cke_top {
-            background: #f8f9fa !important;
-            border-bottom: 1px solid #dee2e6 !important;
-            padding: 8px !important;
-        }
-
-        .cke_editable {
-            font-family: 'Times New Roman', Times, serif !important;
-            font-size: 12pt !important;
-            padding: 20mm !important;
-            background: white !important;
-            min-height: 500px;
-        }
-
-        /* Variable buttons */
-        .insert-variable {
-            text-align: left;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .insert-variable:hover {
-            background-color: #6f42c1 !important;
-            color: white !important;
-            border-color: #6f42c1 !important;
-        }
-
-        .insert-variable code {
-            background: #f8f9fa;
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-size: 11px;
-        }
-
-        .insert-variable:hover code {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        /* Preview paper */
-        #previewPaper {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.6;
-        }
-
-        #previewPaper table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        #previewPaper table td {
-            padding: 4px 0;
-        }
-
-        @media print {
-            body * {
-                visibility: hidden;
+    @push('styles')
+        <style>
+            .table> :not(caption)>*>* {
+                vertical-align: middle;
             }
 
-            #previewPaper,
-            #previewPaper * {
-                visibility: visible;
+            /* CKEditor Styling */
+            .cke_top {
+                background: #f8f9fa !important;
+                border-bottom: 1px solid #dee2e6 !important;
+                padding: 8px !important;
             }
 
+            .cke_editable {
+                font-family: 'Times New Roman', Times, serif !important;
+                font-size: 12pt !important;
+                padding: 20mm !important;
+                background: white !important;
+                min-height: 500px;
+            }
+
+            /* Variable buttons */
+            .insert-variable {
+                text-align: left;
+                font-size: 12px;
+                transition: all 0.2s ease;
+            }
+
+            .insert-variable:hover {
+                background-color: #6f42c1 !important;
+                color: white !important;
+                border-color: #6f42c1 !important;
+            }
+
+            .insert-variable code {
+                background: #f8f9fa;
+                padding: 2px 4px;
+                border-radius: 4px;
+                font-size: 11px;
+            }
+
+            .insert-variable:hover code {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+            }
+
+            #leftMargin,
+            #leftIndent,
+            #firstLineIndent,
+            #lineSpacing {
+                font-size: 12px;
+            }
+
+            .card .form-label.small {
+                margin-bottom: 3px;
+            }
+
+            .card .btn-sm {
+                font-size: 12px;
+            }
+
+            /* Preview paper */
             #previewPaper {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 15mm;
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 12pt;
+                line-height: 1.6;
             }
-        }
-    </style>
-@endpush
 
-@push('scripts')
-    <script src="//cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-            let editor = null;
-            let currentJenisId = null;
-            let currentKopUrl = null;
+            #previewPaper table {
+                border-collapse: collapse;
+                width: 100%;
+            }
 
-            // ============================================
-            // DELETE JENIS SURAT - Confirm Function
-            // ============================================
-            window.confirmDeleteJenisSurat = function(form, nama) {
-                Swal.fire({
-                    title: 'Apakah anda yakin?',
-                    html: `Jenis surat <strong>"${nama}"</strong> akan dihapus permanen!<br>
-                   <small class="text-danger">Data template surat juga akan terhapus.</small>`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
-                return false;
-            };
+            #previewPaper table td {
+                padding: 4px 0;
+            }
 
-            // ============================================
-            // INIT DATATABLE
-            // ============================================
-            if (document.getElementById('jenisSuratTable')) {
-                try {
-                    if ($.fn.DataTable.isDataTable('#jenisSuratTable')) {
-                        $('#jenisSuratTable').DataTable().destroy();
-                    }
-                    $('#jenisSuratTable').DataTable({
-                        responsive: true,
-                        language: {
-                            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
-                        },
-                        pageLength: 10,
-                        columnDefs: [{
-                            orderable: false,
-                            targets: [3, 4, 5]
-                        }],
-                        order: [
-                            [0, 'asc']
-                        ]
-                    });
-                } catch (e) {
-                    console.log('DataTable error:', e);
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+
+                #previewPaper,
+                #previewPaper * {
+                    visibility: visible;
+                }
+
+                #previewPaper {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    margin: 0;
+                    padding: 15mm;
                 }
             }
+        </style>
+    @endpush
 
-            // ============================================
-            // EDIT JENIS SURAT
-            // ============================================
-            document.querySelectorAll('.edit-jenis').forEach(button => {
-                button.addEventListener('click', function() {
-                    const id = this.dataset.id;
-                    const nama = this.dataset.nama;
-                    const kategoriId = this.dataset.kategori;
+    @push('scripts')
+        <script src="//cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+                let editor = null;
+                let currentJenisId = null;
+                let currentKopUrl = null;
 
-                    document.getElementById('edit_nama_surat').value = nama;
-                    document.getElementById('edit_kategori_id').value = kategoriId;
-                    document.getElementById('edit_is_active').checked = true;
+                // ============================================
+                // DELETE JENIS SURAT - Confirm Function
+                // ============================================
+                window.confirmDeleteJenisSurat = function(form, nama) {
+                    Swal.fire({
+                        title: 'Apakah anda yakin?',
+                        html: `Jenis surat <strong>"${nama}"</strong> akan dihapus permanen!<br>
+                   <small class="text-danger">Data template surat juga akan terhapus.</small>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                    return false;
+                };
 
-                    document.getElementById('editJenisSuratForm').action =
-                        `/admin/jenis-surat/${id}`;
-                    $('#editJenisSuratModal').modal('show');
+                // ============================================
+                // INIT DATATABLE
+                // ============================================
+                if (document.getElementById('jenisSuratTable')) {
+                    try {
+                        if ($.fn.DataTable.isDataTable('#jenisSuratTable')) {
+                            $('#jenisSuratTable').DataTable().destroy();
+                        }
+                        $('#jenisSuratTable').DataTable({
+                            responsive: true,
+                            language: {
+                                "sProcessing": "Sedang memproses...",
+                                "sLengthMenu": "Tampilkan _MENU_ data",
+                                "sZeroRecords": "Tidak ada data yang ditemukan",
+                                "sInfo": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                                "sInfoEmpty": "Menampilkan 0 sampai 0 dari 0 data",
+                                "sInfoFiltered": "(difilter dari _MAX_ total data)",
+                                "sSearch": "Cari:",
+                                "sEmptyTable": "Tidak ada data tersedia",
+                                "oPaginate": {
+                                    "sFirst": "Pertama",
+                                    "sPrevious": "Sebelumnya",
+                                    "sNext": "Selanjutnya",
+                                    "sLast": "Terakhir"
+                                }
+                            },
+                            pageLength: 10,
+                            columnDefs: [{
+                                orderable: false,
+                                targets: [3, 4, 5]
+                            }],
+                            order: [
+                                [0, 'asc']
+                            ]
+                        });
+                    } catch (e) {
+                        console.log('DataTable error:', e);
+                    }
+                }
+
+                // ============================================
+                // EDIT JENIS SURAT
+                // ============================================
+                document.querySelectorAll('.edit-jenis').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const id = this.dataset.id;
+                        const nama = this.dataset.nama;
+                        const kategoriId = this.dataset.kategori;
+
+                        const editNamaSurat = document.getElementById('edit_nama_surat');
+                        const editKategoriId = document.getElementById('edit_kategori_id');
+                        const editIsActive = document.getElementById('edit_is_active');
+
+                        if (editNamaSurat) editNamaSurat.value = nama;
+                        if (editKategoriId) editKategoriId.value = kategoriId;
+                        if (editIsActive) editIsActive.checked = true;
+
+                        const editForm = document.getElementById('editJenisSuratForm');
+                        if (editForm) {
+                            editForm.action = `/admin/jenis-surat/${id}`;
+                        }
+
+                        $('#editJenisSuratModal').modal('show');
+                    });
                 });
-            });
 
-            // ============================================
-            // EDIT TEMPLATE
-            // ============================================
-            document.querySelectorAll('.edit-template').forEach(button => {
-                button.addEventListener('click', function() {
+                // ============================================
+                // EDIT TEMPLATE - Event Delegation
+                // ============================================
+                $(document).on('click', '.edit-template', function(e) {
+                    e.preventDefault();
+
                     currentJenisId = this.dataset.id;
                     const nama = this.dataset.nama;
                     const template = this.dataset.template || getDefaultTemplate();
                     const logoPath = this.dataset.logo;
                     const kopPath = this.dataset.kop;
 
-                    // Reset form
-                    document.getElementById('logo_path').value = '';
-                    document.getElementById('kop_surat_path').value = '';
-                    document.getElementById('logoInput').value = '';
-                    document.getElementById('kopInput').value = '';
-                    document.getElementById('btnRemoveLogo').style.display = 'none';
-                    document.getElementById('btnRemoveKop').style.display = 'none';
-                    document.getElementById('kopSizeControl').style.display = 'none';
+                    // Reset form dengan pengecekan element
+                    const logoPathInput = document.getElementById('logo_path');
+                    const kopPathInput = document.getElementById('kop_surat_path');
+                    const logoInput = document.getElementById('logoInput');
+                    const kopInput = document.getElementById('kopInput');
+                    const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+                    const btnRemoveKop = document.getElementById('btnRemoveKop');
+                    const kopSizeControl = document.getElementById('kopSizeControl');
+
+                    if (logoPathInput) logoPathInput.value = '';
+                    if (kopPathInput) kopPathInput.value = '';
+                    if (logoInput) logoInput.value = '';
+                    if (kopInput) kopInput.value = '';
+                    if (btnRemoveLogo) btnRemoveLogo.style.display = 'none';
+                    if (btnRemoveKop) btnRemoveKop.style.display = 'none';
+                    if (kopSizeControl) kopSizeControl.style.display = 'none';
 
                     // Set preview logo
+                    const logoPreviewImg = document.getElementById('logoPreviewImg');
+                    const logoPlaceholder = document.getElementById('logoPlaceholder');
+
                     if (logoPath && logoPath !== 'null' && logoPath !== '') {
-                        const logoUrl = logoPath.startsWith('http') ? logoPath : '/storage/' +
-                            logoPath;
-                        document.getElementById('logoPreviewImg').src = logoUrl;
-                        document.getElementById('logoPreviewImg').style.display = 'block';
-                        document.getElementById('logoPlaceholder').style.display = 'none';
-                        document.getElementById('logo_path').value = logoPath;
-                        document.getElementById('btnRemoveLogo').style.display = 'block';
+                        const logoUrl = logoPath.startsWith('http') ? logoPath : '/storage/' + logoPath;
+                        if (logoPreviewImg) {
+                            logoPreviewImg.src = logoUrl;
+                            logoPreviewImg.style.display = 'block';
+                        }
+                        if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+                        if (logoPathInput) logoPathInput.value = logoPath;
+                        if (btnRemoveLogo) btnRemoveLogo.style.display = 'block';
                     } else {
-                        document.getElementById('logoPreviewImg').style.display = 'none';
-                        document.getElementById('logoPlaceholder').style.display = 'block';
-                        document.getElementById('btnRemoveLogo').style.display = 'none';
+                        if (logoPreviewImg) logoPreviewImg.style.display = 'none';
+                        if (logoPlaceholder) logoPlaceholder.style.display = 'block';
+                        if (btnRemoveLogo) btnRemoveLogo.style.display = 'none';
                     }
 
                     // Set preview kop
+                    const kopPreviewImg = document.getElementById('kopPreviewImg');
+                    const kopPlaceholder = document.getElementById('kopPlaceholder');
+
                     if (kopPath && kopPath !== 'null' && kopPath !== '') {
-                        currentKopUrl = kopPath.startsWith('http') ? kopPath : '/storage/' +
-                        kopPath;
-                        document.getElementById('kopPreviewImg').src = currentKopUrl;
-                        document.getElementById('kopPreviewImg').style.display = 'block';
-                        document.getElementById('kopPlaceholder').style.display = 'none';
-                        document.getElementById('kopSizeControl').style.display = 'block';
-                        document.getElementById('kop_surat_path').value = kopPath;
-                        document.getElementById('btnRemoveKop').style.display = 'block';
+                        currentKopUrl = kopPath.startsWith('http') ? kopPath : '/storage/' + kopPath;
+                        if (kopPreviewImg) {
+                            kopPreviewImg.src = currentKopUrl;
+                            kopPreviewImg.style.display = 'block';
+                        }
+                        if (kopPlaceholder) kopPlaceholder.style.display = 'none';
+                        if (kopSizeControl) kopSizeControl.style.display = 'block';
+                        if (kopPathInput) kopPathInput.value = kopPath;
+                        if (btnRemoveKop) btnRemoveKop.style.display = 'block';
                     } else {
                         currentKopUrl = null;
-                        document.getElementById('kopPreviewImg').style.display = 'none';
-                        document.getElementById('kopPlaceholder').style.display = 'block';
-                        document.getElementById('kopSizeControl').style.display = 'none';
-                        document.getElementById('btnRemoveKop').style.display = 'none';
+                        if (kopPreviewImg) kopPreviewImg.style.display = 'none';
+                        if (kopPlaceholder) kopPlaceholder.style.display = 'block';
+                        if (kopSizeControl) kopSizeControl.style.display = 'none';
+                        if (btnRemoveKop) btnRemoveKop.style.display = 'none';
                     }
 
-                    document.getElementById('template_nama_surat').textContent = nama;
-                    document.getElementById('editTemplateForm').action =
-                        `/admin/jenis-surat/${currentJenisId}/template`;
+                    const templateNama = document.getElementById('template_nama_surat');
+                    if (templateNama) templateNama.textContent = nama;
+
+                    const editForm = document.getElementById('editTemplateForm');
+                    if (editForm) {
+                        editForm.action = `/admin/jenis-surat/${currentJenisId}/template`;
+                    }
 
                     // Destroy existing CKEditor
                     if (CKEDITOR.instances.templateEditor) {
@@ -713,425 +815,607 @@
 
                     $('#editTemplateModal').modal('show');
                 });
-            });
 
-            // ============================================
-            // REMOVE LOGO
-            // ============================================
-            document.getElementById('btnRemoveLogo')?.addEventListener('click', function() {
-                Swal.fire({
-                    title: 'Hapus Logo?',
-                    text: 'Logo akan dihapus dari template',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('logoPreviewImg').style.display = 'none';
-                        document.getElementById('logoPlaceholder').style.display = 'block';
-                        document.getElementById('logo_path').value = '';
-                        document.getElementById('btnRemoveLogo').style.display = 'none';
-                        Swal.fire('Terhapus!', 'Logo telah dihapus', 'success');
-                    }
-                });
-            });
+                // ============================================
+                // REMOVE LOGO
+                // ============================================
+                const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+                if (btnRemoveLogo) {
+                    btnRemoveLogo.addEventListener('click', function() {
+                        Swal.fire({
+                            title: 'Hapus Logo?',
+                            text: 'Logo akan dihapus dari template',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Ya, Hapus!',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const logoPreviewImg = document.getElementById('logoPreviewImg');
+                                const logoPlaceholder = document.getElementById('logoPlaceholder');
+                                const logoPathInput = document.getElementById('logo_path');
+                                const btnRemoveLogo = document.getElementById('btnRemoveLogo');
 
-            // ============================================
-            // REMOVE KOP
-            // ============================================
-            document.getElementById('btnRemoveKop')?.addEventListener('click', function() {
-                Swal.fire({
-                    title: 'Hapus Kop Surat?',
-                    text: 'Kop surat akan dihapus dari template',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('kopPreviewImg').style.display = 'none';
-                        document.getElementById('kopPlaceholder').style.display = 'block';
-                        document.getElementById('kop_surat_path').value = '';
-                        document.getElementById('kopSizeControl').style.display = 'none';
-                        document.getElementById('btnRemoveKop').style.display = 'none';
-                        currentKopUrl = null;
-                        Swal.fire('Terhapus!', 'Kop surat telah dihapus', 'success');
-                    }
-                });
-            });
-
-            // ============================================
-            // INSERT KOP
-            // ============================================
-            document.getElementById('btnInsertKop')?.addEventListener('click', function() {
-                if (!editor) {
-                    Swal.fire('Error', 'Editor belum siap', 'error');
-                    return;
-                }
-
-                const kopUrl = document.getElementById('kopPreviewImg').src;
-                const kopWidth = document.getElementById('kopWidthSlider').value || 80;
-
-                if (kopUrl && kopUrl !== '#') {
-                    const html = `<div style="text-align:center; margin-bottom:20px;">
-                <img src="${kopUrl}" style="width:${kopWidth}%; max-width:100%; height:auto;">
-            </div>`;
-                    editor.insertHtml(html);
-                    editor.focus();
-                    Swal.fire('Sukses', 'Kop surat berhasil disisipkan', 'success');
-                } else {
-                    Swal.fire('Info', 'Silakan upload kop surat terlebih dahulu', 'info');
-                }
-            });
-
-            // ============================================
-            // UPLOAD LOGO
-            // ============================================
-            document.getElementById('logoInput')?.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                if (file.size > 2 * 1024 * 1024) {
-                    Swal.fire('Error', 'Ukuran file maksimal 2MB', 'error');
-                    this.value = '';
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('logo', file);
-                formData.append('_token', csrfToken);
-
-                Swal.fire({
-                    title: 'Uploading...',
-                    text: 'Mohon tunggu',
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading()
-                });
-
-                fetch('/admin/upload-logo', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        Swal.close();
-                        if (data.success) {
-                            document.getElementById('logoPreviewImg').src = data.url;
-                            document.getElementById('logoPreviewImg').style.display = 'block';
-                            document.getElementById('logoPlaceholder').style.display = 'none';
-                            document.getElementById('logo_path').value = data.path;
-                            document.getElementById('btnRemoveLogo').style.display = 'block';
-                            Swal.fire('Sukses', 'Logo berhasil diupload', 'success');
-                        }
-                    })
-                    .catch(() => {
-                        Swal.close();
-                        Swal.fire('Error', 'Gagal upload logo', 'error');
-                        document.getElementById('logoInput').value = '';
+                                if (logoPreviewImg) logoPreviewImg.style.display = 'none';
+                                if (logoPlaceholder) logoPlaceholder.style.display = 'block';
+                                if (logoPathInput) logoPathInput.value = '';
+                                if (btnRemoveLogo) btnRemoveLogo.style.display = 'none';
+                                Swal.fire('Terhapus!', 'Logo telah dihapus', 'success');
+                            }
+                        });
                     });
-            });
-
-            // ============================================
-            // UPLOAD KOP
-            // ============================================
-            document.getElementById('kopInput')?.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                if (file.size > 2 * 1024 * 1024) {
-                    Swal.fire('Error', 'Ukuran file maksimal 2MB', 'error');
-                    this.value = '';
-                    return;
                 }
 
-                const formData = new FormData();
-                formData.append('kop_surat', file);
-                formData.append('_token', csrfToken);
+                // ============================================
+                // REMOVE KOP
+                // ============================================
+                const btnRemoveKop = document.getElementById('btnRemoveKop');
+                if (btnRemoveKop) {
+                    btnRemoveKop.addEventListener('click', function() {
+                        Swal.fire({
+                            title: 'Hapus Kop Surat?',
+                            text: 'Kop surat akan dihapus dari template',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Ya, Hapus!',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const kopPreviewImg = document.getElementById('kopPreviewImg');
+                                const kopPlaceholder = document.getElementById('kopPlaceholder');
+                                const kopPathInput = document.getElementById('kop_surat_path');
+                                const kopSizeControl = document.getElementById('kopSizeControl');
+                                const btnRemoveKop = document.getElementById('btnRemoveKop');
 
-                Swal.fire({
-                    title: 'Uploading...',
-                    text: 'Mohon tunggu',
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading()
+                                if (kopPreviewImg) kopPreviewImg.style.display = 'none';
+                                if (kopPlaceholder) kopPlaceholder.style.display = 'block';
+                                if (kopPathInput) kopPathInput.value = '';
+                                if (kopSizeControl) kopSizeControl.style.display = 'none';
+                                if (btnRemoveKop) btnRemoveKop.style.display = 'none';
+                                currentKopUrl = null;
+                                Swal.fire('Terhapus!', 'Kop surat telah dihapus', 'success');
+                            }
+                        });
+                    });
+                }
+
+                // ============================================
+                // INSERT KOP
+                // ============================================
+                const btnInsertKop = document.getElementById('btnInsertKop');
+                if (btnInsertKop) {
+                    btnInsertKop.addEventListener('click', function() {
+                        if (!editor) {
+                            Swal.fire('Error', 'Editor belum siap', 'error');
+                            return;
+                        }
+
+                        const kopPreviewImg = document.getElementById('kopPreviewImg');
+                        const kopWidthSlider = document.getElementById('kopWidthSlider');
+
+                        const kopUrl = kopPreviewImg ? kopPreviewImg.src : null;
+                        const kopWidth = kopWidthSlider ? kopWidthSlider.value : 80;
+
+                        if (kopUrl && kopUrl !== '#') {
+                            const html = `<div style="text-align:center; margin-bottom:20px;">
+                    <img src="${kopUrl}" style="width:${kopWidth}%; max-width:100%; height:auto;">
+                </div>`;
+                            editor.insertHtml(html);
+                            editor.focus();
+                            Swal.fire('Sukses', 'Kop surat berhasil disisipkan', 'success');
+                        } else {
+                            Swal.fire('Info', 'Silakan upload kop surat terlebih dahulu', 'info');
+                        }
+                    });
+                }
+
+                // ============================================
+                // UPLOAD LOGO
+                // ============================================
+                const logoInput = document.getElementById('logoInput');
+                if (logoInput) {
+                    logoInput.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        if (file.size > 2 * 1024 * 1024) {
+                            Swal.fire('Error', 'Ukuran file maksimal 2MB', 'error');
+                            this.value = '';
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        formData.append('logo', file);
+                        formData.append('_token', csrfToken);
+
+                        Swal.fire({
+                            title: 'Uploading...',
+                            text: 'Mohon tunggu',
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading()
+                        });
+
+                        fetch('/admin/upload-logo', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                Swal.close();
+                                if (data.success) {
+                                    const logoPreviewImg = document.getElementById('logoPreviewImg');
+                                    const logoPlaceholder = document.getElementById('logoPlaceholder');
+                                    const logoPathInput = document.getElementById('logo_path');
+                                    const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+
+                                    if (logoPreviewImg) {
+                                        logoPreviewImg.src = data.url;
+                                        logoPreviewImg.style.display = 'block';
+                                    }
+                                    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+                                    if (logoPathInput) logoPathInput.value = data.path;
+                                    if (btnRemoveLogo) btnRemoveLogo.style.display = 'block';
+                                    Swal.fire('Sukses', 'Logo berhasil diupload', 'success');
+                                }
+                            })
+                            .catch(() => {
+                                Swal.close();
+                                Swal.fire('Error', 'Gagal upload logo', 'error');
+                                document.getElementById('logoInput').value = '';
+                            });
+                    });
+                }
+
+                // ============================================
+                // UPLOAD KOP
+                // ============================================
+                const kopInput = document.getElementById('kopInput');
+                if (kopInput) {
+                    kopInput.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        if (file.size > 2 * 1024 * 1024) {
+                            Swal.fire('Error', 'Ukuran file maksimal 2MB', 'error');
+                            this.value = '';
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        formData.append('kop_surat', file);
+                        formData.append('_token', csrfToken);
+
+                        Swal.fire({
+                            title: 'Uploading...',
+                            text: 'Mohon tunggu',
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading()
+                        });
+
+                        fetch('/admin/upload-kop', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                Swal.close();
+                                if (data.success) {
+                                    currentKopUrl = data.url;
+                                    const kopPreviewImg = document.getElementById('kopPreviewImg');
+                                    const kopPlaceholder = document.getElementById('kopPlaceholder');
+                                    const kopSizeControl = document.getElementById('kopSizeControl');
+                                    const kopPathInput = document.getElementById('kop_surat_path');
+                                    const btnRemoveKop = document.getElementById('btnRemoveKop');
+
+                                    if (kopPreviewImg) {
+                                        kopPreviewImg.src = currentKopUrl;
+                                        kopPreviewImg.style.display = 'block';
+                                    }
+                                    if (kopPlaceholder) kopPlaceholder.style.display = 'none';
+                                    if (kopSizeControl) kopSizeControl.style.display = 'block';
+                                    if (kopPathInput) kopPathInput.value = data.path;
+                                    if (btnRemoveKop) btnRemoveKop.style.display = 'block';
+                                    Swal.fire('Sukses', 'Kop surat berhasil diupload', 'success');
+                                }
+                            })
+                            .catch(() => {
+                                Swal.close();
+                                Swal.fire('Error', 'Gagal upload kop surat', 'error');
+                                document.getElementById('kopInput').value = '';
+                            });
+                    });
+                }
+
+                // ============================================
+                // KOP WIDTH SLIDER
+                // ============================================
+                const kopWidthSlider = document.getElementById('kopWidthSlider');
+                if (kopWidthSlider) {
+                    kopWidthSlider.addEventListener('input', function() {
+                        const width = this.value;
+                        const kopPreviewImg = document.getElementById('kopPreviewImg');
+                        if (kopPreviewImg) {
+                            kopPreviewImg.style.width = width + '%';
+                        }
+                    });
+                }
+
+                // ============================================
+                // INSERT VARIABLE
+                // ============================================
+                document.querySelectorAll('.insert-variable').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const variable = this.dataset.var;
+                        if (editor) {
+                            editor.insertText(variable);
+                            editor.focus();
+                        }
+                    });
                 });
 
-                fetch('/admin/upload-kop', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        Swal.close();
-                        if (data.success) {
-                            currentKopUrl = data.url;
-                            document.getElementById('kopPreviewImg').src = currentKopUrl;
-                            document.getElementById('kopPreviewImg').style.display = 'block';
-                            document.getElementById('kopPlaceholder').style.display = 'none';
-                            document.getElementById('kopSizeControl').style.display = 'block';
-                            document.getElementById('kop_surat_path').value = data.path;
-                            document.getElementById('btnRemoveKop').style.display = 'block';
-                            Swal.fire('Sukses', 'Kop surat berhasil diupload', 'success');
-                        }
-                    })
-                    .catch(() => {
-                        Swal.close();
-                        Swal.fire('Error', 'Gagal upload kop surat', 'error');
-                        document.getElementById('kopInput').value = '';
+                // ============================================
+                // FORMAT PRESET
+                // ============================================
+                const formatSuratResmi = document.getElementById('formatSuratResmi');
+                if (formatSuratResmi) {
+                    formatSuratResmi.addEventListener('click', function() {
+                        const leftMargin = document.getElementById('leftMargin');
+                        const leftIndent = document.getElementById('leftIndent');
+                        const firstLineIndent = document.getElementById('firstLineIndent');
+                        const lineSpacing = document.getElementById('lineSpacing');
+
+                        if (leftMargin) leftMargin.value = 0;
+                        if (leftIndent) leftIndent.value = 0;
+                        if (firstLineIndent) firstLineIndent.value = 48;
+                        if (lineSpacing) lineSpacing.value = 1.5;
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Preset diterapkan',
+                            text: 'Format surat resmi berhasil dimuat',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
                     });
-            });
+                }
 
-            // ============================================
-            // KOP WIDTH SLIDER
-            // ============================================
-            document.getElementById('kopWidthSlider')?.addEventListener('input', function() {
-                const width = this.value;
-                document.getElementById('kopPreviewImg').style.width = width + '%';
-            });
+                // ============================================
+                // APPLY PARAGRAPH STYLE
+                // ============================================
+                const applyParagraphStyle = document.getElementById('applyParagraphStyle');
+                if (applyParagraphStyle) {
+                    applyParagraphStyle.addEventListener('click', function() {
+                        if (!editor) {
+                            Swal.fire('Error', 'Editor belum siap', 'error');
+                            return;
+                        }
 
-            // ============================================
-            // INSERT VARIABLE
-            // ============================================
-            document.querySelectorAll('.insert-variable').forEach(button => {
-                button.addEventListener('click', function() {
-                    const variable = this.dataset.var;
-                    if (editor) {
-                        editor.insertText(variable);
+                        const leftMargin = document.getElementById('leftMargin');
+                        const leftIndent = document.getElementById('leftIndent');
+                        const firstLineIndent = document.getElementById('firstLineIndent');
+                        const lineSpacing = document.getElementById('lineSpacing');
+
+                        const margin = leftMargin ? leftMargin.value : 0;
+                        const indent = leftIndent ? leftIndent.value : 0;
+                        const firstIndent = firstLineIndent ? firstLineIndent.value : 0;
+                        const spacing = lineSpacing ? lineSpacing.value : 1.5;
+
                         editor.focus();
-                    }
-                });
-            });
 
-            // ============================================
-            // PREVIEW
-            // ============================================
-            document.getElementById('previewBtn')?.addEventListener('click', function() {
-                if (!editor) {
-                    Swal.fire('Error', 'Editor belum siap', 'error');
-                    return;
-                }
-
-                let content = editor.getData();
-                const previewData = {
-                    nama_mahasiswa: 'Nuni Lestari',
-                    npm: '10050022094',
-                    alamat: 'Jl. Dederuk No. 21, Bandung',
-                    fakultas: 'Psikologi',
-                    prodi: 'Psikologi S1',
-                    semester: 'VIII',
-                    nomor_surat: '083/M.10/Dek.Psi-k/IV/2026',
-                    tanggal_surat: '29 April 2026',
-                    perihal: 'SURAT KETERANGAN AKTIF KULIAH',
-                    dekan: 'Dr. Oki Mardiawan, M.Psi., Psikolog.',
-                    nip_dekan: 'D.07.0.464'
-                };
-
-                for (const key in previewData) {
-                    content = content.replace(new RegExp(`\\{${key}\\}`, 'g'), previewData[key]);
-                }
-
-                document.getElementById('previewPaper').innerHTML = content;
-                $('#previewModal').modal('show');
-            });
-
-            // ============================================
-            // PRINT PREVIEW
-            // ============================================
-            document.getElementById('printPreviewBtn')?.addEventListener('click', function() {
-                const printContent = document.getElementById('previewPaper').innerHTML;
-                const win = window.open('', '_blank');
-                win.document.write(`<html><head><title>Print Surat</title>
-            <style>
-                @page { size: A4; margin: 15mm; }
-                body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; }
-                table { border-collapse: collapse; width: 100%; }
-                table td { padding: 4px 0; }
-            </style>
-            </head><body>${printContent}</body></html>`);
-                win.document.close();
-                win.print();
-            });
-
-            // ============================================
-            // CKEDITOR INIT
-            // ============================================
-            function initCKEditor(content) {
-                if (typeof CKEDITOR === 'undefined') {
-                    console.error('CKEditor tidak ditemukan!');
-                    return;
-                }
-
-                CKEDITOR.replace('templateEditor', {
-                    toolbar: [{
-                            name: 'document',
-                            items: ['Source', '-', 'Save', 'NewPage', 'Print', '-', 'Templates']
-                        },
-                        {
-                            name: 'clipboard',
-                            items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo',
-                                'Redo'
-                            ]
-                        },
-                        {
-                            name: 'editing',
-                            items: ['Find', 'Replace', '-', 'SelectAll', '-', 'SpellChecker', 'Scayt']
-                        },
-                        {
-                            name: 'forms',
-                            items: ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select',
-                                'Button', 'ImageButton', 'HiddenField'
-                            ]
-                        },
-                        '/',
-                        {
-                            name: 'basicstyles',
-                            items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript',
-                                '-', 'RemoveFormat'
-                            ]
-                        },
-                        {
-                            name: 'paragraph',
-                            items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-',
-                                'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter',
-                                'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'
-                            ]
-                        },
-                        {
-                            name: 'links',
-                            items: ['Link', 'Unlink', 'Anchor']
-                        },
-                        {
-                            name: 'insert',
-                            items: ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley',
-                                'SpecialChar', 'PageBreak', 'Iframe'
-                            ]
-                        },
-                        '/',
-                        {
-                            name: 'styles',
-                            items: ['Styles', 'Format', 'Font', 'FontSize']
-                        },
-                        {
-                            name: 'colors',
-                            items: ['TextColor', 'BGColor']
-                        },
-                        {
-                            name: 'tools',
-                            items: ['Maximize', 'ShowBlocks']
+                        const selection = editor.getSelection();
+                        if (!selection) {
+                            Swal.fire('Info', 'Pilih paragraf terlebih dahulu', 'info');
+                            return;
                         }
-                    ],
-                    height: 'calc(100vh - 200px)',
-                    width: '100%',
-                    language: 'id',
-                    enterMode: CKEDITOR.ENTER_P,
-                    shiftEnterMode: CKEDITOR.ENTER_BR,
-                    filebrowserImageUploadUrl: '{{ route('upload.image') }}',
-                    filebrowserUploadUrl: '{{ route('upload.image') }}',
-                    allowedContent: true,
-                    extraAllowedContent: '*[*]'
-                });
 
-                CKEDITOR.instances.templateEditor.on('instanceReady', function() {
-                    editor = CKEDITOR.instances.templateEditor;
-                    editor.setData(content || getDefaultTemplate());
-                });
-            }
-
-            // ============================================
-            // DEFAULT TEMPLATE
-            // ============================================
-            function getDefaultTemplate() {
-                return `<div style="font-family:'Times New Roman', Times, serif; font-size:12pt;">
-    <div style="text-align:center; margin-bottom:20px;">
-        <img src="{kop_surat}" style="width:80%; max-width:100%; height:auto;">
-    </div>
-    <div style="text-align:center; margin:20px 0;">
-        <strong style="font-size:14pt;">SURAT KETERANGAN AKTIF KULIAH</strong><br>
-        <strong>Nomor : {nomor_surat}</strong>
-    </div>
-    <div style="text-align:justify;">
-        <p>Yang bertanda tangan di bawah ini:</p>
-        <table style="width:100%; border:none;">
-            <tr><td style="width:120px;">Nama</td><td>: {dekan}</td></tr>
-            <tr><td>NIP</td><td>: {nip_dekan}</td></tr>
-            <tr><td>Jabatan</td><td>: Dekan Fakultas</td></tr>
-        </table>
-        <p>Menerangkan bahwa mahasiswa:</p>
-        <table style="width:100%; border:none;">
-            <tr><td style="width:120px;">Nama</td><td>: {nama_mahasiswa}</td></tr>
-            <tr><td>NPM</td><td>: {npm}</td></tr>
-            <tr><td>Fakultas</td><td>: {fakultas}</td></tr>
-            <tr><td>Program Studi</td><td>: {prodi}</td></tr>
-            <tr><td>Semester</td><td>: {semester}</td></tr>
-            <tr><td>Alamat</td><td>: {alamat}</td></tr>
-        </table>
-        <p>Adalah benar-benar mahasiswa aktif Universitas pada semester yang tertera.</p>
-        <p>Surat keterangan ini dibuat untuk memenuhi persyaratan administrasi.</p>
-        <p>Demikian surat ini dibuat dengan sebenarnya dan dapat dipergunakan sebagaimana mestinya.</p>
-    </div>
-    <div style="margin-top:50px; text-align:right;">
-        <p>Bandung, {tanggal_surat}</p>
-        <p>Dekan Fakultas,</p>
-        <br><br>
-        <p><strong><u>{dekan}</u></strong></p>
-        <p>{nip_dekan}</p>
-    </div>
-</div>`;
-            }
-
-            // ============================================
-            // AUTO CLOSE MODAL & RESET FORM
-            // ============================================
-            document.querySelectorAll(
-                '#addJenisSuratModal, #editJenisSuratModal, #editTemplateModal, #previewModal').forEach(
-            modal => {
-                modal.addEventListener('hidden.bs.modal', function() {
-                    if (this.id === 'addJenisSuratModal') {
-                        const form = this.querySelector('form');
-                        if (form) form.reset();
-                    }
-                    if (this.id === 'editTemplateModal') {
-                        if (CKEDITOR.instances.templateEditor) {
-                            CKEDITOR.instances.templateEditor.destroy();
-                            editor = null;
+                        let element = selection.getStartElement();
+                        if (!element) {
+                            Swal.fire('Info', 'Letakkan cursor di dalam paragraf', 'info');
+                            return;
                         }
+
+                        let paragraph = element.getAscendant('p', true);
+                        if (!paragraph) {
+                            paragraph = element.getAscendant('div', true);
+                            if (!paragraph) {
+                                Swal.fire('Info', 'Letakkan cursor pada paragraf yang ingin diformat', 'info');
+                                return;
+                            }
+                        }
+
+                        paragraph.setStyle('margin-left', margin + 'px');
+                        paragraph.setStyle('padding-left', indent + 'px');
+                        paragraph.setStyle('text-indent', firstIndent + 'px');
+                        paragraph.setStyle('line-height', spacing);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: 'Format paragraf berhasil diterapkan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    });
+                }
+
+                // ============================================
+                // PREVIEW
+                // ============================================
+                const previewBtn = document.getElementById('previewBtn');
+                if (previewBtn) {
+                    previewBtn.addEventListener('click', function() {
+                        if (!editor) {
+                            Swal.fire('Error', 'Editor belum siap', 'error');
+                            return;
+                        }
+
+                        let content = editor.getData();
+                        const previewData = {
+                            nama_mahasiswa: 'Nuni Lestari',
+                            npm: '10050022094',
+                            alamat: 'Jl. Dederuk No. 21, Bandung',
+                            fakultas: 'Psikologi',
+                            prodi: 'Psikologi S1',
+                            semester: 'VIII',
+                            nomor_surat: '083/M.10/Dek.Psi-k/IV/2026',
+                            tanggal_surat: '29 April 2026',
+                            perihal: 'SURAT KETERANGAN AKTIF KULIAH',
+                            dekan: 'Dr. Oki Mardiawan, M.Psi., Psikolog.',
+                            nip_dekan: 'D.07.0.464'
+                        };
+
+                        for (const key in previewData) {
+                            content = content.replace(new RegExp(`\\{${key}\\}`, 'g'), previewData[key]);
+                        }
+
+                        const previewPaper = document.getElementById('previewPaper');
+                        if (previewPaper) {
+                            previewPaper.innerHTML = content;
+                        }
+                        $('#previewModal').modal('show');
+                    });
+                }
+
+                // ============================================
+                // PRINT PREVIEW
+                // ============================================
+                const printPreviewBtn = document.getElementById('printPreviewBtn');
+                if (printPreviewBtn) {
+                    printPreviewBtn.addEventListener('click', function() {
+                        const previewPaper = document.getElementById('previewPaper');
+                        if (!previewPaper) return;
+
+                        const printContent = previewPaper.innerHTML;
+                        const win = window.open('', '_blank');
+                        if (win) {
+                            win.document.write(`<html><head><title>Print Surat</title>
+                    <style>
+                        @page { size: A4; margin: 15mm; }
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; }
+                        table { border-collapse: collapse; width: 100%; }
+                        table td { padding: 4px 0; }
+                    </style>
+                    </head><body>${printContent}</body></html>`);
+                            win.document.close();
+                            win.print();
+                        }
+                    });
+                }
+
+                // ============================================
+                // CKEDITOR INIT
+                // ============================================
+                function initCKEditor(content) {
+                    const templateEditor = document.getElementById('templateEditor');
+                    if (!templateEditor) return;
+
+                    if (typeof CKEDITOR === 'undefined') {
+                        console.error('CKEditor tidak ditemukan!');
+                        templateEditor.innerHTML = `
+                <textarea class="form-control" style="height:600px; font-family: 'Times New Roman', Times, serif;">${content || getDefaultTemplate()}</textarea>
+            `;
+                        return;
                     }
+
+                    if (CKEDITOR.instances.templateEditor) {
+                        CKEDITOR.instances.templateEditor.destroy();
+                    }
+
+                    CKEDITOR.replace('templateEditor', {
+                        toolbar: [{
+                                name: 'document',
+                                items: ['Source', '-', 'Save', 'NewPage', 'Print', '-', 'Templates']
+                            },
+                            {
+                                name: 'clipboard',
+                                items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo',
+                                    'Redo'
+                                ]
+                            },
+                            {
+                                name: 'editing',
+                                items: ['Find', 'Replace', '-', 'SelectAll', '-', 'SpellChecker', 'Scayt']
+                            },
+                            {
+                                name: 'forms',
+                                items: ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select',
+                                    'Button', 'ImageButton', 'HiddenField'
+                                ]
+                            },
+                            '/',
+                            {
+                                name: 'basicstyles',
+                                items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript',
+                                    '-', 'RemoveFormat'
+                                ]
+                            },
+                            {
+                                name: 'paragraph',
+                                items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-',
+                                    'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter',
+                                    'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'
+                                ]
+                            },
+                            {
+                                name: 'links',
+                                items: ['Link', 'Unlink', 'Anchor']
+                            },
+                            {
+                                name: 'insert',
+                                items: ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley',
+                                    'SpecialChar', 'PageBreak', 'Iframe'
+                                ]
+                            },
+                            '/',
+                            {
+                                name: 'styles',
+                                items: ['Styles', 'Format', 'Font', 'FontSize']
+                            },
+                            {
+                                name: 'colors',
+                                items: ['TextColor', 'BGColor']
+                            },
+                            {
+                                name: 'tools',
+                                items: ['Maximize', 'ShowBlocks']
+                            }
+                        ],
+                        height: 'calc(100vh - 200px)',
+                        width: '100%',
+                        language: 'id',
+                        enterMode: CKEDITOR.ENTER_P,
+                        shiftEnterMode: CKEDITOR.ENTER_BR,
+                        filebrowserImageUploadUrl: '{{ route('upload.image') }}',
+                        filebrowserUploadUrl: '{{ route('upload.image') }}',
+                        allowedContent: true,
+                        extraAllowedContent: '*[*]'
+                    });
+
+                    CKEDITOR.instances.templateEditor.on('instanceReady', function() {
+                        editor = CKEDITOR.instances.templateEditor;
+                        editor.setData(content || getDefaultTemplate());
+                    });
+
+                    CKEDITOR.instances.templateEditor.on('error', function() {
+                        templateEditor.innerHTML = `
+                <textarea class="form-control" style="height:600px; font-family: 'Times New Roman', Times, serif;">${content || getDefaultTemplate()}</textarea>
+            `;
+                    });
+                }
+
+                // ============================================
+                // DEFAULT TEMPLATE
+                // ============================================
+                function getDefaultTemplate() {
+                    return `<div style="font-family:'Times New Roman', Times, serif; font-size:12pt;">
+            <div style="text-align:center; margin-bottom:20px;">
+                <img src="{kop_surat}" style="width:80%; max-width:100%; height:auto;">
+            </div>
+            <div style="text-align:center; margin:20px 0;">
+                <strong style="font-size:14pt;">SURAT KETERANGAN AKTIF KULIAH</strong><br>
+                <strong>Nomor : {nomor_surat}</strong>
+            </div>
+            <div style="text-align:justify;">
+                <p>Yang bertanda tangan di bawah ini:</p>
+                <table style="width:100%; border:none;">
+                    <tr><td style="width:120px;">Nama</td><td>: {dekan}</td></tr>
+                    <tr><td>NIP</td><td>: {nip_dekan}</td></tr>
+                    <tr><td>Jabatan</td><td>: Dekan Fakultas</td></tr>
+                </table>
+                <p>Menerangkan bahwa mahasiswa:</p>
+                <table style="width:100%; border:none;">
+                    <tr><td style="width:120px;">Nama</td><td>: {nama_mahasiswa}</td></tr>
+                    <tr><td>NPM</td><td>: {npm}</td></tr>
+                    <tr><td>Fakultas</td><td>: {fakultas}</td></tr>
+                    <tr><td>Program Studi</td><td>: {prodi}</td></tr>
+                    <tr><td>Semester</td><td>: {semester}</td></tr>
+                    <tr><td>Alamat</td><td>: {alamat}</td></tr>
+                </table>
+                <p>Adalah benar-benar mahasiswa aktif Universitas pada semester yang tertera.</p>
+                <p>Surat keterangan ini dibuat untuk memenuhi persyaratan administrasi.</p>
+                <p>Demikian surat ini dibuat dengan sebenarnya dan dapat dipergunakan sebagaimana mestinya.</p>
+            </div>
+            <div style="margin-top:50px; text-align:right;">
+                <p>Bandung, {tanggal_surat}</p>
+                <p>Dekan Fakultas,</p>
+                <br><br>
+                <p><strong><u>{dekan}</u></strong></p>
+                <p>{nip_dekan}</p>
+            </div>
+        </div>`;
+                }
+
+                // ============================================
+                // AUTO CLOSE MODAL & RESET FORM
+                // ============================================
+                document.querySelectorAll(
+                        '#addJenisSuratModal, #editJenisSuratModal, #editTemplateModal, #previewModal')
+                    .forEach(modal => {
+                        modal.addEventListener('hidden.bs.modal', function() {
+                            if (this.id === 'addJenisSuratModal') {
+                                const form = this.querySelector('form');
+                                if (form) form.reset();
+                            }
+                            if (this.id === 'editTemplateModal') {
+                                if (CKEDITOR.instances.templateEditor) {
+                                    CKEDITOR.instances.templateEditor.destroy();
+                                    editor = null;
+                                }
+                            }
+                        });
+                    });
+
+                // ============================================
+                // VALIDASI FORM TAMBAH
+                // ============================================
+                const formAddJenisSurat = document.getElementById('formAddJenisSurat');
+                if (formAddJenisSurat) {
+                    formAddJenisSurat.addEventListener('submit', function(e) {
+                        const namaInput = this.querySelector('input[name="nama_surat"]');
+                        const kategoriSelect = this.querySelector('select[name="kategori_surat_id"]');
+
+                        if (!namaInput || !namaInput.value.trim()) {
+                            e.preventDefault();
+                            Swal.fire('Error', 'Nama surat harus diisi', 'error');
+                            if (namaInput) namaInput.focus();
+                            return false;
+                        }
+
+                        if (!kategoriSelect || !kategoriSelect.value) {
+                            e.preventDefault();
+                            Swal.fire('Error', 'Kategori harus dipilih', 'error');
+                            if (kategoriSelect) kategoriSelect.focus();
+                            return false;
+                        }
+
+                        return true;
+                    });
+                }
+
+                // ============================================
+                // CLOSE MODAL BUTTON - Fix untuk modal yang tidak tertutup
+                // ============================================
+                document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const modal = this.closest('.modal');
+                        if (modal) {
+                            const bsModal = bootstrap.Modal.getInstance(modal);
+                            if (bsModal) {
+                                bsModal.hide();
+                            }
+                        }
+                    });
                 });
             });
-
-            // ============================================
-            // VALIDASI FORM TAMBAH
-            // ============================================
-            document.getElementById('formAddJenisSurat')?.addEventListener('submit', function(e) {
-                const nama = this.querySelector('input[name="nama_surat"]');
-                const kategori = this.querySelector('select[name="kategori_surat_id"]');
-
-                if (!nama.value.trim()) {
-                    e.preventDefault();
-                    Swal.fire('Error', 'Nama surat harus diisi', 'error');
-                    nama.focus();
-                    return false;
-                }
-
-                if (!kategori.value) {
-                    e.preventDefault();
-                    Swal.fire('Error', 'Kategori harus dipilih', 'error');
-                    kategori.focus();
-                    return false;
-                }
-
-                return true;
-            });
-        });
-    </script>
-@endpush
+        </script>
+    @endpush
