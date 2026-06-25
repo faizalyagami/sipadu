@@ -26,7 +26,7 @@ class MahasiswaController extends Controller
         $mahasiswas = Mahasiswa::with(['user', 'prodi.fakultas'])->latest()->paginate(25);
         $fakultas = Fakultas::all();
         $allProdis = Prodi::all();
-        
+
         return view('admin.mahasiswa.index', compact('mahasiswas', 'fakultas', 'allProdis'));
     }
 
@@ -34,7 +34,7 @@ class MahasiswaController extends Controller
     {
         $fakultas = Fakultas::with('prodis')->get();
         $allProdis = Prodi::with('fakultas')->get();
-        
+
         return view('admin.mahasiswa.create', compact('fakultas', 'allProdis'));
     }
 
@@ -93,7 +93,7 @@ class MahasiswaController extends Controller
     {
         $fakultas = Fakultas::with('prodis')->get();
         $prodis = Prodi::with('fakultas')->get();
-        
+
         return view('admin.mahasiswa.edit', compact('mahasiswa', 'fakultas', 'prodis'));
     }
 
@@ -132,9 +132,9 @@ class MahasiswaController extends Controller
                 'jenis_kelamin' => $request->jenis_kelamin,
                 'sks_tempuh' => $request->sks_tempuh,
             ]);
-            
+
             $mahasiswa->user->update(['name' => $request->nama_lengkap]);
-            
+
             DB::commit();
             return redirect()->route('admin.mahasiswa.index')->with('success', 'Data mahasiswa berhasil diupdate');
         } catch (\Exception $e) {
@@ -172,7 +172,7 @@ class MahasiswaController extends Controller
 
     public function exportTemplate()
     {
-        $fileName = 'template_import_mahasiswa.xlsx';
+        $fileName = 'import_data_mahasiswa.xlsx';
         return Excel::download(new MahasiswaTemplateExport(), $fileName);
     }
 
@@ -188,11 +188,11 @@ class MahasiswaController extends Controller
         try {
             // Generate batch ID
             $batchId = (string) Str::uuid();
-            
+
             // Simpan file sementara
             $file = $request->file('file');
             $filePath = $file->storeAs('temp_imports', $batchId . '_' . $file->getClientOriginalName());
-            
+
             // Buat record progress
             $progress = ImportProgress::create([
                 'batch_id' => $batchId,
@@ -203,16 +203,15 @@ class MahasiswaController extends Controller
                 'failed_rows' => 0,
                 'status' => 'processing'
             ]);
-            
+
             // Dispatch job ke queue
             dispatch(new \App\Jobs\ProcessMahasiswaImport($filePath, $batchId));
-            
+
             return response()->json([
                 'success' => true,
                 'batch_id' => $batchId,
                 'message' => 'Import dimulai, silahkan pantau progress di modal'
             ]);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -220,32 +219,32 @@ class MahasiswaController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * Cek progress import
      */
     public function checkProgress($batchId)
     {
         $progress = ImportProgress::where('batch_id', $batchId)->first();
-        
+
         if (!$progress) {
             return response()->json([
                 'success' => false,
                 'message' => 'Progress tidak ditemukan'
             ], 404);
         }
-        
+
         $percentage = 0;
         if ($progress->total_rows > 0) {
             $percentage = round(($progress->processed_rows / $progress->total_rows) * 100);
         }
-        
+
         // Ambil errors (limit 100 untuk response)
         $errors = $progress->errors ?? [];
         if (is_array($errors) && count($errors) > 100) {
             $errors = array_slice($errors, 0, 100);
         }
-        
+
         return response()->json([
             'success' => true,
             'data' => [

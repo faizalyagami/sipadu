@@ -1,4 +1,6 @@
 <?php
+// app/Imports/MahasiswaImport.php
+
 namespace App\Imports;
 
 use App\Models\User;
@@ -21,6 +23,7 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
 {
     protected $batchId;
     protected $failedRows = [];
+    protected $rowNumber = 0;
 
     public function __construct($batchId)
     {
@@ -32,10 +35,17 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
         return 50;
     }
 
+    public function chunkSize(): int
+    {
+        return 50;
+    }
+
     public function model(array $row)
     {
+        $this->rowNumber++;
+
         try {
-            // Ambil semua data - sesuaikan dengan kolom di Excel
+            // Ambil semua data
             $npm = $this->getValue($row, ['npm', 'nim']);
             $nikDosenWali = $this->getValue($row, ['nik_dosen_wali', 'nik_dosen', 'nik_wali', 'dosen_wali_nik']);
             $dosenWali = $this->getValue($row, ['dosen_wali', 'nama_dosen_wali', 'dosen']);
@@ -55,7 +65,7 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
             $sksTempuh = $this->getValue($row, ['sks_tempuh', 'sks']);
 
             // Log untuk debugging
-            Log::info("Processing row: NPM={$npm}, NIK Dosen={$nikDosenWali}, Dosen Wali={$dosenWali}");
+            Log::info("Processing row: NPM={$npm}, Nama={$namaLengkap}");
 
             // Skip data kosong
             if (!$npm || !$namaLengkap) {
@@ -72,7 +82,7 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
             }
 
             DB::beginTransaction();
-            
+
             // Fakultas
             $fakultas = null;
             if ($namaFakultas) {
@@ -95,21 +105,27 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
                 );
             }
 
-            // Email generate
-            $userEmail = $email;
-            if (!$userEmail) {
-                $userEmail = strtolower(str_replace(' ', '', $namaLengkap)) . "@student.unisba.ac.id";
+            // PERUBAHAN: Email menggunakan NPM sebagai username
+            // Email format: npm@student.unisba.ac.id
+            $userEmail = $npm . '@student.unisba.ac.id';
+
+            // Jika email sudah ada, tambahkan angka unik
+            $counter = 1;
+            $originalEmail = $userEmail;
+            while (User::where('email', $userEmail)->exists()) {
+                $userEmail = $npm . $counter . '@student.unisba.ac.id';
+                $counter++;
             }
 
-            if (User::where('email', $userEmail)->exists()) {
-                $userEmail = $npm . '@student.unisba.ac.id';
-            }
+            // PERUBAHAN: Password = NPM (default)
+            $defaultPassword = $npm;
+            $hashedPassword = Hash::make($defaultPassword);
 
             // Buat user
             $user = User::create([
                 'name' => $namaLengkap,
                 'email' => $userEmail,
-                'password' => Hash::make(Str::random(8)),
+                'password' => $hashedPassword,
                 'role' => 'mahasiswa'
             ]);
 
@@ -126,7 +142,6 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
 
             // Map jenis kelamin
             $jk = strtolower(trim((string) $jenisKelamin));
-
             $mapJk = [
                 'l' => 'L',
                 'lk' => 'L',
@@ -134,23 +149,21 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
                 'laki-laki' => 'L',
                 'pria' => 'L',
                 'male' => 'L',
-
                 'p' => 'P',
                 'pr' => 'P',
                 'perempuan' => 'P',
                 'wanita' => 'P',
                 'female' => 'P',
             ];
-
             $jenisKelaminValue = $mapJk[$jk] ?? 'L';
 
-            // Buat mahasiswa dengan semua kolom termasuk dosen wali
+            // Buat mahasiswa
             Mahasiswa::create([
                 'user_id' => $user->id,
                 'prodi_id' => $prodi ? $prodi->id : null,
                 'npm' => $npm,
-                'dosen_wali' => $dosenWali,           // sesuai migration
-                'dosen_wali_nik' => $nikDosenWali,    // sesuai migration
+                'dosen_wali' => $dosenWali,
+                'dosen_wali_nik' => $nikDosenWali,
                 'nama_lengkap' => $namaLengkap,
                 'tempat_lahir' => $tempatLahir,
                 'tanggal_lahir' => $parsedTglLahir,
@@ -165,11 +178,10 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
 
             DB::commit();
             $this->incrementSuccess();
-            
-            Log::info("Berhasil import mahasiswa: {$npm} - {$namaLengkap}");
-            
-            return null;
 
+            Log::info("Berhasil import mahasiswa: {$npm} - {$namaLengkap} dengan password: {$defaultPassword}");
+
+            return null;
         } catch (\Exception $e) {
             DB::rollBack();
             $this->addError($row, $e->getMessage());
@@ -177,11 +189,6 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
             Log::error("Import error: " . $e->getMessage());
             return null;
         }
-    }
-
-    public function chunkSize(): int
-    {
-        return 50;
     }
 
     private function incrementSuccess()
@@ -235,30 +242,20 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
     private function parseDate($dateString)
     {
         if (!$dateString || $dateString == '-' || $dateString == '') {
-            return now()->format('Y-m-d');
+            return null;
         }
 
         try {
-
-            // Excel numeric date
             if (is_numeric($dateString)) {
-                return Date::excelToDateTimeObject($dateString)
-                    ->format('Y-m-d');
+                return Date::excelToDateTimeObject($dateString)->format('Y-m-d');
             }
-
-            // d/m/Y
             if (strpos($dateString, '/') !== false) {
-                return Carbon::createFromFormat('d/m/Y', trim($dateString))
-                    ->format('Y-m-d');
+                return Carbon::createFromFormat('d/m/Y', trim($dateString))->format('Y-m-d');
             }
-
             return Carbon::parse($dateString)->format('Y-m-d');
-
         } catch (\Exception $e) {
-
             Log::warning("Tanggal gagal parse: " . $dateString);
-
-            return now()->format('Y-m-d');
+            return null;
         }
     }
 
@@ -266,11 +263,11 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
     {
         $map = [
             'aktif' => 'Aktif',
+            'active' => 'Aktif',
             'cuti' => 'Cuti',
             'lulus' => 'Lulus',
-            'active' => 'Aktif',
+            'graduate' => 'Lulus',
         ];
-
         $statusLower = strtolower(trim((string) $status));
         return $map[$statusLower] ?? 'Aktif';
     }
@@ -278,5 +275,17 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithChunkReading, With
     public function getFailedRows()
     {
         return $this->failedRows;
+    }
+
+    public function getSuccessCount()
+    {
+        $progress = ImportProgress::where('batch_id', $this->batchId)->first();
+        return $progress ? $progress->success_rows : 0;
+    }
+
+    public function getErrorCount()
+    {
+        $progress = ImportProgress::where('batch_id', $this->batchId)->first();
+        return $progress ? $progress->failed_rows : 0;
     }
 }

@@ -16,6 +16,37 @@ class PengajuanSuratController extends Controller
         return view('mahasiswa.pengajuan.index', compact('jenisSurats'));
     }
 
+    public function getFormFields($jenisSuratId)
+    {
+        $jenisSurat = JenisSurat::with('kategoriSurat')->findOrFail($jenisSuratId);
+        $kategori = $jenisSurat->kategoriSurat->nama_kategori ?? '';
+        $fields = [];
+
+        if ($kategori == 'Surat Permohonan') {
+            $fields = [
+                'nama_ortu' => ['type' => 'text', 'label' => 'Nama Orang Tua', 'required' => true],
+                'nik_ortu' => ['type' => 'text', 'label' => 'NIK Orang Tua', 'required' => true],
+                'pangkat_ortu' => ['type' => 'text', 'label' => 'Pangkat Orang Tua', 'required' => true],
+                'instansi_ortu' => ['type' => 'text', 'label' => 'Instansi Orang Tua', 'required' => true],
+                'alamat_kantor_ortu' => ['type' => 'text', 'label' => 'Alamat Kantor Orang Tua', 'required' => true],
+                'bukti_pembayaran' => ['type' => 'file', 'label' => 'Bukti Pembayaran', 'required' => true, 'accept' => '.pdf,.jpg,.jpeg,.png']
+            ];
+        } elseif ($kategori == 'Surat Izin') {
+            $fields = [
+                'tipe_pengajuan' => ['type' => 'select', 'label' => 'Tipe Pengajuan', 'required' => true, 'options' => ['individu' => 'Individu', 'kelompok' => 'Kelompok']],
+                'nama_kelompok' => ['type' => 'text', 'label' => 'Nama Kelompok', 'required' => false],
+                'file_ktm' => ['type' => 'file', 'label' => 'Upload KTM', 'required' => true, 'accept' => '.pdf,.jpg,.jpeg,.png']
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'fields' => $fields,
+            'kategori' => $kategori,
+            'jenis_surat' => $jenisSurat->nama_surat
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -23,21 +54,23 @@ class PengajuanSuratController extends Controller
             'keperluan' => 'required|string'
         ]);
 
-        // Ambil user yang login
         $user = auth()->user();
-        
-        // Cek apakah user memiliki relasi mahasiswa
+
         if (!$user->mahasiswa) {
-            return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan. Silakan hubungi administrator.');
+            return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan.');
         }
 
         $mahasiswa = $user->mahasiswa;
+        $jenisSurat = JenisSurat::findOrFail($request->jenis_surat_id);
+
+        // Generate content dari template menggunakan method di model
+        $content = $jenisSurat->generateSuratContent($request->all(), $mahasiswa);
 
         Surat::create([
             'mahasiswa_id' => $mahasiswa->id,
             'jenis_surat_id' => $request->jenis_surat_id,
             'keperluan' => $request->keperluan,
-            'content' => $request->content ?? '',
+            'content' => $content,
             'status' => 'pending'
         ]);
 
@@ -48,193 +81,84 @@ class PengajuanSuratController extends Controller
     public function history()
     {
         $user = auth()->user();
-        
+
         if (!$user->mahasiswa) {
             return view('mahasiswa.pengajuan.history', [
                 'surats' => collect([]),
                 'error' => 'Data mahasiswa tidak ditemukan'
             ]);
         }
-        
+
         $surats = Surat::where('mahasiswa_id', $user->mahasiswa->id)
             ->with('jenisSurat')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
+
         return view('mahasiswa.pengajuan.history', compact('surats'));
     }
 
     public function download($id)
     {
-        $user = auth()->user();
-        
-        if (!$user->mahasiswa) {
-            return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan');
+        try {
+            set_time_limit(300);
+
+            $user = auth()->user();
+
+            if (!$user->mahasiswa) {
+                return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan');
+            }
+
+            $surat = Surat::with(['mahasiswa', 'jenisSurat', 'approvedBy'])->findOrFail($id);
+
+            if ($surat->mahasiswa_id != $user->mahasiswa->id) {
+                abort(403);
+            }
+
+            if ($surat->status != 'approved') {
+                return redirect()->back()->with('error', 'Surat belum disetujui');
+            }
+
+            \Log::info('Generating PDF for surat ID: ' . $id);
+
+            // Generate HTML surat
+            $html = $surat->generateSuratHtml();
+
+            // Generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'defaultFont' => 'Times New Roman',
+                'logErrors' => true
+            ]);
+
+            $filename = 'Surat_' . ($surat->nomor_surat ?? $surat->id) . '.pdf';
+
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            \Log::error('Download error: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
+            // Coba tampilkan HTML sebagai fallback
+            if (isset($surat) && $surat) {
+                try {
+                    return response()->stream(
+                        function () use ($surat) {
+                            echo $surat->generateSuratHtml();
+                        },
+                        200,
+                        [
+                            'Content-Type' => 'text/html',
+                            'Content-Disposition' => 'inline; filename="surat_' . ($surat->nomor_surat ?? $surat->id) . '.html"'
+                        ]
+                    );
+                } catch (\Exception $fallbackError) {
+                    \Log::error('Fallback HTML error: ' . $fallbackError->getMessage());
+                }
+            }
+
+            return redirect()->back()->with('error', 'Gagal mendownload surat: ' . $e->getMessage());
         }
-        
-        $surat = Surat::with(['mahasiswa', 'jenisSurat'])->findOrFail($id);
-        
-        // Pastikan surat milik mahasiswa yang login
-        if ($surat->mahasiswa_id != $user->mahasiswa->id) {
-            abort(403);
-        }
-
-        // Pastikan surat sudah disetujui
-        if ($surat->status != 'approved') {
-            return redirect()->back()->with('error', 'Surat belum disetujui');
-        }
-
-        // Generate surat dari template
-        $template = $surat->jenisSurat->template_content ?? '<p>Template tidak tersedia</p>';
-        
-        // Replace variables
-        $replacements = [
-            '{nama_mahasiswa}' => $surat->mahasiswa->nama_lengkap ?? '',
-            '{npm}' => $surat->mahasiswa->npm ?? '',
-            '{fakultas}' => $surat->mahasiswa->prodi->fakultas->nama_fakultas ?? '',
-            '{prodi}' => $surat->mahasiswa->prodi->nama_prodi ?? '',
-            '{tanggal_surat}' => now()->format('d F Y'),
-            '{keperluan}' => $surat->keperluan ?? '',
-            '{nomor_surat}' => $surat->id,
-            '{dekan}' => 'Dekan Fakultas',
-            '{nip_dekan}' => '-'
-        ];
-        
-        $content = str_replace(array_keys($replacements), array_values($replacements), $template);
-        
-        return view('surat.cetak', compact('content'));
     }
-
-    private function generateSuratHtml($surat)
-    {
-        $template = $surat->jenisSurat->template_content ?? $this->getDefaultTemplate();
-        
-        // Data untuk template
-        $data = [
-            '{nomor_surat}' => $surat->nomor_surat ?? '-',
-            '{tanggal_surat}' => $surat->approved_at ? $surat->approved_at->format('d F Y') : date('d F Y'),
-            '{nama_mahasiswa}' => $surat->mahasiswa->nama_lengkap ?? '-',
-            '{npm}' => $surat->mahasiswa->npm ?? '-',
-            '{tempat_lahir}' => $surat->mahasiswa->tempat_lahir ?? '-',
-            '{tanggal_lahir}' => $surat->mahasiswa->tanggal_lahir ? $surat->mahasiswa->tanggal_lahir->format('d F Y') : '-',
-            '{alamat}' => $surat->mahasiswa->alamat ?? '-',
-            '{fakultas}' => $surat->mahasiswa->prodi->fakultas->nama_fakultas ?? '-',
-            '{prodi}' => $surat->mahasiswa->prodi->nama_prodi ?? '-',
-            '{jenjang}' => $surat->mahasiswa->prodi->jenjang ?? '-',
-            '{ipk}' => $surat->mahasiswa->ipk ?? '-',
-            '{semester}' => $this->getSemester($surat->mahasiswa->tanggal_masuk),
-            '{keperluan}' => $surat->keperluan,
-            '{ttd_nama}' => $surat->ttd_nama ?? 'Dekan Fakultas',
-            '{ttd_nip}' => $surat->ttd_nip ?? '-',
-            '{ttd_jabatan}' => $surat->ttd_jabatan ?? 'Dekan',
-            '{ttd_elektronik}' => $surat->ttd_elektronik ?? ''
-        ];
-        
-        // Replace variables
-        $html = str_replace(array_keys($data), array_values($data), $template);
-        
-        return $this->addPrintStyles($html);
-    }
-
-    private function getSemester($tanggalMasuk)
-    {
-        if (!$tanggalMasuk) return '-';
-        
-        $tahunMasuk = $tanggalMasuk->year;
-        $tahunSekarang = date('Y');
-        $selisihTahun = $tahunSekarang - $tahunMasuk;
-        $semester = ($selisihTahun * 2) + 1;
-        
-        return $semester . ' (Genap)';
-    }
-
-    private function addPrintStyles($html)
-    {
-        return '
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Surat Keterangan</title>
-            <style>
-                @page {
-                    size: A4;
-                    margin: 2cm;
-                }
-                body {
-                    font-family: "Times New Roman", Times, serif;
-                    font-size: 12pt;
-                    line-height: 1.5;
-                }
-                .kop-surat {
-                    text-align: center;
-                    border-bottom: 3px solid #6f42c1;
-                    padding-bottom: 10px;
-                    margin-bottom: 20px;
-                }
-                .logo {
-                    text-align: center;
-                    margin-bottom: 10px;
-                }
-                .universitas h1 {
-                    font-size: 18pt;
-                    margin: 0;
-                    color: #6f42c1;
-                }
-                .universitas h2 {
-                    font-size: 14pt;
-                    margin: 5px 0;
-                }
-                .nomor-surat {
-                    text-align: center;
-                    margin: 20px 0;
-                    font-weight: bold;
-                }
-                .hal {
-                    text-align: center;
-                    margin: 10px 0;
-                    text-decoration: underline;
-                    font-weight: bold;
-                }
-                .isi-surat {
-                    text-align: justify;
-                    margin: 20px 0;
-                }
-                table {
-                    width: 100%;
-                    margin: 15px 0;
-                }
-                td {
-                    padding: 5px;
-                    vertical-align: top;
-                }
-                .label {
-                    width: 140px;
-                    font-weight: bold;
-                }
-                .tanda-tangan {
-                    margin-top: 40px;
-                    text-align: right;
-                }
-                .ttd-image {
-                    max-width: 200px;
-                    height: auto;
-                    margin-top: 10px;
-                }
-                .footer {
-                    margin-top: 30px;
-                    font-size: 10pt;
-                    text-align: center;
-                    border-top: 1px solid #ccc;
-                    padding-top: 10px;
-                }
-            </style>
-        </head>
-        <body>
-            ' . $html . '
-        </body>
-        </html>
-        ';
-    }
-
 }

@@ -82,7 +82,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('users', UserController::class)->except(['show']);
 
     // Fakultas Management
-    Route::resource('fakultas', FakultasController::class)->except(['show']);
+    Route::get('/fakultas', [FakultasController::class, 'index'])->name('fakultas.index');
+    Route::post('/fakultas', [FakultasController::class, 'store'])->name('fakultas.store');
+    Route::get('/fakultas/create', [FakultasController::class, 'create'])->name('fakultas.create');
+    Route::put('/fakultas/{fakultas}', [FakultasController::class, 'update'])->name('fakultas.update');
+    Route::delete('/fakultas/{fakultas}', [FakultasController::class, 'destroy'])->name('fakultas.destroy');
+    Route::get('/fakultas/{fakultas}/edit', [FakultasController::class, 'edit'])->name('fakultas.edit');
 
     // Prodi Management (di dalam fakultas)
     Route::get('/get-prodi/{fakultasId}', [FakultasController::class, 'getProdiByFakultas'])->name('get-prodi');
@@ -92,7 +97,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Mahasiswa Management
     Route::get('/mahasiswa/export', [MahasiswaController::class, 'export'])->name('mahasiswa.export');
-    Route::get('/mahasiswa/export/{status}', [MahasiswaController::class, 'export'])->name('mahasiswa.export.status'); // Tambahan
+    Route::get('/mahasiswa/export/{status}', [MahasiswaController::class, 'export'])->name('mahasiswa.export.status');
     Route::get('/mahasiswa/export-template', [MahasiswaController::class, 'exportTemplate'])->name('mahasiswa.export-template');
     Route::post('/mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
     Route::get('/mahasiswa/import-progress/{batchId}', [MahasiswaController::class, 'checkProgress'])->name('mahasiswa.import-progress');
@@ -104,6 +109,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('kategori-surat', [KategoriSuratController::class, 'index'])->name('kategori-surat.index');
     Route::post('/jenis-surat/{jenisSurat}/template', [JenisSuratController::class, 'updateTemplate'])->name('jenis-surat.template');
     Route::resource('kategori-surat', KategoriSuratController::class);
+
     // Surat
     Route::get('/surat/{id}/pdf', [JenisSuratController::class, 'exportPdf'])->name('surat.pdf');
     Route::get('/surat/{id}/json', [JenisSuratController::class, 'getSuratJson'])->name('surat.json');
@@ -116,8 +122,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 Route::middleware(['auth'])->prefix('petugas')->name('petugas.')->group(function () {
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('dashboard');
     Route::get('/approval', [ApprovalController::class, 'index'])->name('approval.index');
+
     Route::post('/approval/{surat}/approve', [ApprovalController::class, 'approve'])->name('approval.approve');
     Route::post('/approval/{surat}/reject', [ApprovalController::class, 'reject'])->name('approval.reject');
+    Route::get('/approval/{surat}/data', [ApprovalController::class, 'getSuratData'])->name('petugas.approval.data');
+
     Route::get('/history', [ApprovalController::class, 'history'])->name('history');
 });
 
