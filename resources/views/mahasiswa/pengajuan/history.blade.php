@@ -156,9 +156,9 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
+                                            <!-- Tombol Detail - menggunakan onclick -->
                                             <button type="button" class="btn btn-sm btn-outline-info"
-                                                data-bs-toggle="modal" data-bs-target="#detailModal{{ $surat->id }}"
-                                                title="Detail Surat">
+                                                onclick="openDetailModal({{ $surat->id }})" title="Detail Surat">
                                                 <i class="bi bi-eye"></i>
                                             </button>
 
@@ -180,120 +180,6 @@
                                         </div>
                                     </td>
                                 </tr>
-
-                                <!-- Modal Detail -->
-                                <div class="modal fade" id="detailModal{{ $surat->id }}" tabindex="-1"
-                                    data-bs-backdrop="static">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header"
-                                                style="background: linear-gradient(135deg, #6f42c1, #8b5cf6);">
-                                                <h5 class="modal-title text-white">
-                                                    <i class="bi bi-file-text me-2"></i>Detail Surat
-                                                </h5>
-                                                <button type="button" class="btn-close btn-close-white"
-                                                    data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label class="text-muted small">Jenis Surat</label>
-                                                            <p class="fw-semibold">
-                                                                {{ $surat->jenisSurat->nama_surat ?? '-' }}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label class="text-muted small">Status</label>
-                                                            <div>
-                                                                @if ($surat->status == 'pending')
-                                                                    <span
-                                                                        class="badge bg-warning text-dark">Menunggu</span>
-                                                                @elseif($surat->status == 'approved')
-                                                                    <span class="badge bg-success">Disetujui</span>
-                                                                @else
-                                                                    <span class="badge bg-danger">Ditolak</span>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div class="mb-3">
-                                                            <label class="text-muted small">Tanggal Pengajuan</label>
-                                                            <p>{{ $surat->created_at->format('d F Y H:i') }}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div class="mb-3">
-                                                            <label class="text-muted small">Keperluan</label>
-                                                            <div class="p-3 bg-light rounded">{{ $surat->keperluan }}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    @if ($surat->status == 'approved' && $surat->approved_at)
-                                                        <div class="col-12">
-                                                            <div class="mb-3">
-                                                                <label class="text-muted small">Tanggal Disetujui</label>
-                                                                <p>{{ $surat->approved_at->format('d F Y H:i') }}</p>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                    @if ($surat->status == 'rejected' && $surat->alasan_reject)
-                                                        <div class="col-12">
-                                                            <div class="mb-3">
-                                                                <label class="text-muted small text-danger">Alasan
-                                                                    Ditolak</label>
-                                                                <div
-                                                                    class="p-3 bg-danger bg-opacity-10 rounded text-danger">
-                                                                    {{ $surat->alasan_reject }}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                    @if ($surat->file_ktm)
-                                                        <div class="col-12">
-                                                            <div class="mb-3">
-                                                                <label class="text-muted small">File KTM</label>
-                                                                <div>
-                                                                    <a href="{{ asset('storage/' . $surat->file_ktm) }}"
-                                                                        target="_blank"
-                                                                        class="btn btn-sm btn-outline-primary">
-                                                                        <i class="bi bi-file-pdf"></i> Lihat File
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                    @if ($surat->bukti_pembayaran)
-                                                        <div class="col-12">
-                                                            <div class="mb-3">
-                                                                <label class="text-muted small">Bukti Pembayaran</label>
-                                                                <div>
-                                                                    <a href="{{ asset('storage/' . $surat->bukti_pembayaran) }}"
-                                                                        target="_blank"
-                                                                        class="btn btn-sm btn-outline-primary">
-                                                                        <i class="bi bi-file-pdf"></i> Lihat File
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                @if ($surat->status == 'approved')
-                                                    <a href="{{ route('mahasiswa.pengajuan.download', $surat->id) }}"
-                                                        class="btn btn-success">
-                                                        <i class="bi bi-download"></i> Download Surat
-                                                    </a>
-                                                @endif
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Tutup</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-center py-5">
@@ -327,13 +213,272 @@
         </div>
     </div>
 
+    <!-- ============================================ -->
+    <!-- MODAL DETAIL - SATU MODAL UNTUK SEMUA -->
+    <!-- ============================================ -->
+    <div class="modal fade" id="detailModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1, #8b5cf6);">
+                    <h5 class="modal-title text-white">
+                        <i class="bi bi-file-text me-2"></i>Detail Surat
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detailModalBody">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Memuat data surat...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <a href="#" id="detailDownloadBtn" class="btn btn-success" style="display: none;">
+                        <i class="bi bi-download"></i> Download Surat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
         <script>
             // ============================================
-            // 1. DOWNLOAD BUTTON HANDLER
+            // 1. OPEN DETAIL MODAL
+            // ============================================
+            let currentDetailSuratId = null;
+
+            function openDetailModal(id) {
+                currentDetailSuratId = id;
+
+                // Tampilkan loading
+                document.getElementById('detailModalBody').innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Memuat data surat...</p>
+                    </div>
+                `;
+
+                // Sembunyikan tombol download
+                document.getElementById('detailDownloadBtn').style.display = 'none';
+
+                // Buka modal
+                var modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                modal.show();
+
+                // Load data surat
+                loadDetailSurat(id);
+            }
+
+            // ============================================
+            // 2. LOAD DETAIL SURAT
+            // ============================================
+            function loadDetailSurat(id) {
+                // Cari data dari tabel (data sudah ada di DOM)
+                var rows = document.querySelectorAll('#suratTable tbody tr');
+                var foundRow = null;
+
+                rows.forEach(function(row) {
+                    // Cari berdasarkan tombol detail di row
+                    var detailBtn = row.querySelector('button[onclick*="openDetailModal(' + id + ')"]');
+                    if (detailBtn) {
+                        foundRow = row;
+                    }
+                });
+
+                if (foundRow) {
+                    // Ekstrak data dari row
+                    var cells = foundRow.querySelectorAll('td');
+                    var jenisSurat = cells[1].textContent.trim();
+                    var keperluan = cells[2].textContent.trim();
+                    var tanggal = cells[3].textContent.trim();
+                    var statusBadge = cells[4].querySelector('.badge');
+                    var statusText = statusBadge ? statusBadge.textContent.trim() : '-';
+                    var statusClass = statusBadge ? statusBadge.className : '';
+
+                    // Cari alasan reject di popover
+                    var rejectBtn = foundRow.querySelector('[data-bs-toggle="popover"]');
+                    var alasanReject = rejectBtn ? rejectBtn.getAttribute('data-bs-content') : null;
+
+                    // Cari file KTM
+                    var fileKtm = null;
+                    var fileKtmLink = foundRow.querySelector('a[href*="storage"][href*="ktm"]');
+                    if (fileKtmLink) {
+                        fileKtm = fileKtmLink.getAttribute('href');
+                    }
+
+                    // Cari bukti pembayaran
+                    var fileBukti = null;
+                    var fileBuktiLink = foundRow.querySelector('a[href*="storage"][href*="pembayaran"]');
+                    if (fileBuktiLink) {
+                        fileBukti = fileBuktiLink.getAttribute('href');
+                    }
+
+                    // Cek apakah status approved
+                    var isApproved = statusText.toLowerCase().includes('disetujui');
+
+                    // Render detail
+                    renderDetailModal(jenisSurat, keperluan, tanggal, statusText, statusClass, alasanReject, isApproved, id,
+                        fileKtm, fileBukti);
+
+                } else {
+                    // Fallback: gunakan AJAX
+                    $.ajax({
+                        url: '/mahasiswa/pengajuan/detail/' + id,
+                        method: 'GET',
+                        success: function(response) {
+                            if (response.success) {
+                                renderDetailModal(
+                                    response.data.jenis_surat,
+                                    response.data.keperluan,
+                                    response.data.tanggal,
+                                    response.data.status,
+                                    response.data.status_class,
+                                    response.data.alasan_reject,
+                                    response.data.is_approved,
+                                    id,
+                                    response.data.file_ktm,
+                                    response.data.bukti_pembayaran
+                                );
+                            } else {
+                                showDetailError('Gagal memuat data surat');
+                            }
+                        },
+                        error: function() {
+                            showDetailError('Terjadi kesalahan saat memuat data');
+                        }
+                    });
+                }
+            }
+
+            // ============================================
+            // 3. RENDER DETAIL MODAL
+            // ============================================
+            function renderDetailModal(jenisSurat, keperluan, tanggal, statusText, statusClass, alasanReject, isApproved, id,
+                fileKtm, fileBukti) {
+                var statusIcon = '';
+                var statusBadgeColor = '';
+
+                if (statusText.toLowerCase().includes('menunggu')) {
+                    statusIcon = 'bi-clock';
+                    statusBadgeColor = 'bg-warning text-dark';
+                } else if (statusText.toLowerCase().includes('disetujui')) {
+                    statusIcon = 'bi-check-circle';
+                    statusBadgeColor = 'bg-success';
+                } else {
+                    statusIcon = 'bi-x-circle';
+                    statusBadgeColor = 'bg-danger';
+                }
+
+                var html = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="text-muted small">Jenis Surat</label>
+                                <p class="fw-semibold">${jenisSurat || '-'}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="text-muted small">Status</label>
+                                <div>
+                                    <span class="badge ${statusBadgeColor}">
+                                        <i class="bi ${statusIcon} me-1"></i> ${statusText}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="text-muted small">Tanggal Pengajuan</label>
+                                <p>${tanggal || '-'}</p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="text-muted small">Keperluan</label>
+                                <div class="p-3 bg-light rounded">${keperluan || '-'}</div>
+                            </div>
+                        </div>
+                `;
+
+                if (alasanReject) {
+                    html += `
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="text-muted small text-danger">Alasan Ditolak</label>
+                                <div class="p-3 bg-danger bg-opacity-10 rounded text-danger">
+                                    ${alasanReject}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (fileKtm) {
+                    html += `
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="text-muted small">File KTM</label>
+                                <div>
+                                    <a href="${fileKtm}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-file-pdf"></i> Lihat File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (fileBukti) {
+                    html += `
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="text-muted small">Bukti Pembayaran</label>
+                                <div>
+                                    <a href="${fileBukti}" target="_blank" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-file-pdf"></i> Lihat File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+
+                document.getElementById('detailModalBody').innerHTML = html;
+
+                // Tampilkan tombol download jika status approved
+                var downloadBtn = document.getElementById('detailDownloadBtn');
+                if (isApproved) {
+                    downloadBtn.style.display = 'inline-block';
+                    downloadBtn.href = '/mahasiswa/pengajuan/' + id + '/download';
+                } else {
+                    downloadBtn.style.display = 'none';
+                }
+            }
+
+            // ============================================
+            // 4. SHOW DETAIL ERROR
+            // ============================================
+            function showDetailError(message) {
+                document.getElementById('detailModalBody').innerHTML = `
+                    <div class="alert alert-danger m-3">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ${message}
+                    </div>
+                `;
+            }
+
+            // ============================================
+            // 5. DOWNLOAD BUTTON HANDLER
             // ============================================
             $(document).ready(function() {
-                // Event handler untuk tombol download
                 $(document).on('click', '.download-btn', function(e) {
                     e.preventDefault();
 
@@ -341,16 +486,13 @@
                     var originalText = $this.html();
                     var url = $this.attr('href');
 
-                    // Disable button dan tampilkan loading
                     $this.html(
                         '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Memproses...'
                     );
                     $this.addClass('disabled');
 
-                    // Redirect ke URL download
                     window.location.href = url;
 
-                    // Reset button setelah 5 detik (fallback)
                     setTimeout(function() {
                         $this.html(originalText);
                         $this.removeClass('disabled');
@@ -359,10 +501,9 @@
             });
 
             // ============================================
-            // 2. POPOVER INITIALIZATION
+            // 6. POPOVER INITIALIZATION
             // ============================================
             document.addEventListener('DOMContentLoaded', function() {
-                // Inisialisasi popover Bootstrap
                 var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
                 var popoverList = popoverTriggerList.map(function(popoverTriggerEl) {
                     return new bootstrap.Popover(popoverTriggerEl, {
@@ -376,7 +517,7 @@
             });
 
             // ============================================
-            // 3. FILTER FUNCTION
+            // 7. FILTER FUNCTION
             // ============================================
             function filterTable() {
                 var status = document.getElementById('filterStatus').value;
@@ -400,23 +541,41 @@
                 document.getElementById('filterDate').value = '';
                 filterTable();
             }
+
+            // ============================================
+            // 8. PREVENT MODAL CLOSE ON BACKGROUND CLICK
+            // ============================================
+            document.addEventListener('DOMContentLoaded', function() {
+                var modals = document.querySelectorAll('.modal');
+                modals.forEach(function(modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            // Biarkan modal tetap terbuka karena data-bs-backdrop="static"
+                            // Tidak ada aksi
+                        }
+                    });
+                });
+            });
+
+            // ============================================
+            // 9. RESET DETAIL MODAL
+            // ============================================
+            document.getElementById('detailModal').addEventListener('hidden.bs.modal', function() {
+                currentDetailSuratId = null;
+            });
         </script>
     @endpush
 
     @push('styles')
         <style>
-            /* ============================================
-                       TABLE STYLES
-                    ============================================ */
+            /* TABLE STYLES */
             .table-hover tbody tr:hover {
                 background-color: rgba(111, 66, 193, 0.05);
                 cursor: pointer;
                 transition: background-color 0.2s ease;
             }
 
-            /* ============================================
-                       BADGE STYLES
-                    ============================================ */
+            /* BADGE STYLES */
             .badge {
                 font-size: 0.75rem;
                 padding: 0.35rem 0.65rem;
@@ -439,9 +598,7 @@
                 color: white;
             }
 
-            /* ============================================
-                       BUTTON GROUP STYLES
-                    ============================================ */
+            /* BUTTON GROUP STYLES */
             .btn-group .btn {
                 padding: 0.25rem 0.5rem;
                 font-size: 0.8rem;
@@ -457,9 +614,7 @@
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             }
 
-            /* ============================================
-                       DOWNLOAD BUTTON
-                    ============================================ */
+            /* DOWNLOAD BUTTON */
             .download-btn {
                 transition: all 0.3s ease;
             }
@@ -474,18 +629,14 @@
                 cursor: not-allowed;
             }
 
-            /* ============================================
-                       SPINNER
-                    ============================================ */
+            /* SPINNER */
             .spinner-border-sm {
                 width: 1rem;
                 height: 1rem;
                 border-width: 0.15em;
             }
 
-            /* ============================================
-                       POPOVER
-                    ============================================ */
+            /* POPOVER */
             .popover {
                 max-width: 300px;
                 border: none;
@@ -505,6 +656,16 @@
                 padding: 10px 14px;
                 font-size: 0.85rem;
                 color: #333;
+            }
+
+            /* MODAL */
+            .modal.fade .modal-dialog {
+                transform: scale(0.95);
+                transition: transform 0.2s ease;
+            }
+
+            .modal.show .modal-dialog {
+                transform: scale(1);
             }
         </style>
     @endpush

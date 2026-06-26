@@ -107,22 +107,53 @@ class ApprovalController extends Controller
         try {
             $surat = Surat::with(['mahasiswa.prodi.fakultas', 'jenisSurat'])->findOrFail($id);
 
+            // Ambil data mahasiswa
+            $mahasiswa = $surat->mahasiswa;
+
+            // Siapkan data untuk replace variabel di template
+            $replacements = [
+                '{nama_mahasiswa}' => $mahasiswa->nama_lengkap ?? '-',
+                '{npm}' => $mahasiswa->npm ?? '-',
+                '{alamat}' => $mahasiswa->alamat ?? '-',
+                '{fakultas}' => $mahasiswa->prodi->fakultas->nama_fakultas ?? '-',
+                '{prodi}' => $mahasiswa->prodi->nama_prodi ?? '-',
+                '{semester}' => $mahasiswa->semester ?? '-',
+                '{nomor_surat}' => $surat->nomor_surat ?? '-',
+                '{tanggal_surat}' => now()->format('d F Y'),
+                '{perihal}' => $surat->keperluan ?? '-',
+                '{dekan}' => 'Dr. Oki Mardiawan, M.Psi., Psikolog.',
+                '{nip_dekan}' => 'D.07.0.464',
+                // Data Orang Tua - dari tabel surat
+                '{nama_orangtua}' => $surat->nama_ortu ?? '-',
+                '{nrp_nik_nip}' => $surat->nik_ortu ?? '-',
+                '{pangkat_orangtua}' => $surat->pangkat_ortu ?? '-',
+                '{instansi_orangtua}' => $surat->instansi_ortu ?? '-',
+                '{alamat_kantor}' => $surat->alamat_kantor_ortu ?? '-',
+            ];
+
+            // Ambil template dan replace variabel
+            $templateContent = $surat->jenisSurat->template_content ?? '';
+            $content = str_replace(array_keys($replacements), array_values($replacements), $templateContent);
+
             return response()->json([
                 'success' => true,
                 'data' => [
                     'id' => $surat->id,
-                    'mahasiswa_nama' => $surat->mahasiswa->nama_lengkap,
-                    'mahasiswa_npm' => $surat->mahasiswa->npm,
-                    'fakultas' => $surat->mahasiswa->prodi->fakultas->nama_fakultas ?? '-',
+                    'mahasiswa_nama' => $mahasiswa->nama_lengkap,
+                    'mahasiswa_npm' => $mahasiswa->npm,
+                    'fakultas' => $mahasiswa->prodi->fakultas->nama_fakultas ?? '-',
                     'jenis_surat' => $surat->jenisSurat->nama_surat,
                     'keperluan' => $surat->keperluan,
-                    'content' => $surat->content,
+                    'content' => $content,
                     'tanggal_pengajuan' => $surat->created_at->format('d/m/Y H:i'),
-                    'nama_ortu' => $surat->nama_ortu,
-                    'nik_ortu' => $surat->nik_ortu,
-                    'pangkat_ortu' => $surat->pangkat_ortu,
-                    'instansi_ortu' => $surat->instansi_ortu,
-                    'alamat_kantor_ortu' => $surat->alamat_kantor_ortu,
+                    // Data Orang Tua dari tabel surat
+                    'data_orangtua' => [
+                        'nama' => $surat->nama_ortu ?? '-',
+                        'nik' => $surat->nik_ortu ?? '-',
+                        'pangkat' => $surat->pangkat_ortu ?? '-',
+                        'instansi' => $surat->instansi_ortu ?? '-',
+                        'alamat_kantor' => $surat->alamat_kantor_ortu ?? '-',
+                    ],
                     'file_ktm' => $surat->file_ktm,
                     'bukti_pembayaran' => $surat->bukti_pembayaran,
                     'file_pendukung' => $surat->file_pendukung,
@@ -131,7 +162,7 @@ class ApprovalController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Gagal memuat data: ' . $e->getMessage()
             ], 500);
         }
     }

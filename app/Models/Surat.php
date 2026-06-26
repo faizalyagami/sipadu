@@ -31,7 +31,14 @@ class Surat extends Model
         'nama_kelompok',
         'file_ktm',
         'file_pendukung',
-        'data_tambahan'
+        'data_tambahan',
+        'nama_ortu',
+        'nik_ortu',
+        'pangkat_ortu',
+        'instansi_ortu',
+        'alamat_kantor_ortu',
+        'pekerjaan_ortu',
+        'no_hp_ortu',
     ];
 
     protected $casts = [

@@ -137,6 +137,10 @@ Route::middleware(['auth'])->prefix('mahasiswa')->name('mahasiswa.')->group(func
     Route::post('/pengajuan', [PengajuanSuratController::class, 'store'])->name('pengajuan.store');
     Route::get('/pengajuan/{surat}/download', [PengajuanSuratController::class, 'download'])->name('pengajuan.download');
     Route::get('/riwayat', [PengajuanSuratController::class, 'history'])->name('riwayat');
+    Route::get('/pengajuan/get-fields/{jenisSuratId}', [PengajuanSuratController::class, 'getFormFields'])->name('pengajuan.get-fields');
+
+    Route::get('/pengajuan/{surat}/download', [PengajuanSuratController::class, 'download'])->name('pengajuan.download');
+    Route::get('/riwayat', [PengajuanSuratController::class, 'history'])->name('riwayat');
 });
 
 // =============== CKEDITOR IMAGE UPLOAD ROUTE ===============

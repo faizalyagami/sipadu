@@ -65,6 +65,7 @@
                                 <th class="text-center" style="width: 50px;">No</th>
                                 <th>Nama Surat</th>
                                 <th>Kategori</th>
+                                <th>Variabel</th>
                                 <th class="text-center">Template</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center" style="width: 200px;">Aksi</th>
@@ -86,6 +87,19 @@
                                                 style="background-color: {{ $jenis->kategoriSurat->warna ?? '#6f42c1' }};">
                                                 {{ $jenis->kategoriSurat->nama_kategori }}
                                             </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $vars = $jenis->getVariableFields();
+                                        @endphp
+                                        @if (count($vars) > 0)
+                                            <button class="btn btn-sm btn-info"
+                                                onclick="showVariables({{ $jenis->id }})">
+                                                {{ count($vars) }} Variabel
+                                            </button>
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif

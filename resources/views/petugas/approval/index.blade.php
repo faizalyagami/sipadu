@@ -54,48 +54,13 @@
                                             </form>
 
                                             <!-- Tolak -->
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                data-bs-target="#rejectModal{{ $surat->id }}">
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                onclick="openRejectModal({{ $surat->id }})">
                                                 <i class="bi bi-x-lg"></i> Tolak
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-
-                                <!-- Modal Tolak -->
-                                <div class="modal fade" id="rejectModal{{ $surat->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <form action="{{ route('petugas.approval.reject', $surat->id) }}"
-                                                method="POST">
-                                                @csrf
-                                                <div class="modal-header bg-danger text-white">
-                                                    <h5 class="modal-title">
-                                                        <i class="bi bi-x-circle me-2"></i>Alasan Penolakan
-                                                    </h5>
-                                                    <button type="button" class="btn-close btn-close-white"
-                                                        data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="alert alert-warning">
-                                                        <i class="bi bi-exclamation-triangle"></i>
-                                                        Silakan berikan alasan penolakan dengan jelas agar mahasiswa dapat
-                                                        memperbaiki pengajuannya.
-                                                    </div>
-                                                    <textarea name="alasan" class="form-control" rows="4" required
-                                                        placeholder="Contoh: Data orang tua tidak lengkap, bukti pembayaran tidak jelas, dll."></textarea>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-danger">
-                                                        <i class="bi bi-x-lg"></i> Tolak
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-center py-5">
@@ -113,7 +78,7 @@
     </div>
 
     <!-- Modal Konfirmasi Approve -->
-    <div class="modal fade" id="approveConfirmModal" tabindex="-1">
+    <div class="modal fade" id="approveConfirmModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header" style="background: linear-gradient(135deg, #28a745, #20c997);">
@@ -150,6 +115,37 @@
         </div>
     </div>
 
+    <!-- Modal Tolak -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="rejectForm" method="POST">
+                    @csrf
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-x-circle me-2"></i>Alasan Penolakan
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Silakan berikan alasan penolakan dengan jelas agar mahasiswa dapat memperbaiki pengajuannya.
+                        </div>
+                        <textarea name="alasan" id="rejectReason" class="form-control" rows="4" required
+                            placeholder="Contoh: Data orang tua tidak lengkap, bukti pembayaran tidak jelas, dll."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger" id="confirmRejectBtn">
+                            <i class="bi bi-x-lg"></i> Tolak
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Review Surat -->
     <div class="modal fade" id="reviewModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-xl">
@@ -181,128 +177,79 @@
         </div>
     </div>
 
-    @push('style')
-        <style>
-            /* Style untuk preview surat seperti Word */
-            .surat-preview {
-                font-family: 'Times New Roman', Times, serif;
-                font-size: 12pt;
-                line-height: 1.5;
-                background: white;
-                padding: 40px;
-                max-width: 210mm;
-                margin: 0 auto;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-            }
-
-            .surat-preview .kop-surat {
-                text-align: center;
-                border-bottom: 3px solid #6f42c1;
-                padding-bottom: 10px;
-                margin-bottom: 20px;
-            }
-
-            .surat-preview .kop-surat h1 {
-                color: #6f42c1;
-                font-size: 18pt;
-                margin: 0;
-            }
-
-            .surat-preview .kop-surat h2 {
-                font-size: 14pt;
-                margin: 0;
-                font-weight: normal;
-            }
-
-            .surat-preview .kop-surat p {
-                font-size: 9pt;
-                margin: 2px 0;
-            }
-
-            .surat-preview .nomor-surat {
-                text-align: center;
-                font-weight: bold;
-                margin: 15px 0;
-            }
-
-            .surat-preview .judul-surat {
-                text-align: center;
-                font-size: 14pt;
-                font-weight: bold;
-                text-decoration: underline;
-                margin: 20px 0;
-            }
-
-            .surat-preview .isi-surat {
-                text-align: justify;
-                line-height: 1.6;
-            }
-
-            .surat-preview table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 10px 0;
-            }
-
-            .surat-preview table td {
-                padding: 3px 5px;
-                vertical-align: top;
-                border: none;
-            }
-
-            .surat-preview .label {
-                width: 120px;
-                font-weight: bold;
-            }
-
-            .surat-preview .tanda-tangan {
-                margin-top: 40px;
-                text-align: right;
-            }
-
-            .surat-preview .ttd-image {
-                max-width: 200px;
-                height: auto;
-                margin-top: 10px;
-            }
-
-            @media print {
-                .surat-preview {
-                    box-shadow: none;
-                    padding: 0;
-                }
-            }
-        </style>
-    @endpush
-
     @push('scripts')
         <script>
             $(document).ready(function() {
                 let selectedSuratId = null;
                 let selectedSuratData = null;
 
-                // ========== OPEN REVIEW MODAL ==========
+                // ============================================
+                // 1. OPEN REJECT MODAL
+                // ============================================
+                window.openRejectModal = function(id) {
+                    selectedSuratId = id;
+                    $('#rejectReason').val('');
+                    $('#rejectForm').attr('action', `/petugas/approval/${id}/reject`);
+                    $('#rejectModal').modal('show');
+                };
+
+                // ============================================
+                // 2. CONFIRM APPROVE
+                // ============================================
+                window.confirmApprove = function(id) {
+                    selectedSuratId = id;
+                    $('#approveConfirmModal').modal('show');
+                };
+
+                // ============================================
+                // 3. CONFIRM APPROVE BUTTON
+                // ============================================
+                $(document).on('click', '#confirmApproveBtn', function() {
+                    if (selectedSuratId) {
+                        $(this).prop('disabled', true).html(
+                            '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...');
+                        $('#approveForm' + selectedSuratId).submit();
+                    } else {
+                        Swal.fire('Error', 'ID surat tidak ditemukan', 'error');
+                    }
+                });
+
+                // ============================================
+                // 4. RESET APPROVE MODAL
+                // ============================================
+                $('#approveConfirmModal').on('hidden.bs.modal', function() {
+                    selectedSuratId = null;
+                    $('#confirmApproveBtn').prop('disabled', false).html('Ya, Setujui');
+                });
+
+                // ============================================
+                // 5. RESET REJECT MODAL
+                // ============================================
+                $('#rejectModal').on('hidden.bs.modal', function() {
+                    selectedSuratId = null;
+                    $('#rejectReason').val('');
+                    $('#confirmRejectBtn').prop('disabled', false).html('<i class="bi bi-x-lg"></i> Tolak');
+                });
+
+                // ============================================
+                // 6. REVIEW MODAL
+                // ============================================
                 window.openReviewModal = function(id) {
                     selectedSuratId = id;
 
-                    // Tampilkan loading di modal
                     $('#reviewModalBody').html(`
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2 text-muted">Memuat data surat...</p>
-            </div>
-        `);
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Memuat data surat...</p>
+                        </div>
+                    `);
 
-                    // Buka modal
                     $('#reviewModal').modal('show');
-
-                    // Load data via AJAX
                     loadSuratData(id);
                 };
 
-                // ========== LOAD SURAT DATA ==========
                 function loadSuratData(id) {
                     $.ajax({
                         url: `/petugas/approval/${id}/data`,
@@ -321,149 +268,122 @@
                     });
                 }
 
-                // ========== RENDER REVIEW MODAL ==========
                 function renderReviewModal(data) {
+                    // Informasi dasar surat
                     let html = `
-            <!-- Informasi Surat -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="text-muted small">Mahasiswa</label>
-                    <p class="fw-semibold">${data.mahasiswa_nama}</p>
-                </div>
-                <div class="col-md-3">
-                    <label class="text-muted small">NPM</label>
-                    <p class="fw-semibold">${data.mahasiswa_npm}</p>
-                </div>
-                <div class="col-md-3">
-                    <label class="text-muted small">Tanggal Pengajuan</label>
-                    <p class="fw-semibold">${data.tanggal_pengajuan}</p>
-                </div>
-            </div>
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="text-muted small">Jenis Surat</label>
-                    <p class="fw-semibold">${data.jenis_surat}</p>
-                </div>
-                <div class="col-md-6">
-                    <label class="text-muted small">Fakultas</label>
-                    <p class="fw-semibold">${data.fakultas || '-'}</p>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-12">
-                    <label class="text-muted small">Keperluan</label>
-                    <div class="p-3 bg-light rounded">${data.keperluan}</div>
-                </div>
-            </div>
-        `;
-
-                    // Data Orang Tua
-                    if (data.nama_ortu || data.instansi_ortu) {
-                        html += `
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <h6 class="fw-bold"><i class="bi bi-person-lines-fill me-2"></i>Data Orang Tua</h6>
-                        <table class="table table-sm table-bordered">
-                            ${data.nama_ortu ? `<tr><td width="150"><strong>Nama Orang Tua</strong></td><td>${data.nama_ortu}</td></tr>` : ''}
-                            ${data.nik_ortu ? `<tr><td><strong>NIK Orang Tua</strong></td><td>${data.nik_ortu}</td></tr>` : ''}
-                            ${data.pangkat_ortu ? `<tr><td><strong>Pangkat Orang Tua</strong></td><td>${data.pangkat_ortu}</td></tr>` : ''}
-                            ${data.instansi_ortu ? `<tr><td><strong>Instansi Orang Tua</strong></td><td>${data.instansi_ortu}</td></tr>` : ''}
-                            ${data.alamat_kantor_ortu ? `<tr><td><strong>Alamat Kantor</strong></td><td>${data.alamat_kantor_ortu}</td></tr>` : ''}
-                        </table>
-                    </div>
-                </div>
-            `;
-                    }
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small">Mahasiswa</label>
+                                <p class="fw-semibold">${data.mahasiswa_nama}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small">NPM</label>
+                                <p class="fw-semibold">${data.mahasiswa_npm}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small">Tanggal Pengajuan</label>
+                                <p class="fw-semibold">${data.tanggal_pengajuan}</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small">Jenis Surat</label>
+                                <p class="fw-semibold">${data.jenis_surat}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small">Fakultas</label>
+                                <p class="fw-semibold">${data.fakultas || '-'}</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="text-muted small">Keperluan</label>
+                                <div class="p-3 bg-light rounded">${data.keperluan}</div>
+                            </div>
+                        </div>
+                    `;
 
                     // File Pendukung
                     if (data.file_ktm || data.bukti_pembayaran || data.file_pendukung) {
                         html += `
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <h6 class="fw-bold"><i class="bi bi-files me-2"></i>File Pendukung</h6>
-                        <div class="d-flex gap-2 flex-wrap">
-                            ${data.file_ktm ? `<a href="/storage/${data.file_ktm}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-pdf"></i> KTM</a>` : ''}
-                            ${data.bukti_pembayaran ? `<a href="/storage/${data.bukti_pembayaran}" target="_blank" class="btn btn-sm btn-outline-success"><i class="bi bi-file-pdf"></i> Bukti Pembayaran</a>` : ''}
-                            ${data.file_pendukung ? `<a href="/storage/${data.file_pendukung}" target="_blank" class="btn btn-sm btn-outline-warning"><i class="bi bi-file-pdf"></i> File Pendukung</a>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <h6 class="fw-bold"><i class="bi bi-files me-2"></i>File Pendukung</h6>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        ${data.file_ktm ? `<a href="/storage/${data.file_ktm}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-pdf"></i> KTM</a>` : ''}
+                                        ${data.bukti_pembayaran ? `<a href="/storage/${data.bukti_pembayaran}" target="_blank" class="btn btn-sm btn-outline-success"><i class="bi bi-file-pdf"></i> Bukti Pembayaran</a>` : ''}
+                                        ${data.file_pendukung ? `<a href="/storage/${data.file_pendukung}" target="_blank" class="btn btn-sm btn-outline-warning"><i class="bi bi-file-pdf"></i> File Pendukung</a>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     }
 
-                    // Preview Surat - Style seperti Word
+                    // Preview Surat - Data orang tua sudah ada di dalam content surat
                     html += `
-            <div class="row">
-                <div class="col-12">
-                    <h6 class="fw-bold"><i class="bi bi-file-text me-2"></i>Preview Surat</h6>
-                    <div class="border rounded p-4" style="max-height: 500px; overflow-y: auto; background: white; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5;">
-                        ${data.content || '<p class="text-muted text-center">Tidak ada konten surat</p>'}
-                    </div>
-                </div>
-            </div>
-        `;
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="fw-bold"><i class="bi bi-file-text me-2"></i>Preview Surat</h6>
+                                <div class="border rounded p-0" style="max-height: 600px; overflow-y: auto; background: #f5f5f5;">
+                                    <div style="max-width: 210mm; margin: 0 auto; padding: 15mm; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.05); font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5;">
+                                        ${data.content || '<p class="text-muted text-center">Tidak ada konten surat</p>'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
 
                     $('#reviewModalBody').html(html);
                 }
 
-                // ========== SHOW ERROR ==========
                 function showError(message) {
                     $('#reviewModalBody').html(`
-            <div class="alert alert-danger m-3">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                ${message}
-            </div>
-        `);
+                        <div class="alert alert-danger m-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            ${message}
+                        </div>
+                    `);
                 }
 
-                // ========== CONFIRM APPROVE ==========
-                window.confirmApprove = function(id) {
-                    selectedSuratId = id;
-                    $('#approveConfirmModal').modal('show');
-                };
-
-                // ========== APPROVE FROM REVIEW ==========
+                // ============================================
+                // 7. REVIEW APPROVE
+                // ============================================
                 $('#reviewApproveBtn').on('click', function() {
                     if (selectedSuratId) {
                         $('#reviewModal').modal('hide');
-                        // Tunggu modal tertutup, lalu buka confirm approve
                         setTimeout(function() {
                             confirmApprove(selectedSuratId);
                         }, 300);
                     }
                 });
 
-                // ========== REJECT FROM REVIEW ==========
+                // ============================================
+                // 8. REVIEW REJECT
+                // ============================================
                 $('#reviewRejectBtn').on('click', function() {
                     if (selectedSuratId) {
                         $('#reviewModal').modal('hide');
                         setTimeout(function() {
-                            $('#rejectModal' + selectedSuratId).modal('show');
+                            openRejectModal(selectedSuratId);
                         }, 300);
                     }
                 });
 
-                // ========== CONFIRM APPROVE BUTTON ==========
-                $(document).on('click', '#confirmApproveBtn', function() {
-                    if (selectedSuratId) {
-                        $(this).prop('disabled', true).html(
-                            '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...');
-                        $('#approveForm' + selectedSuratId).submit();
-                    } else {
-                        Swal.fire('Error', 'ID surat tidak ditemukan', 'error');
-                    }
-                });
-
-                // ========== RESET MODAL ==========
-                $('#approveConfirmModal').on('hidden.bs.modal', function() {
-                    selectedSuratId = null;
-                    $('#confirmApproveBtn').prop('disabled', false).html('Ya, Setujui');
-                });
-
+                // ============================================
+                // 9. RESET REVIEW MODAL
+                // ============================================
                 $('#reviewModal').on('hidden.bs.modal', function() {
                     selectedSuratId = null;
+                    selectedSuratData = null;
+                });
+
+                // ============================================
+                // 10. PREVENT MODAL CLOSE ON BACKGROUND CLICK
+                // ============================================
+                $('.modal').on('click', function(e) {
+                    if ($(e.target).hasClass('modal')) {
+                        e.preventDefault();
+                    }
                 });
             });
         </script>

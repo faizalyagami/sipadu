@@ -86,6 +86,31 @@ class JenisSurat extends Model
         return $this->variable_fields ?? [];
     }
 
+    public function getFormFields()
+    {
+        $fields = [];
+        $variables = $this->getVariableFields();
+
+        foreach ($variables as $variable) {
+            $field = [
+                'name' => $variable['name'],
+                'label' => $variable['label'],
+                'type' => $variable['type'] ?? 'text',
+                'required' => $variable['required'] ?? true,
+                'placeholder' => $variable['placeholder'] ?? '',
+                'help_text' => $variable['help_text'] ?? '',
+            ];
+
+            if ($variable['type'] == 'select' && isset($variable['options'])) {
+                $field['options'] = $variable['options'];
+            }
+
+            $fields[] = $field;
+        }
+
+        return $fields;
+    }
+
     /**
      * Get semester berdasarkan tanggal masuk
      */
