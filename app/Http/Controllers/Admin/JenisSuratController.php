@@ -15,7 +15,7 @@ class JenisSuratController extends Controller
     {
         $jenisSurats = JenisSurat::with('kategoriSurat')->get();
         $kategoris = KategoriSurat::active()->get();
-        
+
         return view('admin.jenis_surat.index', compact('jenisSurats', 'kategoris'));
     }
 
@@ -161,5 +161,58 @@ class JenisSuratController extends Controller
             'alasan_reject' => $surat->alasan_reject,
             'content' => $surat->content
         ]);
+    }
+
+    public function exportPdf($id)
+    {
+        try {
+            $surat = Surat::with(['mahasiswa', 'jenisSurat'])->findOrFail($id);
+
+            // Generate HTML surat
+            $html = $surat->generateSuratHtml();
+
+            // Generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'defaultFont' => 'Times New Roman',
+                'logErrors' => true
+            ]);
+
+            return $pdf->stream('surat_' . ($surat->nomor_surat ?? $surat->id) . '.pdf');
+        } catch (\Exception $e) {
+            \Log::error('PDF Export Error: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal generate PDF: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getFormFields($id)
+    {
+        try {
+            $jenisSurat = JenisSurat::with('kategoriSurat')->findOrFail($id);
+
+            // Ambil fields dari database atau generate default
+            $fields = $jenisSurat->getFormFields();
+
+            return response()->json([
+                'success' => true,
+                'fields' => $fields,
+                'kategori' => $jenisSurat->kategoriSurat->nama_kategori ?? '',
+                'jenis_surat' => $jenisSurat->nama_surat,
+                'jenis_surat_id' => $jenisSurat->id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat form: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -122,12 +122,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 Route::middleware(['auth'])->prefix('petugas')->name('petugas.')->group(function () {
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('dashboard');
     Route::get('/approval', [ApprovalController::class, 'index'])->name('approval.index');
-
     Route::post('/approval/{surat}/approve', [ApprovalController::class, 'approve'])->name('approval.approve');
     Route::post('/approval/{surat}/reject', [ApprovalController::class, 'reject'])->name('approval.reject');
     Route::get('/approval/{surat}/data', [ApprovalController::class, 'getSuratData'])->name('petugas.approval.data');
-
     Route::get('/history', [ApprovalController::class, 'history'])->name('history');
+    Route::get('/history/{id}/detail', [ApprovalController::class, 'getHistoryDetail'])->name('petugas.history.detail');
+    Route::get('/download-surat/{id}', [ApprovalController::class, 'downloadSurat'])->name('petugas.download-surat');
 });
 
 // =============== MAHASISWA ROUTES ===============
@@ -139,6 +139,7 @@ Route::middleware(['auth'])->prefix('mahasiswa')->name('mahasiswa.')->group(func
     Route::get('/riwayat', [PengajuanSuratController::class, 'history'])->name('riwayat');
     Route::get('/pengajuan/get-fields/{jenisSuratId}', [PengajuanSuratController::class, 'getFormFields'])->name('pengajuan.get-fields');
 
+    Route::get('/pengajuan/{surat}/download-stream', [PengajuanSuratController::class, 'downloadStream'])->name('pengajuan.download-stream');
     Route::get('/pengajuan/{surat}/download', [PengajuanSuratController::class, 'download'])->name('pengajuan.download');
     Route::get('/riwayat', [PengajuanSuratController::class, 'history'])->name('riwayat');
 });

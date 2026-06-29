@@ -21,7 +21,7 @@ class DashboardController extends Controller
     public function getDashboardData(Request $request)
     {
         $year = $request->get('year', date('Y'));
-        
+
         // Statistik dasar
         $totalMahasiswa = Mahasiswa::count();
         $totalPetugas = User::where('role', 'petugas')->count();
@@ -40,30 +40,27 @@ class DashboardController extends Controller
         // Data chart surat per bulan
         $months = [];
         $suratCounts = [];
-        
+
         for ($i = 1; $i <= 12; $i++) {
             $monthName = date('M', mktime(0, 0, 0, $i, 1));
             $months[] = $monthName;
-            
+
             $count = Surat::whereYear('created_at', $year)
                 ->whereMonth('created_at', $i)
                 ->count();
             $suratCounts[] = $count;
         }
 
-        // Data kategori surat - PERBAIKAN: gunakan 'kategori_surat' bukan 'kategori'
-        // Cek kolom yang tersedia di tabel jenis_surats
         $kategoriLabels = [];
         $kategoriCounts = [];
-        
+
         try {
-            // Coba dengan 'kategori_surat'
-            $kategoriData = JenisSurat::select('kategori_surat', DB::raw('count(*) as total'))
-                ->groupBy('kategori_surat')
+            $kategoriData = JenisSurat::select('kategori_surat_id', DB::raw('count(*) as total'))
+                ->groupBy('kategori_surat_id')
                 ->get();
-            
+
             if ($kategoriData->isNotEmpty()) {
-                $kategoriLabels = $kategoriData->pluck('kategori_surat')->toArray();
+                $kategoriLabels = $kategoriData->pluck('kategori_surat_id')->toArray();
                 $kategoriCounts = $kategoriData->pluck('total')->toArray();
             } else {
                 // Fallback: ambil dari surat langsung
@@ -71,7 +68,7 @@ class DashboardController extends Controller
                     ->join('jenis_surats', 'surats.jenis_surat_id', '=', 'jenis_surats.id')
                     ->groupBy('jenis_surats.kategori_surat')
                     ->get();
-                
+
                 if ($kategoriData->isNotEmpty()) {
                     $kategoriLabels = $kategoriData->pluck('kategori_surat')->toArray();
                     $kategoriCounts = $kategoriData->pluck('total')->toArray();
@@ -92,7 +89,7 @@ class DashboardController extends Controller
             ->latest()
             ->limit(10)
             ->get()
-            ->map(function($surat) {
+            ->map(function ($surat) {
                 return [
                     'id' => $surat->id,
                     'status' => $surat->status,

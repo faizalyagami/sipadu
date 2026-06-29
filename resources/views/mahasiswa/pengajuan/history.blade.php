@@ -1,4 +1,3 @@
-{{-- resources/views/mahasiswa/pengajuan/history.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Riwayat Surat')
@@ -156,22 +155,22 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <!-- Tombol Detail - menggunakan onclick -->
-                                            <button type="button" class="btn btn-sm btn-outline-info"
-                                                onclick="openDetailModal({{ $surat->id }})" title="Detail Surat">
+                                            {{-- <button type="button" class="btn btn-sm btn-outline-info btn-detail"
+                                                data-id="{{ $surat->id }}" data-bs-toggle="modal"
+                                                data-bs-target="#detailModal{{ $surat->id }}" title="Detail Surat">
                                                 <i class="bi bi-eye"></i>
-                                            </button>
+                                            </button> --}}
 
                                             @if ($surat->status == 'approved')
                                                 <a href="{{ route('mahasiswa.pengajuan.download', $surat->id) }}"
                                                     class="btn btn-sm btn-outline-success download-btn"
-                                                    title="Download Surat" onclick="return handleDownload(event, this)">
+                                                    title="Download Surat" data-id="{{ $surat->id }}">
                                                     <i class="bi bi-download me-1"></i> Download
                                                 </a>
                                             @endif
 
                                             @if ($surat->status == 'rejected' && $surat->alasan_reject)
-                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                <button type="button" class="btn btn-sm btn-outline-danger btn-alasan"
                                                     data-bs-toggle="popover" data-bs-placement="top"
                                                     data-bs-content="{{ $surat->alasan_reject }}" title="Alasan Ditolak">
                                                     <i class="bi bi-info-circle"></i>
@@ -180,6 +179,117 @@
                                         </div>
                                     </td>
                                 </tr>
+
+                                <!-- Modal Detail -->
+                                {{-- <div class="modal fade" id="detailModal{{ $surat->id }}" tabindex="-1"
+                                    aria-labelledby="detailModalLabel{{ $surat->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header"
+                                                style="background: linear-gradient(135deg, #6f42c1, #8b5cf6);">
+                                                <h5 class="modal-title text-white"
+                                                    id="detailModalLabel{{ $surat->id }}">
+                                                    <i class="bi bi-file-text me-2"></i>Detail Surat
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white"
+                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="text-muted small">Jenis Surat</label>
+                                                            <p class="fw-semibold">
+                                                                {{ $surat->jenisSurat->nama_surat ?? '-' }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="text-muted small">Status</label>
+                                                            <div>
+                                                                @if ($surat->status == 'pending')
+                                                                    <span
+                                                                        class="badge bg-warning text-dark">Menunggu</span>
+                                                                @elseif($surat->status == 'approved')
+                                                                    <span class="badge bg-success">Disetujui</span>
+                                                                @else
+                                                                    <span class="badge bg-danger">Ditolak</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="mb-3">
+                                                            <label class="text-muted small">Tanggal Pengajuan</label>
+                                                            <p>{{ $surat->created_at->format('d F Y H:i') }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="mb-3">
+                                                            <label class="text-muted small">Keperluan</label>
+                                                            <div class="p-3 bg-light rounded">{{ $surat->keperluan }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    @if ($surat->status == 'approved' && $surat->approved_at)
+                                                        <div class="col-12">
+                                                            <div class="mb-3">
+                                                                <label class="text-muted small">Tanggal Disetujui</label>
+                                                                <p>{{ $surat->approved_at->format('d F Y H:i') }}</p>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                    @if ($surat->status == 'rejected' && $surat->alasan_reject)
+                                                        <div class="col-12">
+                                                            <div class="mb-3">
+                                                                <label class="text-muted small text-danger">Alasan
+                                                                    Ditolak</label>
+                                                                <div
+                                                                    class="p-3 bg-danger bg-opacity-10 rounded text-danger">
+                                                                    {{ $surat->alasan_reject }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                    @if ($surat->file_ktm)
+                                                        <div class="col-12">
+                                                            <div class="mb-3">
+                                                                <label class="text-muted small">File KTM</label>
+                                                                <div>
+                                                                    <a href="{{ asset('storage/' . $surat->file_ktm) }}"
+                                                                        target="_blank"
+                                                                        class="btn btn-sm btn-outline-primary">
+                                                                        <i class="bi bi-file-pdf"></i> Lihat File
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                    @if ($surat->bukti_pembayaran)
+                                                        <div class="col-12">
+                                                            <div class="mb-3">
+                                                                <label class="text-muted small">Bukti Pembayaran</label>
+                                                                <div>
+                                                                    <a href="{{ asset('storage/' . $surat->bukti_pembayaran) }}"
+                                                                        target="_blank"
+                                                                        class="btn btn-sm btn-outline-primary">
+                                                                        <i class="bi bi-file-pdf"></i> Lihat File
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                @if ($surat->status == 'approved')
+                                                    <a href="{{ route('mahasiswa.pengajuan.download', $surat->id) }}"
+                                                        class="btn btn-sm btn-outline-success download-btn">
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> --}}
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-center py-5">
@@ -212,317 +322,39 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <!-- ============================================ -->
-    <!-- MODAL DETAIL - SATU MODAL UNTUK SEMUA -->
-    <!-- ============================================ -->
-    <div class="modal fade" id="detailModal" tabindex="-1" data-bs-backdrop="static">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1, #8b5cf6);">
-                    <h5 class="modal-title text-white">
-                        <i class="bi bi-file-text me-2"></i>Detail Surat
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="detailModalBody">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Memuat data surat...</p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <a href="#" id="detailDownloadBtn" class="btn btn-success" style="display: none;">
-                        <i class="bi bi-download"></i> Download Surat
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+@push('scripts')
+    <script>
+        // ============================================
+        // VARIABEL GLOBAL - HANYA SATU DEKLARASI
+        // ============================================
+        // Gunakan let atau const, hindari var untuk menghindari hoisting issues
+        let suratTableInstance = null;
 
-    @push('scripts')
-        <script>
-            // ============================================
-            // 1. OPEN DETAIL MODAL
-            // ============================================
-            let currentDetailSuratId = null;
-
-            function openDetailModal(id) {
-                currentDetailSuratId = id;
-
-                // Tampilkan loading
-                document.getElementById('detailModalBody').innerHTML = `
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Memuat data surat...</p>
-                    </div>
-                `;
-
-                // Sembunyikan tombol download
-                document.getElementById('detailDownloadBtn').style.display = 'none';
-
-                // Buka modal
-                var modal = new bootstrap.Modal(document.getElementById('detailModal'));
-                modal.show();
-
-                // Load data surat
-                loadDetailSurat(id);
-            }
+        document.addEventListener('DOMContentLoaded', function() {
 
             // ============================================
-            // 2. LOAD DETAIL SURAT
+            // 2. POPOVER INITIALIZATION
             // ============================================
-            function loadDetailSurat(id) {
-                // Cari data dari tabel (data sudah ada di DOM)
-                var rows = document.querySelectorAll('#suratTable tbody tr');
-                var foundRow = null;
-
-                rows.forEach(function(row) {
-                    // Cari berdasarkan tombol detail di row
-                    var detailBtn = row.querySelector('button[onclick*="openDetailModal(' + id + ')"]');
-                    if (detailBtn) {
-                        foundRow = row;
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            popoverTriggerList.forEach(function(popoverTriggerEl) {
+                new bootstrap.Popover(popoverTriggerEl, {
+                    trigger: 'hover focus',
+                    delay: {
+                        show: 200,
+                        hide: 100
                     }
-                });
-
-                if (foundRow) {
-                    // Ekstrak data dari row
-                    var cells = foundRow.querySelectorAll('td');
-                    var jenisSurat = cells[1].textContent.trim();
-                    var keperluan = cells[2].textContent.trim();
-                    var tanggal = cells[3].textContent.trim();
-                    var statusBadge = cells[4].querySelector('.badge');
-                    var statusText = statusBadge ? statusBadge.textContent.trim() : '-';
-                    var statusClass = statusBadge ? statusBadge.className : '';
-
-                    // Cari alasan reject di popover
-                    var rejectBtn = foundRow.querySelector('[data-bs-toggle="popover"]');
-                    var alasanReject = rejectBtn ? rejectBtn.getAttribute('data-bs-content') : null;
-
-                    // Cari file KTM
-                    var fileKtm = null;
-                    var fileKtmLink = foundRow.querySelector('a[href*="storage"][href*="ktm"]');
-                    if (fileKtmLink) {
-                        fileKtm = fileKtmLink.getAttribute('href');
-                    }
-
-                    // Cari bukti pembayaran
-                    var fileBukti = null;
-                    var fileBuktiLink = foundRow.querySelector('a[href*="storage"][href*="pembayaran"]');
-                    if (fileBuktiLink) {
-                        fileBukti = fileBuktiLink.getAttribute('href');
-                    }
-
-                    // Cek apakah status approved
-                    var isApproved = statusText.toLowerCase().includes('disetujui');
-
-                    // Render detail
-                    renderDetailModal(jenisSurat, keperluan, tanggal, statusText, statusClass, alasanReject, isApproved, id,
-                        fileKtm, fileBukti);
-
-                } else {
-                    // Fallback: gunakan AJAX
-                    $.ajax({
-                        url: '/mahasiswa/pengajuan/detail/' + id,
-                        method: 'GET',
-                        success: function(response) {
-                            if (response.success) {
-                                renderDetailModal(
-                                    response.data.jenis_surat,
-                                    response.data.keperluan,
-                                    response.data.tanggal,
-                                    response.data.status,
-                                    response.data.status_class,
-                                    response.data.alasan_reject,
-                                    response.data.is_approved,
-                                    id,
-                                    response.data.file_ktm,
-                                    response.data.bukti_pembayaran
-                                );
-                            } else {
-                                showDetailError('Gagal memuat data surat');
-                            }
-                        },
-                        error: function() {
-                            showDetailError('Terjadi kesalahan saat memuat data');
-                        }
-                    });
-                }
-            }
-
-            // ============================================
-            // 3. RENDER DETAIL MODAL
-            // ============================================
-            function renderDetailModal(jenisSurat, keperluan, tanggal, statusText, statusClass, alasanReject, isApproved, id,
-                fileKtm, fileBukti) {
-                var statusIcon = '';
-                var statusBadgeColor = '';
-
-                if (statusText.toLowerCase().includes('menunggu')) {
-                    statusIcon = 'bi-clock';
-                    statusBadgeColor = 'bg-warning text-dark';
-                } else if (statusText.toLowerCase().includes('disetujui')) {
-                    statusIcon = 'bi-check-circle';
-                    statusBadgeColor = 'bg-success';
-                } else {
-                    statusIcon = 'bi-x-circle';
-                    statusBadgeColor = 'bg-danger';
-                }
-
-                var html = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="text-muted small">Jenis Surat</label>
-                                <p class="fw-semibold">${jenisSurat || '-'}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="text-muted small">Status</label>
-                                <div>
-                                    <span class="badge ${statusBadgeColor}">
-                                        <i class="bi ${statusIcon} me-1"></i> ${statusText}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="text-muted small">Tanggal Pengajuan</label>
-                                <p>${tanggal || '-'}</p>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="text-muted small">Keperluan</label>
-                                <div class="p-3 bg-light rounded">${keperluan || '-'}</div>
-                            </div>
-                        </div>
-                `;
-
-                if (alasanReject) {
-                    html += `
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="text-muted small text-danger">Alasan Ditolak</label>
-                                <div class="p-3 bg-danger bg-opacity-10 rounded text-danger">
-                                    ${alasanReject}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                if (fileKtm) {
-                    html += `
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="text-muted small">File KTM</label>
-                                <div>
-                                    <a href="${fileKtm}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-file-pdf"></i> Lihat File
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                if (fileBukti) {
-                    html += `
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="text-muted small">Bukti Pembayaran</label>
-                                <div>
-                                    <a href="${fileBukti}" target="_blank" class="btn btn-sm btn-outline-success">
-                                        <i class="bi bi-file-pdf"></i> Lihat File
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                html += `</div>`;
-
-                document.getElementById('detailModalBody').innerHTML = html;
-
-                // Tampilkan tombol download jika status approved
-                var downloadBtn = document.getElementById('detailDownloadBtn');
-                if (isApproved) {
-                    downloadBtn.style.display = 'inline-block';
-                    downloadBtn.href = '/mahasiswa/pengajuan/' + id + '/download';
-                } else {
-                    downloadBtn.style.display = 'none';
-                }
-            }
-
-            // ============================================
-            // 4. SHOW DETAIL ERROR
-            // ============================================
-            function showDetailError(message) {
-                document.getElementById('detailModalBody').innerHTML = `
-                    <div class="alert alert-danger m-3">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        ${message}
-                    </div>
-                `;
-            }
-
-            // ============================================
-            // 5. DOWNLOAD BUTTON HANDLER
-            // ============================================
-            $(document).ready(function() {
-                $(document).on('click', '.download-btn', function(e) {
-                    e.preventDefault();
-
-                    var $this = $(this);
-                    var originalText = $this.html();
-                    var url = $this.attr('href');
-
-                    $this.html(
-                        '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Memproses...'
-                    );
-                    $this.addClass('disabled');
-
-                    window.location.href = url;
-
-                    setTimeout(function() {
-                        $this.html(originalText);
-                        $this.removeClass('disabled');
-                    }, 5000);
                 });
             });
 
             // ============================================
-            // 6. POPOVER INITIALIZATION
+            // 3. FILTER FUNCTION
             // ============================================
-            document.addEventListener('DOMContentLoaded', function() {
-                var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-                var popoverList = popoverTriggerList.map(function(popoverTriggerEl) {
-                    return new bootstrap.Popover(popoverTriggerEl, {
-                        trigger: 'hover focus',
-                        delay: {
-                            show: 200,
-                            hide: 100
-                        }
-                    });
-                });
-            });
-
-            // ============================================
-            // 7. FILTER FUNCTION
-            // ============================================
-            function filterTable() {
+            window.filterTable = function() {
                 var status = document.getElementById('filterStatus').value;
                 var date = document.getElementById('filterDate').value;
-                var rows = document.querySelectorAll('#suratTable tbody tr');
+                var rows = document.querySelectorAll('#suratTable tbody tr:not(.empty-row)');
 
                 rows.forEach(function(row) {
                     var rowStatus = row.getAttribute('data-status');
@@ -534,139 +366,308 @@
 
                     row.style.display = show ? '' : 'none';
                 });
-            }
+            };
 
-            function resetFilter() {
+            window.resetFilter = function() {
                 document.getElementById('filterStatus').value = '';
                 document.getElementById('filterDate').value = '';
                 filterTable();
-            }
+            };
 
             // ============================================
-            // 8. PREVENT MODAL CLOSE ON BACKGROUND CLICK
+            // 4. MODAL HANDLER - Fix kedip-kedip
             // ============================================
-            document.addEventListener('DOMContentLoaded', function() {
-                var modals = document.querySelectorAll('.modal');
-                modals.forEach(function(modal) {
-                    modal.addEventListener('click', function(e) {
-                        if (e.target === this) {
-                            // Biarkan modal tetap terbuka karena data-bs-backdrop="static"
-                            // Tidak ada aksi
-                        }
-                    });
+            document.querySelectorAll('[data-bs-toggle="modal"]').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    var target = this.getAttribute('data-bs-target');
+                    var modalId = target.replace('#', '');
+                    var modal = document.getElementById(modalId);
+
+                    if (modal) {
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }
+                });
+            });
+
+            // Bersihkan backdrop saat modal ditutup
+            document.querySelectorAll('.modal').forEach(function(modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
                 });
             });
 
             // ============================================
-            // 9. RESET DETAIL MODAL
+            // 5. FIX: CLOSE MODAL WITH ESC
             // ============================================
-            document.getElementById('detailModal').addEventListener('hidden.bs.modal', function() {
-                currentDetailSuratId = null;
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    var openModals = document.querySelectorAll('.modal.show');
+                    openModals.forEach(function(modal) {
+                        var instance = bootstrap.Modal.getInstance(modal);
+                        if (instance) {
+                            instance.hide();
+                            document.body.classList.remove('modal-open');
+                            document.body.style.overflow = '';
+                            document.body.style.paddingRight = '';
+                        }
+                    });
+                }
             });
-        </script>
-    @endpush
 
-    @push('styles')
-        <style>
-            /* TABLE STYLES */
-            .table-hover tbody tr:hover {
-                background-color: rgba(111, 66, 193, 0.05);
-                cursor: pointer;
-                transition: background-color 0.2s ease;
-            }
+            // ============================================
+            // 6. CLEANUP BACKDROP SAAT LOAD
+            // ============================================
+            window.addEventListener('load', function() {
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            });
+        });
 
-            /* BADGE STYLES */
-            .badge {
-                font-size: 0.75rem;
-                padding: 0.35rem 0.65rem;
-                font-weight: 600;
-                border-radius: 20px;
-            }
+        // ============================================
+        // 7. HANDLE DOWNLOAD (global function)
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gunakan event delegation untuk tombol download
+            document.addEventListener('click', function(e) {
+                var target = e.target.closest('.download-btn');
+                if (!target) return;
 
-            .badge.bg-warning {
-                background: #ffc107 !important;
-                color: #212529;
-            }
+                e.preventDefault();
 
-            .badge.bg-success {
-                background: #28a745 !important;
-                color: white;
-            }
+                var $this = target;
+                var originalText = $this.innerHTML;
+                var url = $this.getAttribute('href');
+                var suratId = $this.dataset.id || 'surat';
 
-            .badge.bg-danger {
-                background: #dc3545 !important;
-                color: white;
-            }
+                // Tampilkan loading
+                Swal.fire({
+                    title: 'Memproses Surat',
+                    text: 'Sedang menyiapkan file PDF...',
+                    allowOutsideClick: false,
+                    didOpen: function() {
+                        Swal.showLoading();
+                    }
+                });
 
-            /* BUTTON GROUP STYLES */
-            .btn-group .btn {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.8rem;
-                border-radius: 6px;
-            }
+                // Disable button
+                $this.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> 
+            Memproses...
+        `;
+                $this.classList.add('disabled');
 
-            .btn-group .btn i {
-                font-size: 0.9rem;
-            }
+                // Gunakan XMLHttpRequest untuk download dengan progress
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'blob';
 
-            .btn-group .btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            }
+                xhr.onload = function() {
+                    Swal.close();
 
-            /* DOWNLOAD BUTTON */
-            .download-btn {
-                transition: all 0.3s ease;
-            }
+                    if (this.status === 200) {
+                        var blob = this.response;
+                        var blobUrl = URL.createObjectURL(blob);
 
-            .download-btn:hover:not(.disabled) {
-                transform: translateY(-1px);
-                box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-            }
+                        var link = document.createElement('a');
+                        link.href = blobUrl;
+                        link.download = 'surat_' + suratId + '.pdf';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
 
-            .download-btn.disabled {
-                opacity: 0.7;
-                cursor: not-allowed;
-            }
+                        setTimeout(function() {
+                            URL.revokeObjectURL(blobUrl);
+                        }, 1000);
 
-            /* SPINNER */
-            .spinner-border-sm {
-                width: 1rem;
-                height: 1rem;
-                border-width: 0.15em;
-            }
+                        // Reset button
+                        $this.innerHTML = originalText;
+                        $this.classList.remove('disabled');
 
-            /* POPOVER */
-            .popover {
-                max-width: 300px;
-                border: none;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                border-radius: 10px;
-            }
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Surat berhasil diunduh',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        // Fallback
+                        window.location.href = url;
+                        setTimeout(function() {
+                            $this.innerHTML = originalText;
+                            $this.classList.remove('disabled');
+                        }, 3000);
+                    }
+                };
 
-            .popover-header {
-                background: #dc3545;
-                color: white;
-                border-radius: 10px 10px 0 0;
-                font-weight: 600;
-                padding: 8px 14px;
-            }
+                xhr.onerror = function() {
+                    Swal.close();
+                    // Fallback
+                    window.location.href = url;
+                    setTimeout(function() {
+                        $this.innerHTML = originalText;
+                        $this.classList.remove('disabled');
+                    }, 3000);
+                };
 
-            .popover-body {
-                padding: 10px 14px;
-                font-size: 0.85rem;
-                color: #333;
-            }
+                xhr.send();
+            });
+        });
+    </script>
+@endpush
 
-            /* MODAL */
-            .modal.fade .modal-dialog {
-                transform: scale(0.95);
-                transition: transform 0.2s ease;
-            }
+@push('styles')
+    <style>
+        /* ============================================
+                                                                       TABLE STYLES
+                                                                    ============================================ */
+        .table-hover tbody tr:hover {
+            background-color: rgba(111, 66, 193, 0.05);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
 
-            .modal.show .modal-dialog {
-                transform: scale(1);
-            }
-        </style>
-    @endpush
-@endsection
+        /* ============================================
+                                                                       BADGE STYLES
+                                                                    ============================================ */
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.65rem;
+            font-weight: 600;
+            border-radius: 20px;
+        }
+
+        .badge.bg-warning {
+            background: #ffc107 !important;
+            color: #212529;
+        }
+
+        .badge.bg-success {
+            background: #28a745 !important;
+            color: white;
+        }
+
+        .badge.bg-danger {
+            background: #dc3545 !important;
+            color: white;
+        }
+
+        /* ============================================
+                                                                       BUTTON GROUP STYLES
+                                                                    ============================================ */
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .btn-group .btn i {
+            font-size: 0.9rem;
+        }
+
+        .btn-group .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ============================================
+                                                                       DOWNLOAD BUTTON
+                                                                    ============================================ */
+        .download-btn {
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover:not(.disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .download-btn.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* ============================================
+                                                                       SPINNER
+                                                                    ============================================ */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15em;
+        }
+
+        /* ============================================
+                                                                       POPOVER
+                                                                    ============================================ */
+        .popover {
+            max-width: 300px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .popover-header {
+            background: #dc3545;
+            color: white;
+            border-radius: 10px 10px 0 0;
+            font-weight: 600;
+            padding: 8px 14px;
+        }
+
+        .popover-body {
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: #333;
+        }
+
+        /* ============================================
+                                                                       FIX MODAL KEDIP
+                                                                    ============================================ */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.fade .modal-dialog {
+            transition: transform 0.3s ease-out, opacity 0.15s linear;
+        }
+
+        .modal.show .modal-dialog {
+            transform: none;
+        }
+
+        /* Prevent double backdrop */
+        .modal-backdrop {
+            opacity: 0.5 !important;
+        }
+
+        .modal-backdrop.fade {
+            opacity: 0;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.5 !important;
+        }
+
+        /* Fix z-index */
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+
+        .modal {
+            z-index: 1050 !important;
+        }
+
+        .modal-dialog {
+            z-index: 1060 !important;
+        }
+
+        .modal-content {
+            z-index: 1070 !important;
+        }
+    </style>
+@endpush

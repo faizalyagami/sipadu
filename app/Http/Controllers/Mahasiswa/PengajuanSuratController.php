@@ -1,18 +1,21 @@
 <?php
-// app/Http/Controllers/Mahasiswa/PengajuanSuratController.php
 
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\JenisSurat;
 use App\Models\Surat;
+use App\Traits\PDFGenerationTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class PengajuanSuratController extends Controller
 {
+
     public function index()
     {
-        $jenisSurats = JenisSurat::where('is_active', true)->get();
+        $jenisSurats = JenisSurat::where('is_active', true)->with('kategoriSurat')->get();
         return view('mahasiswa.pengajuan.index', compact('jenisSurats'));
     }
 
@@ -22,13 +25,7 @@ class PengajuanSuratController extends Controller
             $jenisSurat = JenisSurat::with('kategoriSurat')->findOrFail($jenisSuratId);
             $kategori = $jenisSurat->kategoriSurat->nama_kategori ?? '';
 
-            // Ambil field dari database (jika ada) atau gunakan default
-            $fields = $jenisSurat->getFormFields();
-
-            // Jika tidak ada field di database, gunakan default berdasarkan kategori dan jenis surat
-            if (empty($fields)) {
-                $fields = $this->getDefaultFields($jenisSurat);
-            }
+            $fields = $this->getDefaultFields($jenisSurat);
 
             return response()->json([
                 'success' => true,
@@ -52,280 +49,86 @@ class PengajuanSuratController extends Controller
         $fields = [];
 
         // ============================================
+        // FIELD SEMESTER - TAMBAHKAN UNTUK SEMUA JENIS SURAT
+        // ============================================
+        $fields['semester'] = [
+            'type' => 'select',
+            'label' => 'Semester',
+            'required' => true,
+            'options' => [
+                '1' => 'Semester 1',
+                '2' => 'Semester 2',
+                '3' => 'Semester 3',
+                '4' => 'Semester 4',
+                '5' => 'Semester 5',
+                '6' => 'Semester 6',
+                '7' => 'Semester 7',
+                '8' => 'Semester 8',
+                '9' => 'Semester 9',
+                '10' => 'Semester 10',
+                '11' => 'Semester 11',
+                '12' => 'Semester 12',
+                '13' => 'Semester 13',
+                '14' => 'Semester 14',
+            ],
+            'help_text' => 'Pilih semester saat ini',
+            'order' => 0 // Urutan pertama
+        ];
+
+        // ============================================
         // KATEGORI SURAT KETERANGAN
         // ============================================
         if ($kategori == 'Surat Keterangan') {
-
-            // 1. SURAT KETERANGAN AKTIF KULIAH
             if (strpos($namaSurat, 'Aktif Kuliah') !== false) {
-                $fields = [
-                    'nama_ortu' => [
-                        'type' => 'text',
-                        'label' => 'Nama Orang Tua / Wali',
-                        'required' => true,
-                        'placeholder' => 'Masukkan nama lengkap orang tua/wali',
-                        'help_text' => 'Nama sesuai KTP'
-                    ],
-                    'nik_ortu' => [
-                        'type' => 'text',
-                        'label' => 'NRP/NIK/NIP Orang Tua',
-                        'required' => true,
-                        'placeholder' => 'Masukkan NIK/NIP',
-                        'help_text' => 'Nomor Induk Kependudukan atau NIP'
-                    ],
-                    'pangkat_ortu' => [
-                        'type' => 'text',
-                        'label' => 'Pangkat/Golongan Orang Tua',
-                        'required' => true,
-                        'placeholder' => 'Contoh: Golongan IV-B',
-                        'help_text' => 'Untuk PNS/TNI/Polri'
-                    ],
-                    'instansi_ortu' => [
-                        'type' => 'text',
-                        'label' => 'Instansi/Tempat Kerja Orang Tua',
-                        'required' => true,
-                        'placeholder' => 'Nama instansi atau perusahaan',
-                        'help_text' => 'Jika tidak bekerja, isi dengan "-"'
-                    ],
-                    'alamat_kantor_ortu' => [
-                        'type' => 'textarea',
-                        'label' => 'Alamat Kantor Orang Tua',
-                        'required' => true,
-                        'placeholder' => 'Masukkan alamat kantor/instansi',
-                        'help_text' => 'Alamat lengkap tempat bekerja'
-                    ],
-                    'pekerjaan_ortu' => [
-                        'type' => 'text',
-                        'label' => 'Pekerjaan Orang Tua',
-                        'required' => false,
-                        'placeholder' => 'Contoh: PNS, Wiraswasta, dll',
-                        'help_text' => 'Opsional'
-                    ],
-                    'no_hp_ortu' => [
-                        'type' => 'text',
-                        'label' => 'No HP Orang Tua',
-                        'required' => false,
-                        'placeholder' => 'Contoh: 081234567890',
-                        'help_text' => 'Nomor yang dapat dihubungi'
-                    ]
+                $fields['nama_ortu'] = [
+                    'type' => 'text',
+                    'label' => 'Nama Orang Tua / Wali',
+                    'required' => true,
+                    'placeholder' => 'Masukkan nama lengkap orang tua/wali',
+                    'help_text' => 'Nama sesuai KTP',
+                    'order' => 1
                 ];
-            }
-
-            // 2. SURAT KETERANGAN LULUS
-            elseif (strpos($namaSurat, 'Lulus') !== false) {
-                $fields = [
-                    'tahun_lulus' => [
-                        'type' => 'number',
-                        'label' => 'Tahun Lulus',
-                        'required' => true,
-                        'placeholder' => 'Contoh: 2024',
-                        'help_text' => 'Tahun kelulusan'
-                    ],
-                    'ipk_lulus' => [
-                        'type' => 'text',
-                        'label' => 'IPK Lulus',
-                        'required' => true,
-                        'placeholder' => 'Contoh: 3.75',
-                        'help_text' => 'IPK akhir saat lulus'
-                    ],
-                    'predikat' => [
-                        'type' => 'select',
-                        'label' => 'Predikat Kelulusan',
-                        'required' => true,
-                        'options' => [
-                            'Cumlaude' => 'Cumlaude',
-                            'Sangat Memuaskan' => 'Sangat Memuaskan',
-                            'Memuaskan' => 'Memuaskan'
-                        ]
-                    ]
+                $fields['nik_ortu'] = [
+                    'type' => 'text',
+                    'label' => 'NRP/NIK/NIP Orang Tua',
+                    'required' => true,
+                    'placeholder' => 'Masukkan NIK/NIP',
+                    'help_text' => 'Nomor Induk Kependudukan atau NIP',
+                    'order' => 2
                 ];
-            }
-
-            // 3. SURAT KETERANGAN PENGHASILAN ORANG TUA
-            elseif (strpos($namaSurat, 'Penghasilan') !== false) {
-                $fields = [
-                    'nama_ortu' => [
-                        'type' => 'text',
-                        'label' => 'Nama Orang Tua / Wali',
-                        'required' => true,
-                        'placeholder' => 'Masukkan nama lengkap orang tua/wali'
-                    ],
-                    'pekerjaan_ortu' => [
-                        'type' => 'text',
-                        'label' => 'Pekerjaan Orang Tua',
-                        'required' => true,
-                        'placeholder' => 'Contoh: PNS, Wiraswasta, Petani, dll'
-                    ],
-                    'penghasilan_ortu' => [
-                        'type' => 'number',
-                        'label' => 'Penghasilan Orang Tua per Bulan',
-                        'required' => true,
-                        'placeholder' => 'Contoh: 5000000',
-                        'help_text' => 'Dalam Rupiah (Rp)'
-                    ],
-                    'tanggungan' => [
-                        'type' => 'number',
-                        'label' => 'Jumlah Tanggungan Keluarga',
-                        'required' => true,
-                        'placeholder' => 'Contoh: 3',
-                        'help_text' => 'Jumlah orang yang ditanggung'
-                    ]
+                $fields['pangkat_ortu'] = [
+                    'type' => 'text',
+                    'label' => 'Pangkat/Golongan Orang Tua',
+                    'required' => true,
+                    'placeholder' => 'Contoh: Golongan IV-B',
+                    'help_text' => 'Untuk PNS/TNI/Polri',
+                    'order' => 3
                 ];
-            }
-
-            // 4. SURAT KETERANGAN DOMISILI
-            elseif (strpos($namaSurat, 'Domisili') !== false) {
-                $fields = [
-                    'alamat_ktp' => [
-                        'type' => 'textarea',
-                        'label' => 'Alamat Sesuai KTP',
-                        'required' => true,
-                        'placeholder' => 'Masukkan alamat sesuai KTP',
-                        'help_text' => 'Alamat yang tertera di KTP'
-                    ],
-                    'alamat_domisili' => [
-                        'type' => 'textarea',
-                        'label' => 'Alamat Domisili Saat Ini',
-                        'required' => true,
-                        'placeholder' => 'Masukkan alamat domisili saat ini',
-                        'help_text' => 'Alamat tempat tinggal sekarang'
-                    ],
-                    'lama_tinggal' => [
-                        'type' => 'text',
-                        'label' => 'Lama Tinggal',
-                        'required' => true,
-                        'placeholder' => 'Contoh: 5 tahun',
-                        'help_text' => 'Lama tinggal di alamat domisili'
-                    ]
+                $fields['instansi_ortu'] = [
+                    'type' => 'text',
+                    'label' => 'Instansi/Tempat Kerja Orang Tua',
+                    'required' => true,
+                    'placeholder' => 'Nama instansi atau perusahaan',
+                    'help_text' => 'Jika tidak bekerja, isi dengan "-"',
+                    'order' => 4
+                ];
+                $fields['alamat_kantor_ortu'] = [
+                    'type' => 'textarea',
+                    'label' => 'Alamat Kantor Orang Tua',
+                    'required' => true,
+                    'placeholder' => 'Masukkan alamat kantor/instansi',
+                    'help_text' => 'Alamat lengkap tempat bekerja',
+                    'order' => 5
                 ];
             }
         }
 
-        // ============================================
-        // KATEGORI SURAT IZIN
-        // ============================================
-        elseif ($kategori == 'Surat Izin') {
-
-            // 1. SURAT IZIN MAGANG
-            if (strpos($namaSurat, 'Magang') !== false) {
-                $fields = [
-                    'tipe_pengajuan' => [
-                        'type' => 'select',
-                        'label' => 'Tipe Pengajuan',
-                        'required' => true,
-                        'options' => ['individu' => 'Individu', 'kelompok' => 'Kelompok']
-                    ],
-                    'nama_kelompok' => [
-                        'type' => 'text',
-                        'label' => 'Nama Kelompok',
-                        'required' => false,
-                        'placeholder' => 'Masukkan nama kelompok (jika kelompok)',
-                        'help_text' => 'Isi jika pengajuan kelompok'
-                    ],
-                    'instansi_magang' => [
-                        'type' => 'text',
-                        'label' => 'Nama Instansi Magang',
-                        'required' => true,
-                        'placeholder' => 'Nama perusahaan/instansi tempat magang'
-                    ],
-                    'alamat_magang' => [
-                        'type' => 'textarea',
-                        'label' => 'Alamat Instansi Magang',
-                        'required' => true,
-                        'placeholder' => 'Alamat lengkap instansi magang'
-                    ],
-                    'tgl_mulai' => [
-                        'type' => 'date',
-                        'label' => 'Tanggal Mulai Magang',
-                        'required' => true
-                    ],
-                    'tgl_selesai' => [
-                        'type' => 'date',
-                        'label' => 'Tanggal Selesai Magang',
-                        'required' => true
-                    ],
-                    'file_ktm' => [
-                        'type' => 'file',
-                        'label' => 'Upload KTM',
-                        'required' => true,
-                        'accept' => '.pdf,.jpg,.jpeg,.png',
-                        'help_text' => 'Upload Kartu Tanda Mahasiswa'
-                    ]
-                ];
-            }
-
-            // 2. SURAT IZIN PENELITIAN
-            elseif (strpos($namaSurat, 'Penelitian') !== false) {
-                $fields = [
-                    'judul_penelitian' => [
-                        'type' => 'text',
-                        'label' => 'Judul Penelitian',
-                        'required' => true,
-                        'placeholder' => 'Masukkan judul penelitian',
-                        'help_text' => 'Judul lengkap penelitian'
-                    ],
-                    'lokasi_penelitian' => [
-                        'type' => 'textarea',
-                        'label' => 'Lokasi Penelitian',
-                        'required' => true,
-                        'placeholder' => 'Alamat lengkap lokasi penelitian'
-                    ],
-                    'dosen_pembimbing' => [
-                        'type' => 'text',
-                        'label' => 'Dosen Pembimbing',
-                        'required' => true,
-                        'placeholder' => 'Nama dosen pembimbing'
-                    ],
-                    'tgl_penelitian' => [
-                        'type' => 'date',
-                        'label' => 'Tanggal Penelitian',
-                        'required' => true
-                    ],
-                    'file_proposal' => [
-                        'type' => 'file',
-                        'label' => 'Upload Proposal Penelitian',
-                        'required' => true,
-                        'accept' => '.pdf,.doc,.docx',
-                        'help_text' => 'Upload proposal penelitian (max 5MB)'
-                    ]
-                ];
-            }
-        }
-
-        // ============================================
-        // KATEGORI SURAT PENGAJUAN
-        // ============================================
-        elseif ($kategori == 'Surat Pengajuan') {
-
-            // 1. SURAT PENGAJUAN BEASISWA
-            if (strpos($namaSurat, 'Beasiswa') !== false) {
-                $fields = [
-                    'jenis_beasiswa' => [
-                        'type' => 'select',
-                        'label' => 'Jenis Beasiswa',
-                        'required' => true,
-                        'options' => [
-                            'Pemerintah' => 'Pemerintah',
-                            'Swasta' => 'Swasta',
-                            'Lembaga' => 'Lembaga'
-                        ]
-                    ],
-                    'tujuan_beasiswa' => [
-                        'type' => 'text',
-                        'label' => 'Tujuan Pengajuan Beasiswa',
-                        'required' => true,
-                        'placeholder' => 'Contoh: Biaya Pendidikan, Biaya Hidup, dll'
-                    ],
-                    'file_syarat' => [
-                        'type' => 'file',
-                        'label' => 'Upload Syarat Pendukung',
-                        'required' => true,
-                        'accept' => '.pdf,.jpg,.jpeg,.png',
-                        'help_text' => 'Upload file syarat yang diminta (max 5MB)'
-                    ]
-                ];
-            }
-        }
+        // Urutkan fields berdasarkan order
+        uasort($fields, function ($a, $b) {
+            $orderA = $a['order'] ?? 999;
+            $orderB = $b['order'] ?? 999;
+            return $orderA <=> $orderB;
+        });
 
         return $fields;
     }
@@ -334,7 +137,8 @@ class PengajuanSuratController extends Controller
     {
         $request->validate([
             'jenis_surat_id' => 'required|exists:jenis_surats,id',
-            'keperluan' => 'required|string'
+            'keperluan' => 'required|string',
+            'semester' => 'required|string|in:1,2,3,4,5,6,7,8,9,10,11,12,13,14'
         ]);
 
         $user = auth()->user();
@@ -346,7 +150,6 @@ class PengajuanSuratController extends Controller
         $mahasiswa = $user->mahasiswa;
         $jenisSurat = JenisSurat::findOrFail($request->jenis_surat_id);
 
-        // Validasi berdasarkan kategori
         $kategori = $jenisSurat->kategoriSurat->nama_kategori ?? '';
         $rules = [];
 
@@ -357,8 +160,6 @@ class PengajuanSuratController extends Controller
                 'pangkat_ortu' => 'required|string|max:100',
                 'instansi_ortu' => 'required|string|max:255',
                 'alamat_kantor_ortu' => 'required|string',
-                'pekerjaan_ortu' => 'nullable|string|max:100',
-                'no_hp_ortu' => 'nullable|string|max:15',
             ];
         }
 
@@ -366,8 +167,31 @@ class PengajuanSuratController extends Controller
             $request->validate($rules);
         }
 
-        // Generate content dari template menggunakan method di model
+        $dataOrangTua = [
+            'nama_ortu' => $request->nama_ortu,
+            'nik_ortu' => $request->nik_ortu,
+            'pangkat_ortu' => $request->pangkat_ortu,
+            'instansi_ortu' => $request->instansi_ortu,
+            'alamat_kantor_ortu' => $request->alamat_kantor_ortu,
+        ];
+
+        Log::info('Data Orang Tua:', $dataOrangTua);
+
         $content = $jenisSurat->generateSuratContent($request->all(), $mahasiswa);
+
+        $dataTambahan = [
+            'semester' => $request->semester,
+            'tipe_pengajuan' => $request->tipe_pengajuan,
+            'nama_kelompok' => $request->nama_kelompok,
+        ];
+
+        // Tambahkan field lain yang mungkin ada
+        $extraFields = ['tahun_lulus', 'ipk_lulus', 'predikat', 'pekerjaan_ortu', 'penghasilan_ortu', 'tanggungan'];
+        foreach ($extraFields as $field) {
+            if ($request->has($field)) {
+                $dataTambahan[$field] = $request->$field;
+            }
+        }
 
         Surat::create([
             'mahasiswa_id' => $mahasiswa->id,
@@ -380,8 +204,7 @@ class PengajuanSuratController extends Controller
             'pangkat_ortu' => $request->pangkat_ortu,
             'instansi_ortu' => $request->instansi_ortu,
             'alamat_kantor_ortu' => $request->alamat_kantor_ortu,
-            'pekerjaan_ortu' => $request->pekerjaan_ortu,
-            'no_hp_ortu' => $request->no_hp_ortu,
+            'data_tambahan' => json_encode($dataTambahan),
         ]);
 
         return redirect()->route('mahasiswa.pengajuan.index')
@@ -409,66 +232,29 @@ class PengajuanSuratController extends Controller
 
     public function download($id)
     {
-        try {
-            set_time_limit(300);
+        $user = auth()->user();
 
-            $user = auth()->user();
+        $surat = Surat::findOrFail($id);
 
-            if (!$user->mahasiswa) {
-                return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan');
-            }
-
-            $surat = Surat::with(['mahasiswa', 'jenisSurat', 'approvedBy'])->findOrFail($id);
-
-            if ($surat->mahasiswa_id != $user->mahasiswa->id) {
-                abort(403);
-            }
-
-            if ($surat->status != 'approved') {
-                return redirect()->back()->with('error', 'Surat belum disetujui');
-            }
-
-            \Log::info('Generating PDF for surat ID: ' . $id);
-
-            // Generate HTML surat
-            $html = $surat->generateSuratHtml();
-
-            // Generate PDF
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
-            $pdf->setPaper('A4', 'portrait');
-            $pdf->setOptions([
-                'isRemoteEnabled' => true,
-                'isHtml5ParserEnabled' => true,
-                'defaultFont' => 'Times New Roman',
-                'logErrors' => true
-            ]);
-
-            $filename = 'Surat_' . ($surat->nomor_surat ?? $surat->id) . '.pdf';
-
-            return $pdf->download($filename);
-        } catch (\Exception $e) {
-            \Log::error('Download error: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
-
-            // Coba tampilkan HTML sebagai fallback
-            if (isset($surat) && $surat) {
-                try {
-                    return response()->stream(
-                        function () use ($surat) {
-                            echo $surat->generateSuratHtml();
-                        },
-                        200,
-                        [
-                            'Content-Type' => 'text/html',
-                            'Content-Disposition' => 'inline; filename="surat_' . ($surat->nomor_surat ?? $surat->id) . '.html"'
-                        ]
-                    );
-                } catch (\Exception $fallbackError) {
-                    \Log::error('Fallback HTML error: ' . $fallbackError->getMessage());
-                }
-            }
-
-            return redirect()->back()->with('error', 'Gagal mendownload surat: ' . $e->getMessage());
+        if ($surat->mahasiswa_id != $user->mahasiswa->id) {
+            abort(403);
         }
+
+        if ($surat->status != 'approved') {
+            return back()->with('error', 'Surat belum disetujui');
+        }
+
+        if (!$surat->pdf_path) {
+            return back()->with('error', 'PDF belum dibuat');
+        }
+
+        if (!Storage::disk('public')->exists($surat->pdf_path)) {
+            return back()->with('error', 'File PDF tidak ditemukan');
+        }
+
+        return Storage::disk('public')->download(
+            $surat->pdf_path,
+            'Surat_' . $surat->nomor_surat . '.pdf'
+        );
     }
 }
