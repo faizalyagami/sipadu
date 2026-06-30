@@ -232,29 +232,64 @@ class PengajuanSuratController extends Controller
 
     public function download($id)
     {
-        $user = auth()->user();
+        try {
+            $user = auth()->user();
 
-        $surat = Surat::findOrFail($id);
+            if (!$user->mahasiswa) {
+                return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan');
+            }
 
-        if ($surat->mahasiswa_id != $user->mahasiswa->id) {
-            abort(403);
+            $surat = Surat::with(['mahasiswa', 'jenisSurat', 'approvedBy'])->findOrFail($id);
+
+            if ($surat->mahasiswa_id != $user->mahasiswa->id) {
+                abort(403);
+            }
+
+            if ($surat->status != 'approved') {
+                return redirect()->back()->with('error', 'Surat belum disetujui');
+            }
+
+            // Cek apakah PDF sudah ada
+            if (empty($surat->pdf_path) || !Storage::disk('public')->exists($surat->pdf_path)) {
+                Log::warning('PDF not found for surat ID: ' . $id . ', regenerating...');
+
+                $pdfGenerator = new \App\Services\PDFGenerator();
+                $pdfGenerator->generateAndSave($surat);
+                $surat->refresh();
+            }
+
+            // Pastikan file benar-benar ada
+            if (!Storage::disk('public')->exists($surat->pdf_path)) {
+                throw new \Exception('PDF file not found after regeneration');
+            }
+
+            // ============================================
+            // PERBAIKAN: Nama file: {jenis_surat} - {npm mahasiswa}.pdf
+            // ============================================
+            $jenisSurat = $surat->jenisSurat->nama_surat ?? 'Surat';
+            $npm = $surat->mahasiswa->npm ?? 'unknown';
+
+            // Buat nama file
+            $filename = $jenisSurat . ' - ' . $npm . '.pdf';
+
+            // Hapus karakter ilegal untuk nama file (Windows/Linux)
+            $filename = preg_replace('/[\/\\\\:*?"<>|]/', '-', $filename);
+
+            $fullPath = storage_path('app/public/' . $surat->pdf_path);
+
+            Log::info('Download surat ID: ' . $id . ' - File: ' . $filename);
+
+            // Return download dengan response yang benar
+            return response()->download($fullPath, $filename, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control' => 'public, max-age=86400',
+                'Pragma' => 'public',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Download error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return redirect()->back()->with('error', 'Gagal mendownload surat: ' . $e->getMessage());
         }
-
-        if ($surat->status != 'approved') {
-            return back()->with('error', 'Surat belum disetujui');
-        }
-
-        if (!$surat->pdf_path) {
-            return back()->with('error', 'PDF belum dibuat');
-        }
-
-        if (!Storage::disk('public')->exists($surat->pdf_path)) {
-            return back()->with('error', 'File PDF tidak ditemukan');
-        }
-
-        return Storage::disk('public')->download(
-            $surat->pdf_path,
-            'Surat_' . $surat->nomor_surat . '.pdf'
-        );
     }
 }

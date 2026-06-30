@@ -7,14 +7,54 @@ use App\Models\JenisSurat;
 use App\Models\KategoriSurat;
 use App\Models\Surat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class JenisSuratController extends Controller
 {
+
+    private function migrateTemplate(string $template): string
+    {
+        // Ubah <img src="...storage/uploads/kop_surat/..."> menjadi {kop_surat}
+        $template = preg_replace(
+            '/<img[^>]*src=["\'][^"\']*(?:storage|public|uploads)\/kop_surat[^"\']*["\'][^>]*>/i',
+            '{kop_surat}',
+            $template
+        );
+
+        // Ubah <img src="http://.../storage/uploads/kop_surat/..."> menjadi {kop_surat}
+        $template = preg_replace(
+            '/<img[^>]*src=["\'](?:https?:\/\/[^"\']*)\/storage\/uploads\/kop_surat[^"\']*["\'][^>]*>/i',
+            '{kop_surat}',
+            $template
+        );
+
+        // Hapus div kosong yang berisi hanya placeholder
+        $template = preg_replace(
+            '/<div[^>]*>\s*\{kop_surat\}\s*<\/div>/i',
+            '{kop_surat}',
+            $template
+        );
+
+        return $template;
+    }
+
     public function index()
     {
         $jenisSurats = JenisSurat::with('kategoriSurat')->get();
         $kategoris = KategoriSurat::active()->get();
+
+        // Migrasi template saat index dibuka
+        foreach ($jenisSurats as $jenis) {
+            if ($jenis->template_content && strpos($jenis->template_content, 'kop_surat') !== false) {
+                $migrated = $this->migrateTemplate($jenis->template_content);
+                if ($migrated !== $jenis->template_content) {
+                    $jenis->template_content = $migrated;
+                    $jenis->save();
+                    Log::info('Template migrated for jenis surat ID: ' . $jenis->id);
+                }
+            }
+        }
 
         return view('admin.jenis_surat.index', compact('jenisSurats', 'kategoris'));
     }

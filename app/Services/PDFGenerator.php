@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Surat;
-use App\Services\SuratHtmlGenerator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -20,16 +19,21 @@ class PDFGenerator
             $htmlGenerator = app(SuratHtmlGenerator::class);
             $html = $htmlGenerator->generate($surat);
 
-            // Generate PDF
+            // Debug: Simpan HTML untuk debugging
+            $debugPath = storage_path('app/debug.html');
+            file_put_contents($debugPath, $html);
+            Log::info('HTML debug saved to: ' . $debugPath);
+
+            // Generate PDF dengan optimasi
             $pdf = Pdf::loadHTML($html);
             $pdf->setPaper('A4', 'portrait');
             $pdf->setOptions([
                 'isRemoteEnabled' => false,
-                'isHtml5ParserEnabled' => false,
-                'defaultFont' => 'Times New Roman   ',
-                'dpi' => 96,
+                'isHtml5ParserEnabled' => true,
+                'defaultFont' => 'Helvetica',
+                'dpi' => 72,
                 'logErrors' => true,
-                'enable_remote' => true,
+                'enable_remote' => false,
                 'font_cache' => storage_path('fonts/'),
                 'tempDir' => storage_path('temp/'),
                 'chroot' => public_path(),
@@ -46,9 +50,16 @@ class PDFGenerator
                 mkdir($dir, 0777, true);
             }
 
-            // Simpan PDF - PASTIKAN MENYIMPAN DENGAN BENAR
+            // Simpan PDF
             $pdfContent = $pdf->output();
+            Log::info('PDF size: ' . strlen($pdfContent) . ' bytes');
+
+            if (strlen($pdfContent) < 100) {
+                throw new \Exception('PDF content is too small, likely empty');
+            }
+
             file_put_contents($fullPath, $pdfContent);
+            Log::info('Saved PDF size: ' . filesize($fullPath) . ' bytes');
 
             // Verifikasi file tersimpan
             if (!file_exists($fullPath) || filesize($fullPath) < 100) {
@@ -59,7 +70,7 @@ class PDFGenerator
             $surat->pdf_path = $path;
             $surat->save();
 
-            Log::info('PDF generated and saved for surat ID: ' . $surat->id . ' at: ' . $path . ' Size: ' . filesize($fullPath));
+            Log::info('PDF generated and saved for surat ID: ' . $surat->id . ' at: ' . $path);
 
             return $path;
         } catch (\Exception $e) {
@@ -74,7 +85,6 @@ class PDFGenerator
      */
     public function regenerate(Surat $surat): string
     {
-        // Hapus file lama jika ada
         if ($surat->pdf_path && Storage::disk('public')->exists($surat->pdf_path)) {
             Storage::disk('public')->delete($surat->pdf_path);
         }

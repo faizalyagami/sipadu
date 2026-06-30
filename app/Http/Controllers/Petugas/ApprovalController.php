@@ -349,28 +349,40 @@ class ApprovalController extends Controller
             }
 
             // Cek apakah PDF sudah ada
-            if (empty($surat->pdf_path)) {
+            if (empty($surat->pdf_path) || !Storage::disk('public')->exists($surat->pdf_path)) {
+                Log::warning('PDF not found for surat ID: ' . $id . ', regenerating...');
 
-                return back()->with(
-                    'error',
-                    'File PDF belum tersedia.'
-                );
+                $pdfGenerator = new PDFGenerator();
+                $pdfGenerator->generateAndSave($surat);
+                $surat->refresh();
             }
 
             if (!Storage::disk('public')->exists($surat->pdf_path)) {
-
-                return back()->with(
-                    'error',
-                    'File PDF tidak ditemukan.'
-                );
+                throw new \Exception('PDF file not found');
             }
 
-            return Storage::disk('public')->download(
-                $surat->pdf_path,
-                'Surat_' . $surat->nomor_surat . '.pdf'
-            );
+            // ============================================
+            // Nama file: {jenis_surat} - {npm mahasiswa}.pdf
+            // ============================================
+            $jenisSurat = $surat->jenisSurat->nama_surat ?? 'Surat';
+            $npm = $surat->mahasiswa->npm ?? 'unknown';
+
+            $filename = $jenisSurat . ' - ' . $npm . '.pdf';
+            $filename = preg_replace('/[\/\\\\:*?"<>|]/', '-', $filename);
+
+            $fullPath = storage_path('app/public/' . $surat->pdf_path);
+
+            Log::info('Petugas download surat ID: ' . $id . ' - File: ' . $filename);
+
+            return response()->download($fullPath, $filename, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control' => 'public, max-age=86400',
+                'Pragma' => 'public',
+            ]);
         } catch (\Exception $e) {
             Log::error('Petugas download error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             return redirect()->back()->with('error', 'Gagal mendownload surat: ' . $e->getMessage());
         }
     }

@@ -14,6 +14,7 @@ use App\Http\Controllers\Petugas\ApprovalController;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
 use App\Http\Controllers\Mahasiswa\PengajuanSuratController;
 use App\Http\Controllers\Profile\ChangePasswordController;
+use App\Http\Controllers\DebugController; // Tambahkan import DebugController
 use Illuminate\Http\Request;
 
 /*
@@ -138,10 +139,7 @@ Route::middleware(['auth'])->prefix('mahasiswa')->name('mahasiswa.')->group(func
     Route::get('/pengajuan/{surat}/download', [PengajuanSuratController::class, 'download'])->name('pengajuan.download');
     Route::get('/riwayat', [PengajuanSuratController::class, 'history'])->name('riwayat');
     Route::get('/pengajuan/get-fields/{jenisSuratId}', [PengajuanSuratController::class, 'getFormFields'])->name('pengajuan.get-fields');
-
     Route::get('/pengajuan/{surat}/download-stream', [PengajuanSuratController::class, 'downloadStream'])->name('pengajuan.download-stream');
-    Route::get('/pengajuan/{surat}/download', [PengajuanSuratController::class, 'download'])->name('pengajuan.download');
-    Route::get('/riwayat', [PengajuanSuratController::class, 'history'])->name('riwayat');
 });
 
 // =============== CKEDITOR IMAGE UPLOAD ROUTE ===============
@@ -176,3 +174,11 @@ Route::post('/upload-image', function (Request $request) {
         ]);
     }
 })->name('upload.image')->middleware('auth');
+
+// =============== DEBUG ROUTES ===============
+Route::middleware(['auth'])->prefix('debug')->name('debug.')->group(function () {
+    Route::get('/pdf/{id}', [DebugController::class, 'checkPdf'])->name('pdf.check');
+    Route::get('/pdf/{id}/regenerate', [DebugController::class, 'regeneratePdf'])->name('pdf.regenerate');
+    Route::get('/pdf/{id}/download', [DebugController::class, 'downloadPdf'])->name('pdf.download');
+    Route::get('/test-pdf', [DebugController::class, 'testPdf'])->name('pdf.test');
+});
