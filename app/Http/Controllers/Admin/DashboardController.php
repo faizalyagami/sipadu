@@ -21,7 +21,7 @@ class DashboardController extends Controller
     public function getDashboardData(Request $request)
     {
         $year = $request->get('year', date('Y'));
-        
+
         // Statistik dasar
         $totalMahasiswa = Mahasiswa::count();
         $totalPetugas = User::where('role', 'petugas')->count();
@@ -29,27 +29,54 @@ class DashboardController extends Controller
         $totalPending = Surat::where('status', 'pending')->count();
         $aktifCount = Mahasiswa::where('status_mahasiswa', 'Aktif')->count();
 
+        // Debug - cek apakah ada data
+        \Log::info('Dashboard Data:', [
+            'totalMahasiswa' => $totalMahasiswa,
+            'totalPetugas' => $totalPetugas,
+            'totalFakultas' => $totalFakultas,
+            'totalPending' => $totalPending,
+        ]);
+
         // Data chart surat per bulan
         $months = [];
         $suratCounts = [];
-        
+
         for ($i = 1; $i <= 12; $i++) {
             $monthName = date('M', mktime(0, 0, 0, $i, 1));
             $months[] = $monthName;
-            
+
             $count = Surat::whereYear('created_at', $year)
                 ->whereMonth('created_at', $i)
                 ->count();
             $suratCounts[] = $count;
         }
 
-        // Data kategori surat
-        $kategoriData = JenisSurat::select('kategori', DB::raw('count(*) as total'))
-            ->groupBy('kategori')
-            ->get();
-        
-        $kategoriLabels = $kategoriData->pluck('kategori')->toArray();
-        $kategoriCounts = $kategoriData->pluck('total')->toArray();
+        $kategoriLabels = [];
+        $kategoriCounts = [];
+
+        try {
+            $kategoriData = JenisSurat::select('kategori_surat_id', DB::raw('count(*) as total'))
+                ->groupBy('kategori_surat_id')
+                ->get();
+
+            if ($kategoriData->isNotEmpty()) {
+                $kategoriLabels = $kategoriData->pluck('kategori_surat_id')->toArray();
+                $kategoriCounts = $kategoriData->pluck('total')->toArray();
+            } else {
+                // Fallback: ambil dari surat langsung
+                $kategoriData = Surat::select('jenis_surats.kategori_surat', DB::raw('count(*) as total'))
+                    ->join('jenis_surats', 'surats.jenis_surat_id', '=', 'jenis_surats.id')
+                    ->groupBy('jenis_surats.kategori_surat')
+                    ->get();
+
+                if ($kategoriData->isNotEmpty()) {
+                    $kategoriLabels = $kategoriData->pluck('kategori_surat')->toArray();
+                    $kategoriCounts = $kategoriData->pluck('total')->toArray();
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error getting kategori data: ' . $e->getMessage());
+        }
 
         // Jika tidak ada data kategori, beri data default
         if (empty($kategoriLabels)) {
@@ -62,7 +89,7 @@ class DashboardController extends Controller
             ->latest()
             ->limit(10)
             ->get()
-            ->map(function($surat) {
+            ->map(function ($surat) {
                 return [
                     'id' => $surat->id,
                     'status' => $surat->status,

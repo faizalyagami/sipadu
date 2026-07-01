@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -21,20 +24,33 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string', // Bisa email atau NPM
             'password' => 'required|string',
         ]);
 
-        $credentials = $request->only('email', 'password');
-        
-        if (Auth::attempt($credentials, $request->remember)) {
+        $login = $request->login;
+        $password = $request->password;
+
+        // Cek apakah login menggunakan NPM atau Email
+        $user = null;
+
+        // Coba cari user berdasarkan email
+        $user = User::where('email', $login)->first();
+
+        // Jika tidak ditemukan, coba cari berdasarkan NPM
+        if (!$user) {
+            $mahasiswa = Mahasiswa::where('npm', $login)->first();
+            if ($mahasiswa) {
+                $user = $mahasiswa->user;
+            }
+        }
+
+        // Jika user ditemukan dan password cocok
+        if ($user && Hash::check($password, $user->password)) {
+            Auth::login($user, $request->remember);
             $request->session()->regenerate();
-            
-            // Update last login
-            $user = Auth::user();
-            $user->update(['last_login' => now()]);
-            
-            // Redirect based on role
+
+            // Redirect berdasarkan role
             if ($user->role == 'admin') {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->role == 'petugas') {
@@ -42,13 +58,13 @@ class LoginController extends Controller
             } elseif ($user->role == 'mahasiswa') {
                 return redirect()->route('mahasiswa.dashboard');
             }
-            
+
             return redirect('/');
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+            'login' => 'NPM/Email atau password salah.',
+        ])->onlyInput('login');
     }
 
     public function logout(Request $request)
@@ -57,11 +73,5 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/login');
-    }
-    
-    // Redirect to home fallback
-    public function redirectTo()
-    {
-        return route('login');
     }
 }

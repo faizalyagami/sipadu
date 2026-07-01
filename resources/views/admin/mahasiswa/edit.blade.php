@@ -64,7 +64,19 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Tanggal Lahir</label>
-                                <input type="date" name="tanggal_lahir" class="form-control" value="{{ $mahasiswa->tanggal_lahir->format('Y-m-d') }}" required>
+                                <input type="date" name="tanggal_lahir" class="form-control" value="{{ $mahasiswa->tanggal_lahir ? date('Y-m-d', strtotime($mahasiswa->tanggal_lahir)) : '' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Jenis Kelamin</label>
+                                <select name="jenis_kelamin" class="form-select" required>
+                                    <option value="">Pilih Jenis Kelamin</option>
+                                    <option value="L" {{ $mahasiswa->jenis_kelamin == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="P" {{ $mahasiswa->jenis_kelamin == 'P' ? 'selected' : '' }}>Perempuan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">SKS Tempuh</label>
+                                <input type="number" name="sks_tempuh" class="form-control" value="{{ $mahasiswa->sks_tempuh }}">
                             </div>
                             <div class="col-12 mb-3">
                                 <label class="form-label">Alamat</label>
@@ -72,11 +84,20 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">No HP</label>
-                                <input type="text" name="no_hp" class="form-control" value="{{ $mahasiswa->no_hp }}" required>
+                                <input type="text" name="no_hp" class="form-control" value="{{ $mahasiswa->no_hp }}" placeholder="Contoh: 081234567890">
+                                <small class="text-muted">Opsional, tidak wajib diisi</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Tanggal Masuk</label>
-                                <input type="date" name="tanggal_masuk" class="form-control" value="{{ $mahasiswa->tanggal_masuk->format('Y-m-d') }}" required>
+                                <input type="date" name="tanggal_masuk" class="form-control" value="{{ $mahasiswa->tanggal_masuk ? date('Y-m-d', strtotime($mahasiswa->tanggal_masuk)) : '' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Dosen Wali</label>
+                                <input type="text" name="dosen_wali" class="form-control" value="{{ $mahasiswa->dosen_wali }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">NIK Dosen Wali</label>
+                                <input type="text" name="dosen_wali_nik" class="form-control" value="{{ $mahasiswa->dosen_wali_nik }}">
                             </div>
                         </div>
                         <div class="d-flex justify-content-between">
@@ -93,21 +114,23 @@
 @push('scripts')
 <script>
     const allProdis = @json($prodis ?? []);
+    let currentProdiId = {{ $mahasiswa->prodi_id ?? 0 }};
     
-    $('#fakultas_id').change(function() {
-        let fakultasId = $(this).val();
-        let prodiSelect = $('#prodi_id');
-        let currentProdiId = {{ $mahasiswa->prodi_id }};
-        
-        prodiSelect.empty().append('<option value="">Pilih Program Studi</option>');
-        
-        if (fakultasId) {
-            let filteredProdis = allProdis.filter(prodi => prodi.fakultas_id == fakultasId);
-            filteredProdis.forEach(prodi => {
-                let selected = (prodi.id == currentProdiId) ? 'selected' : '';
-                prodiSelect.append(`<option value="${prodi.id}" ${selected}>${prodi.nama_prodi} (${prodi.jenjang})</option>`);
-            });
-        }
+    $(document).ready(function() {
+        $('#fakultas_id').change(function() {
+            let fakultasId = $(this).val();
+            let prodiSelect = $('#prodi_id');
+            
+            prodiSelect.empty().append('<option value="">Pilih Program Studi</option>');
+            
+            if (fakultasId) {
+                let filteredProdis = allProdis.filter(prodi => prodi.fakultas_id == fakultasId);
+                filteredProdis.forEach(prodi => {
+                    let selected = (prodi.id == currentProdiId) ? 'selected' : '';
+                    prodiSelect.append(`<option value="${prodi.id}" ${selected}>${prodi.nama_prodi} (${prodi.jenjang})</option>`);
+                });
+            }
+        });
     });
 </script>
 @endpush

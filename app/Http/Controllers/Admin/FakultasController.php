@@ -54,6 +54,7 @@ class FakultasController extends Controller
 
     public function destroy(Fakultas $fakultas)
     {
+        // dd('Destroy called for:', $fakultas->id, $fakultas->nama_fakultas);
         $fakultas->delete();
         return redirect()->route('admin.fakultas.index')->with('success', 'Fakultas berhasil dihapus');
     }

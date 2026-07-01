@@ -3,968 +3,1527 @@
 @section('title', 'Jenis Surat')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">Jenis Surat</h4>
-            <p class="text-muted mb-0">Kelola jenis dan template surat</p>
-        </div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addJenisSuratModal">
-            <i class="bi bi-plus-circle me-2"></i>Tambah Jenis Surat
-        </button>
-    </div>
-
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="jenisSuratTable">
-                    <thead>
-                        <tr>
-                            <th width="50">No</th>
-                            <th>Nama Surat</th>
-                            <th>Kategori</th>
-                            <th width="100">Template</th>
-                            <th width="100">Status</th>
-                            <th width="150">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($jenisSurats as $index => $jenis)
-                        <tr>
-                            <td class="text-center">{{ $index + 1 }}</td>
-                            <td class="fw-semibold">{{ $jenis->nama_surat }}</td>
-                            <td>{{ $jenis->kategori_surat }}</td>
-                            <td class="text-center">
-                                @if($jenis->template_content)
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Ada</span>
-                                @else
-                                    <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Belum</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-{{ $jenis->is_active ? 'success' : 'danger' }}">
-                                    {{ $jenis->is_active ? 'Aktif' : 'Nonaktif' }}
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4"
+                        style="background: linear-gradient(135deg, #6f42c1 0%, #8b5cf6 100%); border-radius: 16px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="text-white mb-1 fw-bold">
+                                    <i class="bi bi-file-text me-2"></i>Jenis Surat
+                                </h3>
+                                <p class="text-white-50 mb-0">Kelola jenis dan template surat</p>
+                            </div>
+                            <div>
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-file-earmark me-1"></i>
+                                    {{ $jenisSurats->count() }} Jenis Surat
                                 </span>
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-outline-info edit-template" 
-                                        data-id="{{ $jenis->id }}" 
-                                        data-nama="{{ $jenis->nama_surat }}" 
-                                        data-template="{{ $jenis->template_content }}"
-                                        data-logo="{{ $jenis->logo_path }}"
-                                        data-kop="{{ $jenis->kop_surat_path }}">
-                                    <i class="bi bi-file-text"></i> Template
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning edit-jenis" 
-                                        data-id="{{ $jenis->id }}" 
-                                        data-nama="{{ $jenis->nama_surat }}" 
-                                        data-kategori="{{ $jenis->kategori_surat }}">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger delete-jenis" data-id="{{ $jenis->id }}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Section -->
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        <!-- Toolbar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h5 class="fw-bold mb-0">Daftar Jenis Surat</h5>
+                <p class="text-muted small mb-0">Total {{ $jenisSurats->count() }} jenis surat</p>
+            </div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addJenisSuratModal">
+                <i class="bi bi-plus-circle me-2"></i>Tambah Jenis Surat
+            </button>
+        </div>
+
+        <!-- Tabel Jenis Surat -->
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="jenisSuratTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">No</th>
+                                <th>Nama Surat</th>
+                                <th>Kategori</th>
+                                <th>Variabel</th>
+                                <th class="text-center">Template</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center" style="width: 200px;">Aksi</th>
                             </tr>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
-                                <p class="text-muted mb-0">Belum ada jenis surat</p>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @forelse($jenisSurats as $index => $jenis)
+                                <tr>
+                                    <td class="text-center">{{ $loop->iteration }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-file-earmark-text text-primary"></i>
+                                            <strong>{{ $jenis->nama_surat }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if ($jenis->kategoriSurat)
+                                            <span class="badge"
+                                                style="background-color: {{ $jenis->kategoriSurat->warna ?? '#6f42c1' }};">
+                                                {{ $jenis->kategoriSurat->nama_kategori }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $vars = $jenis->getVariableFields();
+                                        @endphp
+                                        @if (count($vars) > 0)
+                                            <button class="btn btn-sm btn-info"
+                                                onclick="showVariables({{ $jenis->id }})">
+                                                {{ count($vars) }} Variabel
+                                            </button>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @if ($jenis->template_content)
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>Ada
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-x-circle me-1"></i>Belum
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-{{ $jenis->is_active ? 'success' : 'danger' }}">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i>
+                                            {{ $jenis->is_active ? 'Aktif' : 'Nonaktif' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                            <button class="btn btn-sm btn-outline-info edit-template"
+                                                data-id="{{ $jenis->id }}" data-nama="{{ $jenis->nama_surat }}"
+                                                data-template="{{ $jenis->template_content }}"
+                                                data-logo="{{ $jenis->logo_path }}"
+                                                data-kop="{{ $jenis->kop_surat_path }}" title="Edit Template">
+                                                <i class="bi bi-file-text"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning edit-jenis"
+                                                data-id="{{ $jenis->id }}" data-nama="{{ $jenis->nama_surat }}"
+                                                data-kategori="{{ $jenis->kategori_surat_id }}" title="Edit Jenis Surat">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <form action="{{ route('admin.jenis-surat.destroy', $jenis->id) }}"
+                                                method="POST" class="d-inline delete-form"
+                                                onsubmit="return confirmDeleteJenisSurat(this, '{{ $jenis->nama_surat }}')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    title="Hapus Jenis Surat">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                                        <p class="text-muted mb-0">Belum ada jenis surat</p>
+                                        <p class="text-muted small">Klik tombol "Tambah Jenis Surat" untuk menambahkan</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Tambah Jenis Surat -->
-<div class="modal fade" id="addJenisSuratModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('admin.jenis-surat.store') }}" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Tambah Jenis Surat</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nama Surat <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_surat" class="form-control" required>
+    <!-- ============================================ -->
+    <!-- MODAL TAMBAH JENIS SURAT -->
+    <!-- ============================================ -->
+    <div class="modal fade" id="addJenisSuratModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('admin.jenis-surat.store') }}" method="POST" id="formAddJenisSurat">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-plus-circle me-2"></i>Tambah Jenis Surat
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Kategori <span class="text-danger">*</span></label>
-                        <select name="kategori" class="form-select" required>
-                            <option value="">Pilih Kategori</option>
-                            <option value="Surat Izin">📋 Surat Izin</option>
-                            <option value="Surat Keterangan">📄 Surat Keterangan</option>
-                            <option value="Surat Pengajuan">📝 Surat Pengajuan</option>
-                            <option value="Surat Rekomendasi">⭐ Surat Rekomendasi</option>
-                        </select>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Surat <span class="text-danger">*</span></label>
+                            <input type="text" name="nama_surat" class="form-control"
+                                placeholder="Contoh: Surat Keterangan Aktif Kuliah" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kategori <span class="text-danger">*</span></label>
+                            <select name="kategori_surat_id" class="form-select" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                @foreach ($kategoris as $kategori)
+                                    <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="add_is_active"
+                                    value="1" checked>
+                                <label class="form-check-label fw-bold" for="add_is_active">
+                                    Aktifkan Jenis Surat
+                                </label>
+                            </div>
+                            <small class="text-muted">Nonaktifkan untuk menyembunyikan jenis surat</small>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Edit Jenis Surat -->
-<div class="modal fade" id="editJenisSuratModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="editJenisSuratForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Jenis Surat</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nama Surat</label>
-                        <input type="text" name="nama_surat" id="edit_nama_surat" class="form-control" required>
+    <!-- ============================================ -->
+    <!-- MODAL EDIT JENIS SURAT -->
+    <!-- ============================================ -->
+    <div class="modal fade" id="editJenisSuratModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editJenisSuratForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-pencil-square me-2"></i>Edit Jenis Surat
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Kategori</label>
-                        <select name="kategori" id="edit_kategori" class="form-select" required>
-                            <option value="Surat Izin">📋 Surat Izin</option>
-                            <option value="Surat Keterangan">📄 Surat Keterangan</option>
-                            <option value="Surat Pengajuan">📝 Surat Pengajuan</option>
-                            <option value="Surat Rekomendasi">⭐ Surat Rekomendasi</option>
-                        </select>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Surat <span class="text-danger">*</span></label>
+                            <input type="text" name="nama_surat" id="edit_nama_surat" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kategori <span class="text-danger">*</span></label>
+                            <select name="kategori_surat_id" id="edit_kategori_id" class="form-select" required>
+                                <option value="">Pilih Kategori</option>
+                                @foreach ($kategoris as $kategori)
+                                    <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="edit_is_active"
+                                    value="1">
+                                <label class="form-check-label fw-bold" for="edit_is_active">
+                                    Aktifkan Jenis Surat
+                                </label>
+                            </div>
+                            <small class="text-muted">Nonaktifkan untuk menyembunyikan jenis surat</small>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Update
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Edit Template (Fullscreen seperti Microsoft Word) -->
-<div class="modal fade" id="editTemplateModal" tabindex="-1" data-bs-backdrop="static">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <form id="editTemplateForm" method="POST" enctype="multipart/form-data">
-                @csrf
+    <!-- ============================================ -->
+    <!-- MODAL EDIT TEMPLATE (Fullscreen) -->
+    <!-- ============================================ -->
+    <div class="modal fade" id="editTemplateModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <form id="editTemplateForm" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1, #8b5cf6);">
+                        <h5 class="modal-title text-white">
+                            <i class="bi bi-file-text me-2"></i>
+                            Edit Template Surat: <span id="template_nama_surat" class="fw-bold"></span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="row g-0 h-100">
+                            <!-- Sidebar Kiri -->
+                            <div class="col-md-2 bg-light p-3"
+                                style="border-right: 1px solid #dee2e6; height: calc(100vh - 130px); overflow-y: auto;">
+
+                                <!-- Upload Logo -->
+                                <div class="mb-4">
+                                    <label class="fw-bold mb-2"><i class="bi bi-image"></i> Logo Universitas</label>
+                                    <div class="border rounded p-2 text-center bg-white">
+                                        <div id="logoPreview" class="mb-2">
+                                            <img id="logoPreviewImg" src=""
+                                                style="max-width: 80px; max-height: 80px; display: none;">
+                                            <div id="logoPlaceholder" class="text-muted">
+                                                <i class="bi bi-building fs-1"></i>
+                                                <p class="small mb-0">Belum ada logo</p>
+                                            </div>
+                                        </div>
+                                        <input type="file" name="logo" id="logoInput"
+                                            class="form-control form-control-sm" accept="image/*">
+                                        <small class="text-muted">PNG, JPG (Max 2MB)</small>
+                                        <button type="button" class="btn btn-sm btn-outline-danger mt-2 w-100"
+                                            id="btnRemoveLogo" style="display: none;">
+                                            <i class="bi bi-trash"></i> Hapus Logo
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Upload Kop Surat -->
+                                <div class="mb-4">
+                                    <label class="fw-bold mb-2"><i class="bi bi-file-image"></i> Gambar Kop Surat</label>
+                                    <div class="border rounded p-2 text-center bg-white">
+                                        <div id="kopPreview" class="mb-2">
+                                            <img id="kopPreviewImg" src=""
+                                                style="max-width: 100%; max-height: 100px; display: none;">
+                                            <div id="kopPlaceholder" class="text-muted">
+                                                <i class="bi bi-card-image fs-1"></i>
+                                                <p class="small mb-0">Belum ada kop</p>
+                                            </div>
+                                        </div>
+                                        <input type="file" name="kop_surat" id="kopInput"
+                                            class="form-control form-control-sm" accept="image/*">
+                                        <div class="mt-2" id="kopSizeControl" style="display: none;">
+                                            <label class="form-label small">Ukuran Gambar Kop</label>
+                                            <input type="range" id="kopWidthSlider" class="form-range" min="30"
+                                                max="100" value="80">
+                                            <div class="d-flex justify-content-between small text-muted">
+                                                <span>Kecil</span>
+                                                <span>Normal</span>
+                                                <span>Besar</span>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger mt-2 w-100"
+                                            id="btnRemoveKop" style="display: none;">
+                                            <i class="bi bi-trash"></i> Hapus Kop Surat
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-sm btn-primary w-100 mb-3" id="btnInsertKop">
+                                    <i class="bi bi-image"></i> Sisipkan Kop Surat
+                                </button>
+
+                                <input type="hidden" name="logo_path" id="logo_path">
+                                <input type="hidden" name="kop_surat_path" id="kop_surat_path">
+
+                                <hr>
+
+                                <!-- Variabel -->
+                                <h6 class="fw-bold mb-2"><i class="bi bi-tags"></i> Variabel Tersedia</h6>
+                                <p class="text-muted small">Klik untuk menyisipkan</p>
+
+                                <div class="mb-3">
+                                    <label class="fw-bold small text-primary">Data Mahasiswa</label>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{nama_mahasiswa}">
+                                        <code>{nama_mahasiswa}</code> - Nama Lengkap
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{npm}">
+                                        <code>{npm}</code> - NPM
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{alamat}">
+                                        <code>{alamat}</code> - Alamat
+                                    </button>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="fw-bold small text-danger">Data Orangtua Mahasiswa</label>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{nama_orangtua}">
+                                        <code>{nama_orangtua}</code> - Nama Orangtua
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{nrp_nik_nip}">
+                                        <code>{nrp_nik_nip}</code> - NRP/NIK/NIP
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{pangkat_orangtua}">
+                                        <code>{pangkat_orangtua}</code> - Pangkat/Golongan
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{instansi_orangtua}">
+                                        <code>{instansi_orangtua}</code> - Instansi
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{alamat_kantor}">
+                                        <code>{alamat_kantor}</code> - Alamat Kantor
+                                    </button>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="fw-bold small text-success">Data Akademik</label>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{fakultas}">
+                                        <code>{fakultas}</code> - Fakultas
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{prodi}">
+                                        <code>{prodi}</code> - Program Studi
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{semester}">
+                                        <code>{semester}</code> - Semester
+                                    </button>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="fw-bold small text-warning">Data Surat</label>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{nomor_surat}">
+                                        <code>{nomor_surat}</code> - Nomor Surat
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{tanggal_surat}">
+                                        <code>{tanggal_surat}</code> - Tanggal Surat
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{perihal}">
+                                        <code>{perihal}</code> - Perihal
+                                    </button>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="fw-bold small text-danger">Data Tanda Tangan</label>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{dekan}">
+                                        <code>{dekan}</code> - Nama Dekan
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable"
+                                        data-var="{nip_dekan}">
+                                        <code>{nip_dekan}</code> - NIP Dekan
+                                    </button>
+                                </div>
+
+                                <hr>
+
+                                <!-- Format Paragraf -->
+                                <h6 class="fw-bold mb-2">
+                                    <i class="bi bi-text-paragraph"></i> Format Paragraf
+                                </h6>
+                                <div class="card mb-3">
+                                    <div class="card-body p-2">
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Left Margin (px)</label>
+                                            <input type="number" id="leftMargin" class="form-control form-control-sm"
+                                                value="0">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Left Indent (px)</label>
+                                            <input type="number" id="leftIndent" class="form-control form-control-sm"
+                                                value="0">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">First Line Indent (px)</label>
+                                            <input type="number" id="firstLineIndent"
+                                                class="form-control form-control-sm" value="48">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Line Spacing</label>
+                                            <select id="lineSpacing" class="form-select form-select-sm">
+                                                <option value="1">1.0</option>
+                                                <option value="1.15">1.15</option>
+                                                <option value="1.5" selected>1.5</option>
+                                                <option value="2">2.0</option>
+                                                <option value="2.5">2.5</option>
+                                                <option value="3">3.0</option>
+                                            </select>
+                                        </div>
+                                        <div class="d-grid gap-2 mt-2">
+                                            <button type="button" class="btn btn-sm btn-primary" id="applyMarginBtn">
+                                                <i class="bi bi-layout-text-window"></i> Terapkan Margin ke Template
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                id="formatSuratResmi">
+                                                <i class="bi bi-file-earmark-text"></i> Format Surat Resmi
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                id="applyParagraphStyle">
+                                                <i class="bi bi-check-circle"></i> Terapkan ke Paragraf
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Editor Area -->
+                            <div class="col-md-10 p-0 d-flex flex-column">
+                                <textarea id="templateEditor" name="template_content" style="width:100%; height:600px;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                                class="bi bi-x-circle me-1"></i> Batal</button>
+                        <button type="button" class="btn btn-info" id="previewBtn"><i class="bi bi-eye me-1"></i>
+                            Preview</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Simpan
+                            Template</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL PREVIEW -->
+    <!-- ============================================ -->
+    <div class="modal fade" id="previewModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
                 <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1, #8b5cf6);">
                     <h5 class="modal-title text-white">
-                        <i class="bi bi-file-text me-2"></i>
-                        Edit Template Surat: <span id="template_nama_surat" class="fw-bold"></span>
+                        <i class="bi bi-eye me-2"></i>Preview Template Surat
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-0">
-                    <div class="row g-0 h-100">
-                        <!-- Sidebar Kiri -->
-                        <div class="col-md-2 bg-light p-3" style="border-right: 1px solid #dee2e6; height: calc(100vh - 130px); overflow-y: auto;">
-                            
-                            <!-- Upload Logo -->
-                            <div class="mb-4">
-                                <label class="fw-bold mb-2"><i class="bi bi-image"></i> Logo</label>
-                                <div class="border rounded p-2 text-center bg-white">
-                                    <div id="logoPreview" class="mb-2">
-                                        <img id="logoPreviewImg" src="" style="max-width: 80px; max-height: 80px; display: none;">
-                                        <div id="logoPlaceholder" class="text-muted">
-                                            <i class="bi bi-building fs-1"></i>
-                                            <p class="small mb-0">Belum ada logo</p>
-                                        </div>
-                                    </div>
-                                    <input type="file" name="logo" id="logoInput" class="form-control form-control-sm" accept="image/*">
-                                </div>
-                            </div>
-                            
-                            <!-- Upload Kop Surat -->
-                            <div class="mb-4">
-                                <label class="fw-bold mb-2"><i class="bi bi-file-image"></i> Kop Surat</label>
-                                <div class="border rounded p-2 text-center bg-white">
-                                    <div id="kopPreview" class="mb-2">
-                                        <img id="kopPreviewImg" src="" style="max-width: 100%; max-height: 100px; display: none;">
-                                        <div id="kopPlaceholder" class="text-muted">
-                                            <i class="bi bi-card-image fs-1"></i>
-                                            <p class="small mb-0">Belum ada kop</p>
-                                        </div>
-                                    </div>
-                                    <input type="file" name="kop_surat" id="kopInput" class="form-control form-control-sm" accept="image/*">
-                                    <div class="mt-2 d-none" id="kopSizeControl">
-                                        <label class="form-label small">Ukuran Gambar Kop</label>
-                                        <input type="range" id="kopWidthSlider" class="form-range" min="30" max="100" value="80">
-                                        <div class="d-flex justify-content-between">
-                                            <small>Kecil</small>
-                                            <small>Normal</small>
-                                            <small>Besar</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <hr>
-                            
-                            <!-- Variabel -->
-                            <h6 class="fw-bold mb-2"><i class="bi bi-tags"></i> Variabel</h6>
-                            <div class="alert alert-info small py-1">Klik untuk menyisipkan</div>
-                            
-                            <div class="mb-2">
-                                <label class="fw-bold small">Mahasiswa</label>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{nama_mahasiswa}"><code>{nama_mahasiswa}</code></button>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{npm}"><code>{npm}</code></button>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{alamat}"><code>{alamat}</code></button>
-                            </div>
-                            <div class="mb-2">
-                                <label class="fw-bold small">Akademik</label>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{fakultas}"><code>{fakultas}</code></button>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{prodi}"><code>{prodi}</code></button>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{semester}"><code>{semester}</code></button>
-                            </div>
-                            <div class="mb-2">
-                                <label class="fw-bold small">Surat</label>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{nomor_surat}"><code>{nomor_surat}</code></button>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{tanggal_surat}"><code>{tanggal_surat}</code></button>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{perihal}"><code>{perihal}</code></button>
-                            </div>
-                            <div class="mb-2">
-                                <label class="fw-bold small">Tanda Tangan</label>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{dekan}"><code>{dekan}</code></button>
-                                <button class="btn btn-sm btn-outline-secondary w-100 mb-1 insert-variable" data-var="{nip_dekan}"><code>{nip_dekan}</code></button>
-                            </div>
-                        </div>
-                        
-                        <!-- Editor Area -->
-                        <div class="col-md-10 p-0 d-flex flex-column">
-                            <!-- Toolbar Lengkap seperti MS Word -->
-                            <div class="btn-toolbar p-2 border-bottom flex-wrap" style="background: #f8f9fa;">
-                                <!-- Clipboard -->
-                                <div class="btn-group me-2 mb-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-undo" title="Undo"><i class="bi bi-arrow-return-left"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-redo" title="Redo"><i class="bi bi-arrow-return-right"></i></button>
-                                </div>
-                                
-                                <!-- Font Style -->
-                                <div class="btn-group me-2 mb-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-bold" title="Tebal (Ctrl+B)"><i class="bi bi-type-bold"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-italic" title="Miring (Ctrl+I)"><i class="bi bi-type-italic"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-underline" title="Garis Bawah (Ctrl+U)"><i class="bi bi-type-underline"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-strikethrough" title="Coret"><i class="bi bi-type-strikethrough"></i></button>
-                                </div>
-                                
-                                <!-- Font Size -->
-                                <div class="btn-group me-2 mb-1">
-                                    <select id="fontSizeSelect" class="form-select form-select-sm" style="width: 70px;">
-                                        <option value="8">8</option>
-                                        <option value="9">9</option>
-                                        <option value="10">10</option>
-                                        <option value="11">11</option>
-                                        <option value="12" selected>12</option>
-                                        <option value="14">14</option>
-                                        <option value="16">16</option>
-                                        <option value="18">18</option>
-                                        <option value="20">20</option>
-                                        <option value="22">22</option>
-                                        <option value="24">24</option>
-                                        <option value="26">26</option>
-                                        <option value="28">28</option>
-                                        <option value="36">36</option>
-                                        <option value="48">48</option>
-                                        <option value="72">72</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Font Family -->
-                                <div class="btn-group me-2 mb-1">
-                                    <select id="fontFamilySelect" class="form-select form-select-sm" style="width: 150px;">
-                                        <option value="'Times New Roman', Times, serif" selected>Times New Roman</option>
-                                        <option value="Arial, sans-serif">Arial</option>
-                                        <option value="'Courier New', monospace">Courier New</option>
-                                        <option value="Georgia, serif">Georgia</option>
-                                        <option value="Verdana, sans-serif">Verdana</option>
-                                        <option value="'Segoe UI', Tahoma, Geneva">Segoe UI</option>
-                                        <option value="'Calibri', sans-serif">Calibri</option>
-                                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Alignment -->
-                                <div class="btn-group me-2 mb-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-align-left" title="Rata Kiri"><i class="bi bi-text-left"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-align-center" title="Rata Tengah"><i class="bi bi-text-center"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-align-right" title="Rata Kanan"><i class="bi bi-text-right"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-align-justify" title="Rata Kiri-Kanan"><i class="bi bi-text-paragraph"></i></button>
-                                </div>
-                                
-                                <!-- List -->
-                                <div class="btn-group me-2 mb-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-bullet-list" title="Bullet List"><i class="bi bi-list-ul"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-numbered-list" title="Numbered List"><i class="bi bi-list-ol"></i></button>
-                                </div>
-                                
-                                <!-- Indent -->
-                                <div class="btn-group me-2 mb-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-indent" title="Indent"><i class="bi bi-text-indent-left"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-outdent" title="Outdent"><i class="bi bi-text-indent-right"></i></button>
-                                </div>
-                                
-                                <!-- Insert -->
-                                <div class="btn-group me-2 mb-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-insert-logo" title="Insert Logo"><i class="bi bi-image"></i> Logo</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-insert-kop" title="Insert Kop Surat"><i class="bi bi-file-image"></i> Kop</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-insert-table" title="Insert Table"><i class="bi bi-table"></i> Table</button>
-                                </div>
-                                
-                                <!-- Tools -->
-                                <div class="btn-group mb-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-fullscreen" title="Fullscreen"><i class="bi bi-arrows-fullscreen"></i></button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-print-editor" title="Print"><i class="bi bi-printer"></i></button>
-                                </div>
-                            </div>
-                            
-                            <!-- Editor -->
-                            <div id="templateEditor" style="flex:1; overflow:auto; padding:20px; background:white; font-family:'Times New Roman', Times, serif; font-size:12pt;"></div>
-                            <textarea name="template_content" id="template_content" style="display:none;"></textarea>
-                        </div>
+                <div class="modal-body" style="background:#e5e5e5; overflow:auto;">
+                    <div id="previewPaper"
+                        style="width:210mm; min-height:297mm; margin:0 auto; background:white; padding:0; box-shadow:0 0 10px rgba(0,0,0,0.1);">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Batal</button>
-                    <button type="button" class="btn btn-info" id="previewBtn"><i class="bi bi-eye"></i> Preview</button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Simpan Template</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" id="printPreviewBtn"><i
+                            class="bi bi-printer me-1"></i> Print</button>
                 </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Preview -->
-<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content border-0">
-            
-            <!-- Header -->
-            <div class="modal-header bg-primary text-white border-0">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-eye me-2"></i>Preview Template Surat
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-
-            <!-- Body -->
-            <div class="modal-body p-0" style="background:#dcdcdc; overflow:auto;">
-                
-                <div class="preview-wrapper">
-                    <div id="previewPaper" class="preview-paper"></div>
-                </div>
-
-            </div>
-
-            <!-- Footer -->
-            <div class="modal-footer border-0 bg-white shadow-sm">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Tutup
-                </button>
-
-                <button type="button" class="btn btn-primary" id="printPreviewBtn">
-                    <i class="bi bi-printer"></i> Print
-                </button>
             </div>
         </div>
     </div>
-</div>
+@endsection
 
 @push('styles')
-<style>
-    .ck-editor__editable_inline {
-        min-height: 600px;
-        font-family: 'Times New Roman', Times, serif;
-    }
-    .btn-group .btn-sm {
-        padding: 4px 8px;
-    }
-    .form-select-sm {
-        font-size: 12px;
-        padding: 4px 8px;
-    }
-    .a4-preview {
-        font-family: 'Times New Roman', Times, serif;
-        font-size: 12pt;
-        line-height: 1.5;
-    }
-    .a4-preview table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .a4-preview td {
-        padding: 4px 0;
-    }
-
-    .ck-editor__editable {
-    min-height: 1100px !important;
-    width: 210mm !important;
-    margin: auto !important;
-    background: white !important;
-    padding: 20mm !important;
-    box-shadow: 0 0 15px rgba(0,0,0,0.15);
-    border: 1px solid #ddd;
-    font-family: 'Times New Roman', serif;
-    font-size: 14pt;
-    }
-
-    .ck-content img {
-        max-width: 100%;
-        cursor: move;
-        resize: both;
-        overflow: auto;
-    }
-    #previewContent {
-    background:#d9d9d9;
-    height:100vh;
-    overflow:auto;
-    padding:40px;
-    }
-
-    /* Kertas A4 */
-    .preview-paper {
-        width: 210mm;
-        min-height: 297mm;
-        background: white;
-        padding: 20mm;
-        box-shadow: 0 0 20px rgba(0,0,0,0.15);
-        border-radius: 4px;
-        font-family: 'Times New Roman', Times, serif;
-        font-size: 12pt;
-        line-height: 1.6;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .preview-paper img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    .preview-paper table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .preview-paper td,
-    .preview-paper th {
-        border: 1px solid #000;
-        padding: 6px;
-    }
-
-    /* Fullscreen modal lebih rapi */
-    #previewModal .modal-body {
-        height: calc(100vh - 130px);
-    }
-
-    /* Print khusus */
-    @media print {
-        body * {
-            visibility: hidden;
+    <style>
+        .table> :not(caption)>*>* {
+            vertical-align: middle;
         }
 
-        #previewPaper,
-        #previewPaper * {
-            visibility: visible;
+        .cke_top {
+            background: #f8f9fa !important;
+            border-bottom: 1px solid #dee2e6 !important;
+            padding: 8px !important;
         }
 
+        .cke_editable {
+            font-family: 'Times New Roman', Times, serif !important;
+            font-size: 12pt !important;
+            padding: 20mm !important;
+            background: white !important;
+            min-height: 500px;
+        }
+
+        .insert-variable {
+            text-align: left;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .insert-variable:hover {
+            background-color: #6f42c1 !important;
+            color: white !important;
+            border-color: #6f42c1 !important;
+        }
+
+        .insert-variable code {
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .insert-variable:hover code {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        #leftMargin,
+        #leftIndent,
+        #firstLineIndent,
+        #lineSpacing {
+            font-size: 12px;
+        }
+
+        .card .form-label.small {
+            margin-bottom: 3px;
+        }
+
+        .card .btn-sm {
+            font-size: 12px;
+        }
+
+        /* Preview paper - TANPA padding agar full */
         #previewPaper {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0;
-            padding: 15mm;
-            box-shadow: none;
-            border-radius: 0;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.6;
         }
-    }
-</style>
+
+        #previewPaper table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #previewPaper table td {
+            padding: 4px 0;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #previewPaper,
+            #previewPaper * {
+                visibility: visible;
+            }
+
+            #previewPaper {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    </style>
 @endpush
 
 @push('scripts')
-<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-<script>
-    let editor;
-    let currentKopWidth = 80;
-    let currentKopUrl = null;
-    
-    $(document).ready(function() {
-        // DataTable
-        if ($('#jenisSuratTable').length) {
-            if ($.fn.DataTable.isDataTable('#jenisSuratTable')) $('#jenisSuratTable').DataTable().destroy();
-            $('#jenisSuratTable').DataTable({ 
-                responsive: true, 
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json' }, 
-                pageLength: 10,
-                columnDefs: [{ orderable: false, targets: [3, 4, 5] }]
-            });
-        }
-        
-        // Edit Jenis Surat
-        $('.edit-jenis').click(function() {
-            $('#edit_nama_surat').val($(this).data('nama'));
-            $('#edit_kategori').val($(this).data('kategori'));
-            $('#editJenisSuratForm').attr('action', `/admin/jenis-surat/${$(this).data('id')}`);
-            $('#editJenisSuratModal').modal('show');
-        });
-        
-        // Edit Template
-        $('.edit-template').click(function() {
-            let id = $(this).data('id');
-            let nama = $(this).data('nama');
-            let template = $(this).data('template') || getDefaultTemplate();
-            let logoPath = $(this).data('logo');
-            let kopPath = $(this).data('kop');
-            
-            // Set preview logo
-            if (logoPath) {
-                let logoUrl = logoPath.startsWith('/') ? logoPath : '/' + logoPath;
-                $('#logoPreviewImg').attr('src', logoUrl).show();
-                $('#logoPlaceholder').hide();
-            } else {
-                $('#logoPreviewImg').hide();
-                $('#logoPlaceholder').show();
-            }
-            
-            // Set preview kop
-            if (kopPath) {
-                currentKopUrl = kopPath.startsWith('/') ? kopPath : '/' + kopPath;
-                $('#kopPreviewImg').attr('src', currentKopUrl).show();
-                $('#kopPlaceholder').hide();
-                $('#kopSizeControl').removeClass('d-none');
-            } else {
-                currentKopUrl = null;
-                $('#kopPreviewImg').hide();
-                $('#kopPlaceholder').show();
-                $('#kopSizeControl').addClass('d-none');
-            }
-            
-            $('#template_nama_surat').text(nama);
-            $('#editTemplateForm').attr('action', `/admin/jenis-surat/${id}/template`);
-            
-            if (editor) {
-                editor.destroy().then(() => initEditor(template));
-            } else {
-                initEditor(template);
-            }
-            
-            $('#editTemplateModal').modal('show');
-        });
-        
-        $('.delete-jenis').click(function() {
-            confirmDelete(`/admin/jenis-surat/${$(this).data('id')}`, 'Yakin hapus jenis surat ini?');
-        });
-        
-        // Preview Logo
-        $('#logoInput').on('change', function(e) {
-            let file = e.target.files[0];
-            if (file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#logoPreviewImg').attr('src', e.target.result).show();
-                    $('#logoPlaceholder').hide();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Preview Kop
-        $('#kopInput').on('change', function(e) {
-            let file = e.target.files[0];
-            if (file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    currentKopUrl = e.target.result;
-                    $('#kopPreviewImg').attr('src', currentKopUrl).show();
-                    $('#kopPlaceholder').hide();
-                    $('#kopSizeControl').removeClass('d-none');
-                    $('#kopPreviewImg').css('width', currentKopWidth + '%');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Kop Width Slider
-        $('#kopWidthSlider').on('input', function () {
+    <script src="//cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+            let editor = null;
+            let currentJenisId = null;
+            let currentKopUrl = null;
 
-            currentKopWidth = $(this).val();
-
-            $('#kopPreviewImg').css({
-                width: currentKopWidth + '%',
-                maxWidth: '100%'
-            });
-
-            if (editor) {
-
-                let html = editor.getData();
-
-                html = html.replace(
-                    /(<img[^>]*alt="Kop Surat"[^>]*style="[^"]*width:)([^;]+)(;[^"]*")/g,
-                    `$1${currentKopWidth}%$3`
-                );
-
-                editor.setData(html);
-            }
-        });
-        
-        // Insert Variable
-        $('.insert-variable').click(function() {
-            let variable = $(this).data('var');
-            if (editor && variable) {
-                editor.model.change(writer => {
-                    writer.insertText(variable, editor.model.document.selection.getFirstPosition());
-                });
-            }
-        });
-        
-        // Insert Logo
-        $('#btn-insert-logo').click(function() {
-            let logoUrl = $('#logoPreviewImg').attr('src');
-            if (logoUrl && logoUrl !== '#') {
-                let html = `<div style="text-align:center; margin:10px 0;"><img src="${logoUrl}" style="max-width:100px; height:auto;"></div>`;
-                insertHtmlToEditor(html);
-            } else {
-                Swal.fire('Info', 'Silakan upload logo terlebih dahulu', 'info');
-            }
-        });
-        
-        // Insert Kop
-        $('#btn-insert-kop').click(function () {
-
-            if (!currentKopUrl || !editor) return;
-
-            const width = $('#kopWidth').val();
-            const height = $('#kopHeight').val();
-
-            const html = `
-                <div style="text-align:center; margin-bottom:20px;">
-                    <img src="${currentKopUrl}"
-                        style="
-                            width:${width}%;
-                            height:${height}px;
-                            object-fit:contain;
-                            display:block;
-                            margin:auto;
-                            resize:both;
-                            overflow:auto;
-                            cursor:move;
-                        ">
-                </div>
-            `;
-
-            editor.model.change(() => {
-
-                const viewFragment = editor.data.processor.toView(html);
-                const modelFragment = editor.data.toModel(viewFragment);
-
-                editor.model.insertContent(modelFragment);
-            });
-        });
-        
-        // Insert Table
-        $('#btn-insert-table').click(function() {
-            Swal.fire({
-                title: 'Insert Table',
-                html: `
-                    <div class="row">
-                        <div class="col-6"><label>Baris:</label><input id="table-rows" class="form-control" value="3" type="number" min="1" max="10"></div>
-                        <div class="col-6"><label>Kolom:</label><input id="table-cols" class="form-control" value="3" type="number" min="1" max="10"></div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Insert',
-                preConfirm: () => {
-                    return { rows: document.getElementById('table-rows').value, cols: document.getElementById('table-cols').value };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let rows = parseInt(result.value.rows);
-                    let cols = parseInt(result.value.cols);
-                    let tableHtml = '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse; width:100%; margin:10px 0;">';
-                    for (let i = 0; i < rows; i++) {
-                        tableHtml += '<tr>';
-                        for (let j = 0; j < cols; j++) {
-                            tableHtml += '<td style="border:1px solid #ddd; padding:8px;">&nbsp;</td>';
-                        }
-                        tableHtml += '</tr>';
+            // ============================================
+            // DELETE JENIS SURAT - Confirm Function
+            // ============================================
+            window.confirmDeleteJenisSurat = function(form, nama) {
+                Swal.fire({
+                    title: 'Apakah anda yakin?',
+                    html: `Jenis surat <strong>"${nama}"</strong> akan dihapus permanen!<br>
+                       <small class="text-danger">Data template surat juga akan terhapus.</small>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
                     }
-                    tableHtml += '</table>';
-                    insertHtmlToEditor(tableHtml);
-                }
-            });
-        });
-        
-        // Toolbar Functions
-        function insertHtmlToEditor(html) {
-            if (editor) {
-                editor.model.change(writer => {
-                    const viewFragment = editor.data.processor.toView(html);
-                    const modelFragment = editor.data.toModel(viewFragment);
-                    editor.model.insertContent(modelFragment);
                 });
-            }
-        }
-        
-        // Editor commands
-        $('#btn-bold').click(() => editor && editor.execute('bold'));
-        $('#btn-italic').click(() => editor && editor.execute('italic'));
-        $('#btn-underline').click(() => editor && editor.execute('underline'));
-        $('#btn-strikethrough').click(() => editor && editor.execute('strikethrough'));
-        $('#btn-align-left').click(() => editor && editor.execute('alignment', { value: 'left' }));
-        $('#btn-align-center').click(() => editor && editor.execute('alignment', { value: 'center' }));
-        $('#btn-align-right').click(() => editor && editor.execute('alignment', { value: 'right' }));
-        $('#btn-align-justify').click(() => editor && editor.execute('alignment', { value: 'justify' }));
-        $('#btn-bullet-list').click(() => editor && editor.execute('bulletedList'));
-        $('#btn-numbered-list').click(() => editor && editor.execute('numberedList'));
-        $('#btn-indent').click(() => editor && editor.execute('indentList'));
-        $('#btn-outdent').click(() => editor && editor.execute('outdentList'));
-        $('#btn-undo').click(() => editor && editor.execute('undo'));
-        $('#btn-redo').click(() => editor && editor.execute('redo'));
-        
-        // Font Size
-        $('#fontSizeSelect').change(function() {
-            if (editor) editor.execute('fontSize', { value: $(this).val() + 'pt' });
-        });
-        
-        // Font Family
-        $('#fontFamilySelect').change(function() {
-            if (editor) editor.execute('fontFamily', { value: $(this).val() });
-        });
-        
-        // Fullscreen
-        $('#btn-fullscreen').click(function() {
-            let elem = document.querySelector('.ck-editor__editable');
-            if (!document.fullscreenElement) elem.requestFullscreen();
-            else document.exitFullscreen();
-        });
-        
-        // Print Editor
-        $('#btn-print-editor').click(function() {
-            let content = editor.getData();
-            let win = window.open('', '_blank');
-            win.document.write(`<html><head><title>Print Template</title><style>body{font-family:'Times New Roman',serif;padding:20mm;}</style></head><body>${content}</body></html>`);
-            win.document.close();
-            win.print();
-        });
-        
-        // Preview
-        $('#previewBtn').click(function() {
-            if (!editor) return;
-
-            let content = editor.getData();
-
-            let previewData = {
-                nama_mahasiswa: 'Nuni Lestari',
-                npm: '10050022094',
-                tempat_lahir: 'Bandung',
-                tanggal_lahir: '23 Desember 2000',
-                alamat: 'Jl. Dederuk No. 21, Bandung',
-                fakultas: 'Psikologi',
-                prodi: 'Psikologi S1',
-                jenjang: 'S1',
-                ipk: '3.75',
-                semester: 'VIII',
-                tahun_akademik: '2025/2026',
-                nomor_surat: '083/M.10/Dek.Psi-k/IV/2026',
-                tanggal_surat: '29 April 2026',
-                keperluan: 'persyaratan administrasi',
-                perihal: 'SURAT KETERANGAN AKTIF KULIAH',
-                dekan: 'Dr. Oki Mardiawan, M.Psi., Psikolog.',
-                nip_dekan: 'D.07.0.464',
-                nama_ortu: 'Iwan Ridwan',
-                nik_ortu: '3205152111070961',
-                pangkat_ortu: 'Golongan IV-B',
-                instansi_ortu: 'SDN Sukamukti 4',
-                alamat_kantor_ortu: 'Jalan Lapang Trikarya, Kec. Sukawening, Kab. Garut'
+                return false;
             };
 
-            let html = content;
-
-            for (let key in previewData) {
-                html = html.replace(new RegExp(`\\{${key}\\}`, 'g'), previewData[key]);
-            }
-
-            $('#previewPaper').html(html);
-            $('#previewModal').modal('show');
-        });
-        
-        // Print Preview
-        $('#printPreviewBtn').click(function() {
-            let printContent = $('#previewPaper').html();
-
-            let printWindow = window.open('', '_blank');
-
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Print Surat</title>
-                    <style>
-                        @page {
-                            size: A4;
-                            margin: 15mm;
-                        }
-
-                        body {
-                            margin: 0;
-                            padding: 0;
-                            font-family: 'Times New Roman', Times, serif;
-                            background: white;
-                        }
-
-                        .paper {
-                            width: 210mm;
-                            min-height: 297mm;
-                            margin: auto;
-                            padding: 15mm;
-                            box-sizing: border-box;
-                        }
-
-                        img {
-                            max-width: 100%;
-                            height: auto;
-                        }
-
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                        }
-
-                        td, th {
-                            border: 1px solid #000;
-                            padding: 6px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="paper">
-                        ${printContent}
-                    </div>
-                </body>
-                </html>
-            `);
-
-            printWindow.document.close();
-
-            setTimeout(() => {
-                printWindow.print();
-            }, 500);
-        });
-        
-        $('#editTemplateForm').on('submit', function(e) {
-            if (editor) $('#template_content').val(editor.getData());
-        });
-    });
-    
-    function initEditor(content) {
-
-        if (editor) {
-            editor.destroy();
-        }
-
-        ClassicEditor.create(document.querySelector('#templateEditor'), {
-
-            toolbar: {
-                items: [
-                    'undo','redo',
-                    '|',
-                    'heading',
-                    '|',
-                    'bold','italic','underline','strikethrough',
-                    '|',
-                    'fontFamily','fontSize',
-                    '|',
-                    'alignment',
-                    '|',
-                    'bulletedList','numberedList',
-                    '|',
-                    'outdent','indent',
-                    '|',
-                    'insertTable',
-                    'blockQuote',
-                    'link'
-                ]
-            },
-
-            table: {
-                contentToolbar: [
-                    'tableColumn',
-                    'tableRow',
-                    'mergeTableCells'
-                ]
-            },
-
-            htmlSupport: {
-                allow: [
-                    {
-                        name: /.*/,
-                        attributes: true,
-                        classes: true,
-                        styles: true
+            // ============================================
+            // INIT DATATABLE
+            // ============================================
+            if (document.getElementById('jenisSuratTable')) {
+                try {
+                    if ($.fn.DataTable.isDataTable('#jenisSuratTable')) {
+                        $('#jenisSuratTable').DataTable().destroy();
                     }
-                ]
+                    $('#jenisSuratTable').DataTable({
+                        responsive: true,
+                        language: {
+                            "sProcessing": "Sedang memproses...",
+                            "sLengthMenu": "Tampilkan _MENU_ data",
+                            "sZeroRecords": "Tidak ada data yang ditemukan",
+                            "sInfo": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                            "sInfoEmpty": "Menampilkan 0 sampai 0 dari 0 data",
+                            "sInfoFiltered": "(difilter dari _MAX_ total data)",
+                            "sSearch": "Cari:",
+                            "sEmptyTable": "Tidak ada data tersedia",
+                            "oPaginate": {
+                                "sFirst": "Pertama",
+                                "sPrevious": "Sebelumnya",
+                                "sNext": "Selanjutnya",
+                                "sLast": "Terakhir"
+                            }
+                        },
+                        pageLength: 10,
+                        columnDefs: [{
+                            orderable: false,
+                            targets: [3, 4, 5, 6]
+                        }],
+                        order: [
+                            [0, 'asc']
+                        ]
+                    });
+                } catch (e) {
+                    console.log('DataTable error:', e);
+                }
             }
-        })
 
-        .then(newEditor => {
+            // ============================================
+            // EDIT JENIS SURAT
+            // ============================================
+            document.querySelectorAll('.edit-jenis').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const nama = this.dataset.nama;
+                    const kategoriId = this.dataset.kategori;
 
-            editor = newEditor;
+                    const editNamaSurat = document.getElementById('edit_nama_surat');
+                    const editKategoriId = document.getElementById('edit_kategori_id');
+                    const editIsActive = document.getElementById('edit_is_active');
 
-            editor.setData(content || '');
+                    if (editNamaSurat) editNamaSurat.value = nama;
+                    if (editKategoriId) editKategoriId.value = kategoriId;
+                    if (editIsActive) editIsActive.checked = true;
 
-            const editable = editor.ui.view.editable.element;
+                    const editForm = document.getElementById('editJenisSuratForm');
+                    if (editForm) {
+                        editForm.action = `/admin/jenis-surat/${id}`;
+                    }
 
-            editable.style.minHeight = '1100px';
-            editable.style.width = '210mm';
-            editable.style.margin = '20px auto';
-            editable.style.padding = '20mm';
-            editable.style.background = '#fff';
-            editable.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
-            editable.style.border = '1px solid #ddd';
-        })
+                    $('#editJenisSuratModal').modal('show');
+                });
+            });
 
-        .catch(error => console.error(error));
-    }
-    
-    function getDefaultTemplate() {
-        return `<div style="font-family:'Times New Roman', Times, serif;">
-            <div style="text-align:center; margin-bottom:15px;">
-                <img src="{kop_surat}" style="width:80%; max-width:100%; height:auto;">
+            // ============================================
+            // FUNGSI: Ambil Format dari Form
+            // ============================================
+            function getFormatFromForm() {
+                return {
+                    left_margin: parseInt(document.getElementById('leftMargin')?.value) || 0,
+                    left_indent: parseInt(document.getElementById('leftIndent')?.value) || 0,
+                    first_line_indent: parseInt(document.getElementById('firstLineIndent')?.value) || 48,
+                    line_spacing: parseFloat(document.getElementById('lineSpacing')?.value) || 1.5,
+                };
+            }
+
+            // ============================================
+            // EDIT TEMPLATE - Event Delegation
+            // ============================================
+            $(document).on('click', '.edit-template', function(e) {
+                e.preventDefault();
+
+                currentJenisId = this.dataset.id;
+                const nama = this.dataset.nama;
+                const template = this.dataset.template || getDefaultTemplate();
+                const logoPath = this.dataset.logo;
+                const kopPath = this.dataset.kop;
+
+                // Clean template untuk editor
+                let cleanTemplate = template;
+
+                // Reset form
+                const logoPathInput = document.getElementById('logo_path');
+                const kopPathInput = document.getElementById('kop_surat_path');
+                const logoInput = document.getElementById('logoInput');
+                const kopInput = document.getElementById('kopInput');
+                const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+                const btnRemoveKop = document.getElementById('btnRemoveKop');
+                const kopSizeControl = document.getElementById('kopSizeControl');
+
+                if (logoPathInput) logoPathInput.value = '';
+                if (kopPathInput) kopPathInput.value = '';
+                if (logoInput) logoInput.value = '';
+                if (kopInput) kopInput.value = '';
+                if (btnRemoveLogo) btnRemoveLogo.style.display = 'none';
+                if (btnRemoveKop) btnRemoveKop.style.display = 'none';
+                if (kopSizeControl) kopSizeControl.style.display = 'none';
+
+                // Set preview logo
+                const logoPreviewImg = document.getElementById('logoPreviewImg');
+                const logoPlaceholder = document.getElementById('logoPlaceholder');
+
+                if (logoPath && logoPath !== 'null' && logoPath !== '') {
+                    const logoUrl = logoPath.startsWith('http') ? logoPath : '/storage/' + logoPath;
+                    if (logoPreviewImg) {
+                        logoPreviewImg.src = logoUrl;
+                        logoPreviewImg.style.display = 'block';
+                    }
+                    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+                    if (logoPathInput) logoPathInput.value = logoPath;
+                    if (btnRemoveLogo) btnRemoveLogo.style.display = 'block';
+                } else {
+                    if (logoPreviewImg) logoPreviewImg.style.display = 'none';
+                    if (logoPlaceholder) logoPlaceholder.style.display = 'block';
+                    if (btnRemoveLogo) btnRemoveLogo.style.display = 'none';
+                }
+
+                // Set preview kop
+                const kopPreviewImg = document.getElementById('kopPreviewImg');
+                const kopPlaceholder = document.getElementById('kopPlaceholder');
+
+                if (kopPath && kopPath !== 'null' && kopPath !== '') {
+                    currentKopUrl = kopPath.startsWith('http') ? kopPath : '/storage/' + kopPath;
+                    if (kopPreviewImg) {
+                        kopPreviewImg.src = currentKopUrl;
+                        kopPreviewImg.style.display = 'block';
+                    }
+                    if (kopPlaceholder) kopPlaceholder.style.display = 'none';
+                    if (kopSizeControl) kopSizeControl.style.display = 'block';
+                    if (kopPathInput) kopPathInput.value = kopPath;
+                    if (btnRemoveKop) btnRemoveKop.style.display = 'block';
+                } else {
+                    currentKopUrl = null;
+                    if (kopPreviewImg) kopPreviewImg.style.display = 'none';
+                    if (kopPlaceholder) kopPlaceholder.style.display = 'block';
+                    if (kopSizeControl) kopSizeControl.style.display = 'none';
+                    if (btnRemoveKop) btnRemoveKop.style.display = 'none';
+                }
+
+                const templateNama = document.getElementById('template_nama_surat');
+                if (templateNama) templateNama.textContent = nama;
+
+                const editForm = document.getElementById('editTemplateForm');
+                if (editForm) {
+                    editForm.action = `/admin/jenis-surat/${currentJenisId}/template`;
+                }
+
+                // Destroy existing CKEditor
+                if (CKEDITOR.instances.templateEditor) {
+                    CKEDITOR.instances.templateEditor.destroy();
+                }
+
+                // Initialize CKEditor
+                initCKEditor(cleanTemplate);
+
+                $('#editTemplateModal').modal('show');
+            });
+
+            // ============================================
+            // REMOVE LOGO
+            // ============================================
+            const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+            if (btnRemoveLogo) {
+                btnRemoveLogo.addEventListener('click', function() {
+                    Swal.fire({
+                        title: 'Hapus Logo?',
+                        text: 'Logo akan dihapus dari template',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const logoPreviewImg = document.getElementById('logoPreviewImg');
+                            const logoPlaceholder = document.getElementById('logoPlaceholder');
+                            const logoPathInput = document.getElementById('logo_path');
+                            const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+
+                            if (logoPreviewImg) logoPreviewImg.style.display = 'none';
+                            if (logoPlaceholder) logoPlaceholder.style.display = 'block';
+                            if (logoPathInput) logoPathInput.value = '';
+                            if (btnRemoveLogo) btnRemoveLogo.style.display = 'none';
+                            Swal.fire('Terhapus!', 'Logo telah dihapus', 'success');
+                        }
+                    });
+                });
+            }
+
+            // ============================================
+            // REMOVE KOP
+            // ============================================
+            const btnRemoveKop = document.getElementById('btnRemoveKop');
+            if (btnRemoveKop) {
+                btnRemoveKop.addEventListener('click', function() {
+                    Swal.fire({
+                        title: 'Hapus Kop Surat?',
+                        text: 'Kop surat akan dihapus dari template',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const kopPreviewImg = document.getElementById('kopPreviewImg');
+                            const kopPlaceholder = document.getElementById('kopPlaceholder');
+                            const kopPathInput = document.getElementById('kop_surat_path');
+                            const kopSizeControl = document.getElementById('kopSizeControl');
+                            const btnRemoveKop = document.getElementById('btnRemoveKop');
+
+                            if (kopPreviewImg) kopPreviewImg.style.display = 'none';
+                            if (kopPlaceholder) kopPlaceholder.style.display = 'block';
+                            if (kopPathInput) kopPathInput.value = '';
+                            if (kopSizeControl) kopSizeControl.style.display = 'none';
+                            if (btnRemoveKop) btnRemoveKop.style.display = 'none';
+                            currentKopUrl = null;
+                            Swal.fire('Terhapus!', 'Kop surat telah dihapus', 'success');
+                        }
+                    });
+                });
+            }
+
+            // ============================================
+            // INSERT KOP - Sisipkan {kop_surat}
+            // ============================================
+            const btnInsertKop = document.getElementById('btnInsertKop');
+            if (btnInsertKop) {
+                btnInsertKop.addEventListener('click', function() {
+                    if (!editor) {
+                        Swal.fire('Error', 'Editor belum siap', 'error');
+                        return;
+                    }
+
+                    editor.insertText('{kop_surat}');
+                    editor.focus();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Placeholder {kop_surat} berhasil disisipkan',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                });
+            }
+
+            // ============================================
+            // UPLOAD LOGO
+            // ============================================
+            const logoInput = document.getElementById('logoInput');
+            if (logoInput) {
+                logoInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    if (file.size > 2 * 1024 * 1024) {
+                        Swal.fire('Error', 'Ukuran file maksimal 2MB', 'error');
+                        this.value = '';
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('logo', file);
+                    formData.append('_token', csrfToken);
+
+                    Swal.fire({
+                        title: 'Uploading...',
+                        text: 'Mohon tunggu',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    fetch('/admin/upload-logo', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.close();
+                            if (data.success) {
+                                const logoPreviewImg = document.getElementById('logoPreviewImg');
+                                const logoPlaceholder = document.getElementById('logoPlaceholder');
+                                const logoPathInput = document.getElementById('logo_path');
+                                const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+
+                                if (logoPreviewImg) {
+                                    logoPreviewImg.src = data.url;
+                                    logoPreviewImg.style.display = 'block';
+                                }
+                                if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+                                if (logoPathInput) logoPathInput.value = data.path;
+                                if (btnRemoveLogo) btnRemoveLogo.style.display = 'block';
+                                Swal.fire('Sukses', 'Logo berhasil diupload', 'success');
+                            }
+                        })
+                        .catch(() => {
+                            Swal.close();
+                            Swal.fire('Error', 'Gagal upload logo', 'error');
+                            document.getElementById('logoInput').value = '';
+                        });
+                });
+            }
+
+            // ============================================
+            // UPLOAD KOP
+            // ============================================
+            const kopInput = document.getElementById('kopInput');
+            if (kopInput) {
+                kopInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    if (file.size > 2 * 1024 * 1024) {
+                        Swal.fire('Error', 'Ukuran file maksimal 2MB', 'error');
+                        this.value = '';
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('kop_surat', file);
+                    formData.append('_token', csrfToken);
+
+                    Swal.fire({
+                        title: 'Uploading...',
+                        text: 'Mohon tunggu',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    fetch('/admin/upload-kop', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.close();
+                            if (data.success) {
+                                currentKopUrl = data.url;
+                                const kopPreviewImg = document.getElementById('kopPreviewImg');
+                                const kopPlaceholder = document.getElementById('kopPlaceholder');
+                                const kopSizeControl = document.getElementById('kopSizeControl');
+                                const kopPathInput = document.getElementById('kop_surat_path');
+                                const btnRemoveKop = document.getElementById('btnRemoveKop');
+
+                                if (kopPreviewImg) {
+                                    kopPreviewImg.src = currentKopUrl;
+                                    kopPreviewImg.style.display = 'block';
+                                }
+                                if (kopPlaceholder) kopPlaceholder.style.display = 'none';
+                                if (kopSizeControl) kopSizeControl.style.display = 'block';
+                                if (kopPathInput) kopPathInput.value = data.path;
+                                if (btnRemoveKop) btnRemoveKop.style.display = 'block';
+                                Swal.fire('Sukses', 'Kop surat berhasil diupload', 'success');
+                            }
+                        })
+                        .catch(() => {
+                            Swal.close();
+                            Swal.fire('Error', 'Gagal upload kop surat', 'error');
+                            document.getElementById('kopInput').value = '';
+                        });
+                });
+            }
+
+            // ============================================
+            // KOP WIDTH SLIDER
+            // ============================================
+            const kopWidthSlider = document.getElementById('kopWidthSlider');
+            if (kopWidthSlider) {
+                kopWidthSlider.addEventListener('input', function() {
+                    const width = this.value;
+                    const kopPreviewImg = document.getElementById('kopPreviewImg');
+                    if (kopPreviewImg) {
+                        kopPreviewImg.style.width = width + '%';
+                    }
+                });
+            }
+
+            // ============================================
+            // INSERT VARIABLE
+            // ============================================
+            document.querySelectorAll('.insert-variable').forEach(button => {
+                button.addEventListener('click', function() {
+                    const variable = this.dataset.var;
+                    if (editor) {
+                        editor.insertText(variable);
+                        editor.focus();
+                    }
+                });
+            });
+
+            // ============================================
+            // FORMAT PRESET - Surat Resmi
+            // ============================================
+            const formatSuratResmi = document.getElementById('formatSuratResmi');
+            if (formatSuratResmi) {
+                formatSuratResmi.addEventListener('click', function() {
+                    document.getElementById('leftMargin').value = 0;
+                    document.getElementById('leftIndent').value = 0;
+                    document.getElementById('firstLineIndent').value = 48;
+                    document.getElementById('lineSpacing').value = 1.5;
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Preset diterapkan',
+                        text: 'Format surat resmi berhasil dimuat',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                });
+            }
+
+            // ============================================
+            // APPLY PARAGRAPH STYLE
+            // ============================================
+            const applyParagraphStyle = document.getElementById('applyParagraphStyle');
+            if (applyParagraphStyle) {
+                applyParagraphStyle.addEventListener('click', function() {
+                    if (!editor) {
+                        Swal.fire('Error', 'Editor belum siap', 'error');
+                        return;
+                    }
+
+                    const leftMargin = document.getElementById('leftMargin');
+                    const leftIndent = document.getElementById('leftIndent');
+                    const firstLineIndent = document.getElementById('firstLineIndent');
+                    const lineSpacing = document.getElementById('lineSpacing');
+
+                    const margin = leftMargin ? parseInt(leftMargin.value) || 0 : 0;
+                    const indent = leftIndent ? parseInt(leftIndent.value) || 0 : 0;
+                    const firstIndent = firstLineIndent ? parseInt(firstLineIndent.value) || 0 : 48;
+                    const spacing = lineSpacing ? parseFloat(lineSpacing.value) || 1.5 : 1.5;
+
+                    editor.focus();
+
+                    const selection = editor.getSelection();
+                    if (!selection) {
+                        Swal.fire('Info', 'Pilih paragraf terlebih dahulu', 'info');
+                        return;
+                    }
+
+                    let element = selection.getStartElement();
+                    if (!element) {
+                        Swal.fire('Info', 'Letakkan cursor di dalam paragraf', 'info');
+                        return;
+                    }
+
+                    let paragraph = element.getAscendant('p', true);
+                    if (!paragraph) {
+                        paragraph = element.getAscendant('div', true);
+                        if (!paragraph) {
+                            Swal.fire('Info', 'Letakkan cursor pada paragraf yang ingin diformat', 'info');
+                            return;
+                        }
+                    }
+
+                    // ============================================
+                    // TERAPKAN STYLE KE CKEDITOR
+                    // ============================================
+                    paragraph.setStyle('margin-left', margin + 'px');
+                    paragraph.setStyle('padding-left', indent + 'px');
+                    paragraph.setStyle('text-indent', firstIndent + 'px');
+                    paragraph.setStyle('line-height', spacing);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Format paragraf berhasil diterapkan ke CKEditor',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                });
+            }
+            // ============================================
+            // TERAPKAN MARGIN KE TEMPLATE
+            // ============================================
+            document.getElementById('applyMarginBtn')?.addEventListener('click', function() {
+                if (!editor) {
+                    Swal.fire('Error', 'Editor belum siap', 'error');
+                    return;
+                }
+
+                const marginTop = document.getElementById('marginTop')?.value || 20;
+                const marginBottom = document.getElementById('marginBottom')?.value || 20;
+                const marginLeft = document.getElementById('marginLeft')?.value || 20;
+                const marginRight = document.getElementById('marginRight')?.value || 20;
+
+                // Ambil semua konten editor
+                let content = editor.getData();
+
+                // Cek apakah sudah ada wrapper dengan class 'surat-wrapper'
+                const wrapperRegex = /<div class="surat-wrapper"[^>]*>([\s\S]*?)<\/div>/;
+                const match = content.match(wrapperRegex);
+
+                if (match) {
+                    // Update wrapper yang sudah ada
+                    const newWrapper =
+                        `<div class="surat-wrapper" style="padding: ${marginTop}mm ${marginRight}mm ${marginBottom}mm ${marginLeft}mm; max-width: 210mm; margin: 0 auto;">${match[1]}</div>`;
+                    content = content.replace(wrapperRegex, newWrapper);
+                } else {
+                    // Bungkus dengan wrapper baru
+                    content =
+                        `<div class="surat-wrapper" style="padding: ${marginTop}mm ${marginRight}mm ${marginBottom}mm ${marginLeft}mm; max-width: 210mm; margin: 0 auto;">${content}</div>`;
+                }
+
+                // Set ke editor
+                editor.setData(content);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Margin Diterapkan',
+                    text: `Margin: Top ${marginTop}mm, Bottom ${marginBottom}mm, Left ${marginLeft}mm, Right ${marginRight}mm`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+            // ============================================
+            // PREVIEW
+            // ============================================
+            const previewBtn = document.getElementById('previewBtn');
+            if (previewBtn) {
+                previewBtn.addEventListener('click', function() {
+                    if (!editor) {
+                        Swal.fire('Error', 'Editor belum siap', 'error');
+                        return;
+                    }
+
+                    let content = editor.getData();
+
+                    // ============================================
+                    // GANTI VARIABEL DENGAN DATA PREVIEW
+                    // ============================================
+                    const previewData = {
+                        nama_mahasiswa: 'Nuni Lestari',
+                        npm: '10050022094',
+                        alamat: 'Jl. Dederuk No. 21, Bandung',
+                        fakultas: 'Psikologi',
+                        prodi: 'Psikologi S1',
+                        semester: 'VIII',
+                        nomor_surat: '083/M.10/Dek.Psi-k/IV/2026',
+                        tanggal_surat: '29 April 2026',
+                        perihal: 'SURAT KETERANGAN AKTIF KULIAH',
+                        dekan: 'Dr. Oki Mardiawan, M.Psi., Psikolog.',
+                        nip_dekan: 'D.07.0.464',
+                        nama_orangtua: 'H. M. Nurdin',
+                        nrp_nik_nip: '32104330107920069',
+                        pangkat_orangtua: 'Golongan VII',
+                        instansi_orangtua: 'TNI',
+                        alamat_kantor: 'Bandung',
+                    };
+
+                    // Ganti {kop_surat} dengan preview placeholder
+                    const hasKopSurat = content.includes('{kop_surat}');
+                    if (hasKopSurat) {
+                        content = content.replace(
+                            /\{kop_surat\}/g,
+                            '<div style="text-align:center; padding:15px 0; background:#f5f0ff; border:2px dashed #6f42c1; margin:0; font-size:16pt; font-weight:bold; color:#6f42c1; width:100%;">[KOP SURAT - PREVIEW]</div>'
+                        );
+                    }
+
+                    // Replace semua variabel
+                    for (const key in previewData) {
+                        const regex = new RegExp(`\\{${key}\\}`, 'g');
+                        content = content.replace(regex, previewData[key]);
+                    }
+
+                    // ============================================
+                    // TAMPILKAN DI PREVIEW PAPER
+                    // ============================================
+                    const previewHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Preview Surat</title>
+            <style>
+                @page { size: A4; margin: 0; }
+                body { font-family: "Times New Roman", Times, serif; font-size: 12pt; background: white; margin: 0; padding: 0; }
+                .kop-surat { margin: 0; padding: 0; width: 100%; }
+                .kop-surat img { width: 100%; max-width: 100%; height: auto; display: block; margin: 0; padding: 0; }
+            </style>
+        </head>
+        <body>
+            <div class="kop-surat">
+                ${hasKopSurat ? previewData.kop_surat : ''}
             </div>
-            <div style="text-align:center; margin:20px 0;">
-                <strong style="font-size:14pt;">SURAT KETERANGAN AKTIF KULIAH</strong><br>
-                <strong>Nomor : {nomor_surat}</strong>
-            </div>
-            <div style="text-align:justify;">
-                <p>Assalamu'alaikum wr. wb.</p>
-                <p>Yang bertanda tangan dibawah ini:</p>
-                <p>Nama : {dekan}<br>N.I.K. : {nip_dekan}<br>Jabatan : Wakil Dekan</p>
-                <p>Menyatakan bahwa:</p>
-                <p>Nama : {nama_mahasiswa}<br>NPM : {npm}<br>Fakultas : {fakultas}<br>Semester : {semester}</p>
-                <p>Adalah benar mahasiswa aktif Universitas Islam Bandung.</p>
-                <p>Demikian surat ini dibuat untuk dipergunakan sebagaimana mestinya.</p>
-                <p>Wassalamu'alaikum wr. wb.</p>
-            </div>
-            <div style="margin-top:50px; text-align:right;">
-                <p>Bandung, {tanggal_surat}</p>
-                <p>Dekan,</p>
-                <br><br>
-                <p><strong><u>{dekan}</u></strong></p>
-                <p>{nip_dekan}</p>
-            </div>
-        </div>`;
-    }
-</script>
+            ${content}
+        </body>
+        </html>
+        `;
+
+                    document.getElementById('previewPaper').innerHTML = previewHtml;
+                    $('#previewModal').modal('show');
+                });
+            }
+
+            // ============================================
+            // PRINT PREVIEW
+            // ============================================
+            const printPreviewBtn = document.getElementById('printPreviewBtn');
+            if (printPreviewBtn) {
+                printPreviewBtn.addEventListener('click', function() {
+                    const previewPaper = document.getElementById('previewPaper');
+                    if (!previewPaper) return;
+
+                    const printContent = previewPaper.innerHTML;
+                    const win = window.open('', '_blank');
+                    if (win) {
+                        win.document.write(`<html><head><title>Print Surat</title>
+                            <style>
+                                @page { size: A4; margin: 15mm; }
+                                body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; }
+                                table { border-collapse: collapse; width: 100%; }
+                                table td { padding: 4px 0; }
+                            </style>
+                        </head><body>${printContent}</body></html>`);
+                        win.document.close();
+                        win.print();
+                    }
+                });
+            }
+
+            // ============================================
+            // CKEDITOR INIT
+            // ============================================
+            function initCKEditor(content) {
+                const templateEditor = document.getElementById('templateEditor');
+                if (!templateEditor) return;
+
+                if (typeof CKEDITOR === 'undefined') {
+                    console.error('CKEditor tidak ditemukan!');
+                    templateEditor.innerHTML = `
+                        <textarea class="form-control" style="height:600px; font-family: 'Times New Roman', Times, serif;">${content || getDefaultTemplate()}</textarea>
+                    `;
+                    return;
+                }
+
+                if (CKEDITOR.instances.templateEditor) {
+                    CKEDITOR.instances.templateEditor.destroy();
+                }
+
+                CKEDITOR.replace('templateEditor', {
+                    toolbar: [{
+                            name: 'document',
+                            items: ['Source', '-', 'Save', 'NewPage', 'Print', '-', 'Templates']
+                        },
+                        {
+                            name: 'clipboard',
+                            items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo',
+                                'Redo'
+                            ]
+                        },
+                        {
+                            name: 'editing',
+                            items: ['Find', 'Replace', '-', 'SelectAll', '-', 'SpellChecker', 'Scayt']
+                        },
+                        {
+                            name: 'forms',
+                            items: ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select',
+                                'Button', 'ImageButton', 'HiddenField'
+                            ]
+                        },
+                        '/',
+                        {
+                            name: 'basicstyles',
+                            items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript',
+                                '-', 'RemoveFormat'
+                            ]
+                        },
+                        {
+                            name: 'paragraph',
+                            items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-',
+                                'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter',
+                                'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'
+                            ]
+                        },
+                        {
+                            name: 'links',
+                            items: ['Link', 'Unlink', 'Anchor']
+                        },
+                        {
+                            name: 'insert',
+                            items: ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley',
+                                'SpecialChar', 'PageBreak', 'Iframe'
+                            ]
+                        },
+                        '/',
+                        {
+                            name: 'styles',
+                            items: ['Styles', 'Format', 'Font', 'FontSize']
+                        },
+                        {
+                            name: 'colors',
+                            items: ['TextColor', 'BGColor']
+                        },
+                        {
+                            name: 'tools',
+                            items: ['Maximize', 'ShowBlocks']
+                        }
+                    ],
+                    height: 'calc(100vh - 200px)',
+                    width: '100%',
+                    language: 'id',
+                    enterMode: CKEDITOR.ENTER_P,
+                    shiftEnterMode: CKEDITOR.ENTER_BR,
+                    filebrowserImageUploadUrl: '{{ route('upload.image') }}',
+                    filebrowserUploadUrl: '{{ route('upload.image') }}',
+                    allowedContent: true,
+                    extraAllowedContent: '*[*]'
+                });
+
+                CKEDITOR.instances.templateEditor.on('instanceReady', function() {
+                    editor = CKEDITOR.instances.templateEditor;
+                    editor.setData(content || getDefaultTemplate());
+                });
+
+                CKEDITOR.instances.templateEditor.on('error', function() {
+                    templateEditor.innerHTML = `
+                        <textarea class="form-control" style="height:600px; font-family: 'Times New Roman', Times, serif;">${content || getDefaultTemplate()}</textarea>
+                    `;
+                });
+            }
+
+            // ============================================
+            // DEFAULT TEMPLATE
+            // ============================================
+            function getDefaultTemplate() {
+                return `<div style="font-family:'Times New Roman', Times, serif; font-size:12pt;">
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <img src="{kop_surat}" style="width:80%; max-width:100%; height:auto;">
+                    </div>
+                    <div style="text-align:center; margin:20px 0;">
+                        <strong style="font-size:14pt;">SURAT KETERANGAN AKTIF KULIAH</strong><br>
+                        <strong>Nomor : {nomor_surat}</strong>
+                    </div>
+                    <div style="text-align:justify;">
+                        <p>Yang bertanda tangan di bawah ini:</p>
+                        <table style="width:100%; border:none;">
+                            <tr><td style="width:120px;">Nama</td><td>: {dekan}</td></tr>
+                            <tr><td>NIP</td><td>: {nip_dekan}</td></tr>
+                            <tr><td>Jabatan</td><td>: Dekan Fakultas</td></tr>
+                        </table>
+                        <p>Menerangkan bahwa mahasiswa:</p>
+                        <table style="width:100%; border:none;">
+                            <tr><td style="width:120px;">Nama</td><td>: {nama_mahasiswa}</td></tr>
+                            <tr><td>NPM</td><td>: {npm}</td></tr>
+                            <tr><td>Fakultas</td><td>: {fakultas}</td></tr>
+                            <tr><td>Program Studi</td><td>: {prodi}</td></tr>
+                            <tr><td>Semester</td><td>: {semester}</td></tr>
+                            <tr><td>Alamat</td><td>: {alamat}</td></tr>
+                        </table>
+                        <p>Adalah benar-benar mahasiswa aktif Universitas pada semester yang tertera.</p>
+                        <p>Surat keterangan ini dibuat untuk memenuhi persyaratan administrasi.</p>
+                        <p>Demikian surat ini dibuat dengan sebenarnya dan dapat dipergunakan sebagaimana mestinya.</p>
+                    </div>
+                    <div style="margin-top:50px; text-align:right;">
+                        <p>Bandung, {tanggal_surat}</p>
+                        <p>Dekan Fakultas,</p>
+                        <br><br>
+                        <p><strong><u>{dekan}</u></strong></p>
+                        <p>{nip_dekan}</p>
+                    </div>
+                </div>`;
+            }
+
+            // ============================================
+            // AUTO CLOSE MODAL & RESET FORM
+            // ============================================
+            document.querySelectorAll(
+                    '#addJenisSuratModal, #editJenisSuratModal, #editTemplateModal, #previewModal')
+                .forEach(modal => {
+                    modal.addEventListener('hidden.bs.modal', function() {
+                        if (this.id === 'addJenisSuratModal') {
+                            const form = this.querySelector('form');
+                            if (form) form.reset();
+                        }
+                        if (this.id === 'editTemplateModal') {
+                            if (CKEDITOR.instances.templateEditor) {
+                                CKEDITOR.instances.templateEditor.destroy();
+                                editor = null;
+                            }
+                        }
+                    });
+                });
+
+            // ============================================
+            // VALIDASI FORM TAMBAH
+            // ============================================
+            const formAddJenisSurat = document.getElementById('formAddJenisSurat');
+            if (formAddJenisSurat) {
+                formAddJenisSurat.addEventListener('submit', function(e) {
+                    const namaInput = this.querySelector('input[name="nama_surat"]');
+                    const kategoriSelect = this.querySelector('select[name="kategori_surat_id"]');
+
+                    if (!namaInput || !namaInput.value.trim()) {
+                        e.preventDefault();
+                        Swal.fire('Error', 'Nama surat harus diisi', 'error');
+                        if (namaInput) namaInput.focus();
+                        return false;
+                    }
+
+                    if (!kategoriSelect || !kategoriSelect.value) {
+                        e.preventDefault();
+                        Swal.fire('Error', 'Kategori harus dipilih', 'error');
+                        if (kategoriSelect) kategoriSelect.focus();
+                        return false;
+                    }
+
+                    return true;
+                });
+            }
+
+            // ============================================
+            // CLOSE MODAL BUTTON - Fix untuk modal yang tidak tertutup
+            // ============================================
+            document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        const bsModal = bootstrap.Modal.getInstance(modal);
+                        if (bsModal) {
+                            bsModal.hide();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 @endpush
-@endsection

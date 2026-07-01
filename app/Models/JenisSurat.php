@@ -1,4 +1,5 @@
 <?php
+// app/Models/JenisSurat.php
 
 namespace App\Models;
 
@@ -7,51 +8,32 @@ use Illuminate\Database\Eloquent\Model;
 class JenisSurat extends Model
 {
     protected $table = 'jenis_surats';
-    
+
     protected $fillable = [
         'nama_surat',
-        'kategori_surat',
+        'kategori_surat_id',
         'kode_surat',
         'deskripsi',
         'is_active',
         'processing_time',
         'syarat_surat',
-        'urut',
         'template_content',
+        'variable_fields',
+        'variable_options',
+        'deskripsi_template',
         'logo_path',
         'kop_surat_path'
     ];
 
     protected $casts = [
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'variable_fields' => 'array',
+        'variable_options' => 'array'
     ];
 
-    public static function generateNomorSurat($kode = 'M.10/Dek.Psi-k')
+    public function kategoriSurat()
     {
-        $bulanRomawi = [1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI', 
-                        7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'];
-        
-        $bulan = $bulanRomawi[now()->month];
-        $tahun = now()->year;
-        $count = Surat::whereYear('created_at', $tahun)->count() + 1;
-        $no = str_pad($count, 3, '0', STR_PAD_LEFT);
-        
-        return "{$no}/{$kode}/{$bulan}/{$tahun}";
-    }
-
-    public function getLogoUrlAttribute()
-    {
-        return $this->logo_path ? asset('storage/' . $this->logo_path) : null;
-    }
-
-    public function getKopUrlAttribute()
-    {
-        return $this->kop_surat_path ? asset('storage/' . $this->kop_surat_path) : null;
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
+        return $this->belongsTo(KategoriSurat::class, 'kategori_surat_id');
     }
 
     public function surats()
@@ -59,13 +41,99 @@ class JenisSurat extends Model
         return $this->hasMany(Surat::class);
     }
 
-    public function templates()
+    /**
+     * Generate konten surat dengan replace variabel
+     */
+    public function generateSuratContent($data, $mahasiswa)
     {
-        return $this->hasMany(TemplateSurat::class);
+        $template = $this->template_content ?? $this->getDefaultTemplate();
+
+        // Data dasar mahasiswa
+        $replaceData = [
+            '{nama_mahasiswa}' => $mahasiswa->nama_lengkap ?? '-',
+            '{npm}' => $mahasiswa->npm ?? '-',
+            '{tempat_lahir}' => $mahasiswa->tempat_lahir ?? '-',
+            '{tanggal_lahir}' => $mahasiswa->tanggal_lahir ? date('d F Y', strtotime($mahasiswa->tanggal_lahir)) : '-',
+            '{alamat}' => $mahasiswa->alamat ?? '-',
+            '{fakultas}' => $mahasiswa->prodi->fakultas->nama_fakultas ?? '-',
+            '{prodi}' => $mahasiswa->prodi->nama_prodi ?? '-',
+            '{jenjang}' => $mahasiswa->prodi->jenjang ?? 'S1',
+            '{ipk}' => $mahasiswa->ipk ?? '-',
+            '{semester}' => $this->getSemester($mahasiswa->tanggal_masuk),
+            '{tanggal_surat}' => now()->format('d F Y'),
+            '{keperluan}' => $data['keperluan'] ?? '',
+        ];
+
+        // Data dari variabel tambahan
+        $variables = $this->getVariableFields();
+        foreach ($variables as $variable) {
+            $key = '{' . $variable['name'] . '}';
+            $value = $data[$variable['name']] ?? $variable['default'] ?? '';
+            $replaceData[$key] = $value;
+        }
+
+        // Replace semua variabel di template
+        $content = str_replace(array_keys($replaceData), array_values($replaceData), $template);
+
+        return $content;
     }
 
-    public function activeTemplate()
+    /**
+     * Get variable fields
+     */
+    public function getVariableFields()
     {
-        return $this->hasOne(TemplateSurat::class)->where('status', 'active');
+        return $this->variable_fields ?? [];
+    }
+
+    public function getFormFields()
+    {
+        $fields = [];
+        $variables = $this->getVariableFields();
+
+        foreach ($variables as $variable) {
+            $field = [
+                'name' => $variable['name'],
+                'label' => $variable['label'],
+                'type' => $variable['type'] ?? 'text',
+                'required' => $variable['required'] ?? true,
+                'placeholder' => $variable['placeholder'] ?? '',
+                'help_text' => $variable['help_text'] ?? '',
+            ];
+
+            if ($variable['type'] == 'select' && isset($variable['options'])) {
+                $field['options'] = $variable['options'];
+            }
+
+            $fields[] = $field;
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get semester berdasarkan tanggal masuk
+     */
+    private function getSemester($tanggalMasuk)
+    {
+        if (!$tanggalMasuk) return '-';
+        $tahunMasuk = date('Y', strtotime($tanggalMasuk));
+        $tahunSekarang = date('Y');
+        $selisihTahun = $tahunSekarang - $tahunMasuk;
+        return ($selisihTahun * 2) + 1;
+    }
+
+    /**
+     * Default template
+     */
+    private function getDefaultTemplate()
+    {
+        return '<div style="font-family: Times New Roman, Times, serif; padding: 20px;">
+            <h2 style="text-align: center;">SURAT KETERANGAN</h2>
+            <p>Yang bertanda tangan di bawah ini menerangkan bahwa:</p>
+            <p>Nama: {nama_mahasiswa}<br>NPM: {npm}<br>Fakultas: {fakultas}</p>
+            <p>Adalah benar mahasiswa aktif Universitas Islam Bandung.</p>
+            <p>Surat ini dibuat untuk {keperluan}.</p>
+        </div>';
     }
 }
