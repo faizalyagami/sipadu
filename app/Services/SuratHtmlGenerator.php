@@ -25,6 +25,13 @@ class SuratHtmlGenerator
         $data = $this->prepareData($surat, $mahasiswa);
         $htmlContent = strtr($templateContent, $data);
 
+        $htmlContent = preg_replace(
+            '/<p>\s*&nbsp;\s*<\/p>/i',
+            '<p>' . $data['{ttd_cap_dekan}'] . '</p>',
+            $htmlContent,
+            1
+        );
+
         // ============================================
         // BUNGKUS DENGAN HTML LENGKAP
         // ============================================
@@ -95,6 +102,7 @@ class SuratHtmlGenerator
             // Kop Surat & TTD
             '{kop_surat}' => $this->getKopSuratBase64($surat),
             '{ttd_elektronik}' => $this->getTTDImageBase64(),
+            '{ttd_cap_dekan}' => $this->getTTDImageBase64(),
         ];
 
         // Tambahkan data dari data_tambahan
@@ -157,7 +165,14 @@ class SuratHtmlGenerator
                     $base64 = base64_encode($imageData);
                     $mimeType = mime_content_type($path);
 
-                    return '<img src="data:' . $mimeType . ';base64,' . $base64 . '" style="max-width:150px; height:auto; margin-top:5px;" alt="TTD dan Cap">';
+                    return '<img src="data:' . $mimeType . ';base64,' . $base64 . '"
+                            style="
+                                width:150px;
+                                height:auto;
+                                display:block;
+                                margin:0 auto;
+                            "
+                            alt="TTD dan Cap">';
                 } catch (\Exception $e) {
                     Log::error('Error loading TTD image: ' . $e->getMessage());
                 }
