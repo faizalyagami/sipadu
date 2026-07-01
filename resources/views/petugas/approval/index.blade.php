@@ -554,163 +554,47 @@
                 // 9. RENDER REVIEW MODAL
                 // ============================================
                 function renderReviewModal(data) {
-                    console.log('=== renderReviewModal called ===');
-                    console.log('Data:', data);
-
-                    if (!data || typeof data !== 'object') {
-                        console.error('Data invalid:', data);
-                        showError('Data surat tidak valid');
-                        return;
-                    }
-
-                    // Cek data orang tua
-                    const hasNamaOrtu = data.nama_ortu &&
-                        data.nama_ortu !== '-' &&
-                        data.nama_ortu !== '' &&
-                        data.nama_ortu !== 'null' &&
-                        data.nama_ortu !== 'undefined';
-
-                    const hasInstansiOrtu = data.instansi_ortu &&
-                        data.instansi_ortu !== '-' &&
-                        data.instansi_ortu !== '' &&
-                        data.instansi_ortu !== 'null' &&
-                        data.instansi_ortu !== 'undefined';
-
-                    const hasOrangTua = hasNamaOrtu && hasInstansiOrtu;
-
-                    console.log('Hasil pengecekan data orang tua:', {
-                        hasNamaOrtu: hasNamaOrtu,
-                        hasInstansiOrtu: hasInstansiOrtu,
-                        hasOrangTua: hasOrangTua,
-                        nama_ortu: data.nama_ortu,
-                        instansi_ortu: data.instansi_ortu
-                    });
-
                     // ============================================
-                    // BUILD HTML
+                    // TAMPILKAN CONTENT APA ADANYA
                     // ============================================
                     let html = `
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="text-muted small">Mahasiswa</label>
-                                <p class="fw-semibold">${data.mahasiswa_nama || '-'}</p>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="text-muted small">NPM</label>
-                                <p class="fw-semibold">${data.mahasiswa_npm || '-'}</p>
-                            </div>
-                            <div class="col-md-5">
-                                <label class="text-muted small">Tanggal Pengajuan</label>
-                                <p class="fw-semibold">${data.tanggal_pengajuan || '-'}</p>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="text-muted small">Jenis Surat</label>
-                                <p class="fw-semibold">${data.jenis_surat || '-'}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="text-muted small">Fakultas</label>
-                                <p class="fw-semibold">${data.fakultas || '-'}</p>
-                            </div>
-                        </div>
-                    `;
-
-                    // Data Orang Tua
-                    if (hasOrangTua) {
-                        html += `
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <div class="card border-primary bg-light">
-                                        <div class="card-header bg-primary text-white">
-                                            <i class="bi bi-people me-2"></i> Data Orang Tua / Wali Mahasiswa
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <label class="text-muted small">Nama Orang Tua</label>
-                                                    <p class="fw-semibold">${data.nama_ortu || '-'}</p>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="text-muted small">NRP/NIK/NIP</label>
-                                                    <p class="fw-semibold">${data.nik_ortu || '-'}</p>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="text-muted small">Pangkat/Golongan</label>
-                                                    <p class="fw-semibold">${data.pangkat_ortu || '-'}</p>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="text-muted small">Instansi</label>
-                                                    <p class="fw-semibold">${data.instansi_ortu || '-'}</p>
-                                                </div>
-                                                <div class="col-12">
-                                                    <label class="text-muted small">Alamat Kantor</label>
-                                                    <p class="fw-semibold">${data.alamat_kantor_ortu || '-'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        html += `
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <div class="alert alert-warning">
-                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                        <strong>Perhatian:</strong> Data orang tua/wali mahasiswa belum lengkap.
-                                        <br><small class="text-muted">Nama: ${data.nama_ortu || 'Kosong'} | Instansi: ${data.instansi_ortu || 'Kosong'}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    // Keperluan
-                    html += `
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="text-muted small">Keperluan</label>
-                                <div class="p-3 bg-light rounded">${data.keperluan || '-'}</div>
-                            </div>
-                        </div>
-                    `;
-
-                    // File Pendukung
-                    if (data.file_ktm || data.bukti_pembayaran || data.file_pendukung) {
-                        html += `
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <h6 class="fw-bold"><i class="bi bi-files me-2"></i>File Pendukung</h6>
-                                    <div class="d-flex gap-2 flex-wrap">
-                                        ${data.file_ktm ? `<a href="/storage/${data.file_ktm}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-pdf me-1"></i> KTM</a>` : ''}
-                                        ${data.bukti_pembayaran ? `<a href="/storage/${data.bukti_pembayaran}" target="_blank" class="btn btn-sm btn-outline-success"><i class="bi bi-file-pdf me-1"></i> Bukti Pembayaran</a>` : ''}
-                                        ${data.file_pendukung ? `<a href="/storage/${data.file_pendukung}" target="_blank" class="btn btn-sm btn-outline-warning"><i class="bi bi-file-pdf me-1"></i> File Pendukung</a>` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    // Preview Surat
-                    html += `
-                        <div class="row">
-                            <div class="col-12">
-                                <h6 class="fw-bold"><i class="bi bi-file-text me-2"></i>Preview Surat</h6>
-                                <div class="border rounded p-0" style="max-height: 600px; overflow-y: auto; background: #f5f5f5;">
-                                    <div style="max-width: 210mm; margin: 0 auto; padding: 15mm; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.05); font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5;">
-                                        ${data.content || '<p class="text-muted text-center">Tidak ada konten surat</p>'}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label class="text-muted small">Mahasiswa</label>
+                <p class="fw-semibold">${data.mahasiswa_nama || '-'}</p>
+            </div>
+            <div class="col-md-3">
+                <label class="text-muted small">NPM</label>
+                <p class="fw-semibold">${data.mahasiswa_npm || '-'}</p>
+            </div>
+            <div class="col-md-5">
+                <label class="text-muted small">Tanggal Pengajuan</label>
+                <p class="fw-semibold">${data.tanggal_pengajuan || '-'}</p>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="text-muted small">Jenis Surat</label>
+                <p class="fw-semibold">${data.jenis_surat || '-'}</p>
+            </div>
+            <div class="col-md-6">
+                <label class="text-muted small">Fakultas</label>
+                <p class="fw-semibold">${data.fakultas || '-'}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <h6 class="fw-bold"><i class="bi bi-file-text me-2"></i>Preview Surat</h6>
+                <div class="border rounded p-0" style="max-height: 600px; overflow-y: auto; background: #f5f5f5;">
+                    <div style="max-width: 210mm; margin: 0 auto; padding: 0; background: white; font-family: 'Times New Roman', Times, serif; font-size: 12pt;">
+                        ${data.content || '<p class="text-muted text-center">Tidak ada konten surat</p>'}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 
                     $('#reviewModalBody').html(html);
-                    $('#reviewModalBody').scrollTop(0);
-
-                    console.log('=== renderReviewModal selesai ===');
                 }
 
                 function showError(message) {

@@ -128,9 +128,6 @@ class JenisSuratController extends Controller
             $jenisSurat->kop_surat_path = null;
         }
 
-        // ============================================
-        // SIMPAN TEMPLATE - LANGSUNG TANPA FORMAT KOMPENTAR
-        // ============================================
         $jenisSurat->template_content = $request->template_content;
         $jenisSurat->save();
 

@@ -14,40 +14,37 @@ class SuratHtmlGenerator
         $mahasiswa = $surat->mahasiswa;
         $jenisSurat = $surat->jenisSurat;
 
+        // ============================================
+        // AMBIL TEMPLATE DARI DATABASE
+        // ============================================
         $templateContent = $jenisSurat->template_content ?? $this->getDefaultTemplate();
 
+        // ============================================
+        // REPLACE VARIABEL SAJA, TIDAK UBAH FORMAT
+        // ============================================
         $data = $this->prepareData($surat, $mahasiswa);
-
         $htmlContent = strtr($templateContent, $data);
 
+        // ============================================
+        // BUNGKUS DENGAN HTML LENGKAP
+        // ============================================
         $css = SuratCssGenerator::generateCss();
 
-        // ============================================
-        // HTML LENGKAP
-        // ============================================
         $html = '
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Surat Keterangan</title>
-            ' . $css . '
-        </head>
-        <body>
-            <div class="kop-surat">
-                ' . $data['{kop_surat}'] . '
-            </div>
-            
-            <div class="surat-container">
-                <div class="surat-content">
-                    ' . $htmlContent . '
-                </div>
-            </div>
-        </body>
-        </html>';
-
-        Log::info('HTML size: ' . strlen($html) . ' bytes');
-        file_put_contents(storage_path('app/debug_final_' . $surat->id . '.html'), $html);
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Surat</title>
+        ' . $css . '
+    </head>
+    <body>
+        <div class="kop-surat">
+            ' . $data['{kop_surat}'] . '
+        </div>
+        ' . $htmlContent . '
+    </body>
+    </html>';
 
         return $html;
     }

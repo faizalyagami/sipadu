@@ -283,7 +283,7 @@
                     </div>
                     <div class="modal-body p-0">
                         <div class="row g-0 h-100">
-                            <!-- Sidebar Kiri (kolom 2) -->
+                            <!-- Sidebar Kiri -->
                             <div class="col-md-2 bg-light p-3"
                                 style="border-right: 1px solid #dee2e6; height: calc(100vh - 130px); overflow-y: auto;">
 
@@ -461,57 +461,6 @@
                                 </h6>
                                 <div class="card mb-3">
                                     <div class="card-body p-2">
-                                        <!-- ============================================ -->
-                                        <!-- PAGE SETUP - MARGIN -->
-                                        <!-- ============================================ -->
-                                        <div class="mb-2">
-                                            <label class="form-label small fw-bold text-primary">
-                                                <i class="bi bi-layout-text-window"></i> Page Setup (Margin)
-                                            </label>
-                                            <div class="row g-1">
-                                                <div class="col-6">
-                                                    <label class="form-label small">Top (mm)</label>
-                                                    <input type="number" id="marginTop"
-                                                        class="form-control form-control-sm" value="20"
-                                                        min="0" max="50">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label small">Bottom (mm)</label>
-                                                    <input type="number" id="marginBottom"
-                                                        class="form-control form-control-sm" value="20"
-                                                        min="0" max="50">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label small">Left (mm)</label>
-                                                    <input type="number" id="marginLeft"
-                                                        class="form-control form-control-sm" value="20"
-                                                        min="0" max="50">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label small">Right (mm)</label>
-                                                    <input type="number" id="marginRight"
-                                                        class="form-control form-control-sm" value="20"
-                                                        min="0" max="50">
-                                                </div>
-                                            </div>
-                                            <div class="mt-1">
-                                                <button type="button" class="btn btn-xs btn-outline-secondary"
-                                                    id="presetMarginNormal">
-                                                    <i class="bi bi-check2"></i> Normal (2.54 cm)
-                                                </button>
-                                                <button type="button" class="btn btn-xs btn-outline-secondary"
-                                                    id="presetMarginNarrow">
-                                                    <i class="bi bi-check2"></i> Sempit (1.27 cm)
-                                                </button>
-                                                <button type="button" class="btn btn-xs btn-outline-secondary"
-                                                    id="presetMarginWide">
-                                                    <i class="bi bi-check2"></i> Lebar (3.81 cm)
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <hr class="my-2">
-
                                         <div class="mb-2">
                                             <label class="form-label small fw-bold">Left Margin (px)</label>
                                             <input type="number" id="leftMargin" class="form-control form-control-sm"
@@ -539,6 +488,9 @@
                                             </select>
                                         </div>
                                         <div class="d-grid gap-2 mt-2">
+                                            <button type="button" class="btn btn-sm btn-primary" id="applyMarginBtn">
+                                                <i class="bi bi-layout-text-window"></i> Terapkan Margin ke Template
+                                            </button>
                                             <button type="button" class="btn btn-sm btn-outline-primary"
                                                 id="formatSuratResmi">
                                                 <i class="bi bi-file-earmark-text"></i> Format Surat Resmi
@@ -552,7 +504,7 @@
                                 </div>
                             </div>
 
-                            <!-- Editor Area (kolom 10) -->
+                            <!-- Editor Area -->
                             <div class="col-md-10 p-0 d-flex flex-column">
                                 <textarea id="templateEditor" name="template_content" style="width:100%; height:600px;"></textarea>
                             </div>
@@ -585,7 +537,7 @@
                 </div>
                 <div class="modal-body" style="background:#e5e5e5; overflow:auto;">
                     <div id="previewPaper"
-                        style="width:210mm; min-height:297mm; margin:0 auto; background:white; padding:20mm; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+                        style="width:210mm; min-height:297mm; margin:0 auto; background:white; padding:0; box-shadow:0 0 10px rgba(0,0,0,0.1);">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -604,7 +556,6 @@
             vertical-align: middle;
         }
 
-        /* CKEditor Styling */
         .cke_top {
             background: #f8f9fa !important;
             border-bottom: 1px solid #dee2e6 !important;
@@ -619,7 +570,6 @@
             min-height: 500px;
         }
 
-        /* Variable buttons */
         .insert-variable {
             text-align: left;
             font-size: 12px;
@@ -659,7 +609,7 @@
             font-size: 12px;
         }
 
-        /* Preview paper */
+        /* Preview paper - TANPA padding agar full */
         #previewPaper {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
@@ -691,7 +641,7 @@
                 top: 0;
                 width: 100%;
                 margin: 0;
-                padding: 15mm;
+                padding: 0;
             }
         }
     </style>
@@ -803,239 +753,8 @@
                     left_indent: parseInt(document.getElementById('leftIndent')?.value) || 0,
                     first_line_indent: parseInt(document.getElementById('firstLineIndent')?.value) || 48,
                     line_spacing: parseFloat(document.getElementById('lineSpacing')?.value) || 1.5,
-                    margin_top: parseInt(document.getElementById('marginTop')?.value) || 20,
-                    margin_bottom: parseInt(document.getElementById('marginBottom')?.value) || 20,
-                    margin_left: parseInt(document.getElementById('marginLeft')?.value) || 20,
-                    margin_right: parseInt(document.getElementById('marginRight')?.value) || 20,
                 };
             }
-
-            // ============================================
-            // FUNGSI: Generate CSS dari Format
-            // ============================================
-            function generateSuratCss(format) {
-                const leftMargin = format.left_margin || 0;
-                const leftIndent = format.left_indent || 0;
-                const firstLineIndent = format.first_line_indent || 48;
-                const lineSpacing = format.line_spacing || 1.5;
-                const marginTop = format.margin_top || 20;
-                const marginBottom = format.margin_bottom || 20;
-                const marginLeft = format.margin_left || 20;
-                const marginRight = format.margin_right || 20;
-
-                return `
-                <style>
-                    @page { 
-                        size: A4; 
-                        margin: ${marginTop}mm ${marginRight}mm ${marginBottom}mm ${marginLeft}mm;
-                    }
-                    
-                    body { 
-                        font-family: "Times New Roman", Times, serif; 
-                        font-size: 12pt; 
-                        background: white; 
-                        margin: 0; 
-                        padding: 0; 
-                    }
-                    
-                    .kop-surat { 
-                        margin: 0; 
-                        padding: 0; 
-                        width: 100%; 
-                    }
-                    
-                    .kop-surat img { 
-                        width: 100%; 
-                        max-width: 100%; 
-                        height: auto; 
-                        display: block; 
-                        margin: 0; 
-                    }
-                    
-                    .surat-container {
-                        max-width: 210mm;
-                        margin: 0 auto;
-                        background: white;
-                    }
-                    
-                    .surat-content {
-                        padding-top: 5mm;
-                    }
-                    
-                    p {
-                        margin-left: ${leftMargin}px;
-                        padding-left: ${leftIndent}px;
-                        text-indent: ${firstLineIndent}px;
-                        line-height: ${lineSpacing};
-                        margin-top: 0;
-                        margin-bottom: 6px;
-                        text-align: justify;
-                    }
-                    
-                    table { 
-                        width: 100%; 
-                        border-collapse: collapse; 
-                    }
-                    
-                    td { 
-                        padding: 3px 0; 
-                        vertical-align: top; 
-                        border: none; 
-                    }
-                    
-                    .label-col { 
-                        width: 120px; 
-                    }
-                    
-                    .text-center { text-align: center; }
-                    .text-right { text-align: right; }
-                    .text-justify { text-align: justify; }
-                    
-                    .surat-title { 
-                        font-size: 14pt; 
-                        font-weight: bold; 
-                        text-align: center; 
-                        margin: 8px 0 4px; 
-                    }
-                    
-                    .surat-nomor { 
-                        font-weight: bold; 
-                        text-align: center; 
-                        margin-bottom: 12px; 
-                    }
-                    
-                    .ttd-area { 
-                        margin-top: 35px; 
-                        text-align: right; 
-                    }
-                    
-                    .ttd-image { 
-                        max-width: 150px; 
-                        height: auto; 
-                        margin-top: 5px; 
-                    }
-                    
-                    img { 
-                        max-width: 100%; 
-                        height: auto; 
-                    }
-                    
-                    @media print { 
-                        body { margin: 0; padding: 0; } 
-                    }
-                </style>`;
-            }
-
-            // ============================================
-            // FUNGSI: Load Format dari Template
-            // ============================================
-            function loadParagraphFormat(template) {
-                const match = template.match(/<!--PARAGRAPH_FORMAT:(.*?)-->/);
-                if (match && match[1]) {
-                    try {
-                        const format = JSON.parse(match[1]);
-
-                        // Paragraph Format
-                        document.getElementById('leftMargin').value = format.left_margin || 0;
-                        document.getElementById('leftIndent').value = format.left_indent || 0;
-                        document.getElementById('firstLineIndent').value = format.first_line_indent || 48;
-                        document.getElementById('lineSpacing').value = format.line_spacing || 1.5;
-
-                        // Page Setup
-                        document.getElementById('marginTop').value = format.margin_top || 20;
-                        document.getElementById('marginBottom').value = format.margin_bottom || 20;
-                        document.getElementById('marginLeft').value = format.margin_left || 20;
-                        document.getElementById('marginRight').value = format.margin_right || 20;
-
-                        // Hidden Fields
-                        document.getElementById('hiddenLeftMargin').value = format.left_margin || 0;
-                        document.getElementById('hiddenLeftIndent').value = format.left_indent || 0;
-                        document.getElementById('hiddenFirstLineIndent').value = format.first_line_indent || 48;
-                        document.getElementById('hiddenLineSpacing').value = format.line_spacing || 1.5;
-
-                        document.getElementById('hiddenMarginTop').value = format.margin_top || 20;
-                        document.getElementById('hiddenMarginBottom').value = format.margin_bottom || 20;
-                        document.getElementById('hiddenMarginLeft').value = format.margin_left || 20;
-                        document.getElementById('hiddenMarginRight').value = format.margin_right || 20;
-
-                    } catch (e) {
-                        console.log('Error parsing format:', e);
-                    }
-                }
-            }
-
-            // ============================================
-            // FUNGSI: Simpan Format ke Hidden Fields
-            // ============================================
-            function saveParagraphFormatToHidden() {
-                // Paragraph Format
-                document.getElementById('hiddenLeftMargin').value = parseInt(document.getElementById('leftMargin')
-                    .value) || 0;
-                document.getElementById('hiddenLeftIndent').value = parseInt(document.getElementById('leftIndent')
-                    .value) || 0;
-                document.getElementById('hiddenFirstLineIndent').value = parseInt(document.getElementById(
-                    'firstLineIndent').value) || 48;
-                document.getElementById('hiddenLineSpacing').value = parseFloat(document.getElementById(
-                    'lineSpacing').value) || 1.5;
-
-                // Page Setup
-                document.getElementById('hiddenMarginTop').value = parseInt(document.getElementById('marginTop')
-                    .value) || 20;
-                document.getElementById('hiddenMarginBottom').value = parseInt(document.getElementById(
-                    'marginBottom').value) || 20;
-                document.getElementById('hiddenMarginLeft').value = parseInt(document.getElementById('marginLeft')
-                    .value) || 20;
-                document.getElementById('hiddenMarginRight').value = parseInt(document.getElementById('marginRight')
-                    .value) || 20;
-            }
-
-            // ============================================
-            // PRESET MARGIN
-            // ============================================
-            document.getElementById('presetMarginNormal')?.addEventListener('click', function() {
-                document.getElementById('marginTop').value = 25.4;
-                document.getElementById('marginBottom').value = 25.4;
-                document.getElementById('marginLeft').value = 25.4;
-                document.getElementById('marginRight').value = 25.4;
-                saveParagraphFormatToHidden();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Margin Normal',
-                    text: 'Top/Bottom/Left/Right: 2.54 cm',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            });
-
-            document.getElementById('presetMarginNarrow')?.addEventListener('click', function() {
-                document.getElementById('marginTop').value = 12.7;
-                document.getElementById('marginBottom').value = 12.7;
-                document.getElementById('marginLeft').value = 12.7;
-                document.getElementById('marginRight').value = 12.7;
-                saveParagraphFormatToHidden();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Margin Sempit',
-                    text: 'Top/Bottom/Left/Right: 1.27 cm',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            });
-
-            document.getElementById('presetMarginWide')?.addEventListener('click', function() {
-                document.getElementById('marginTop').value = 38.1;
-                document.getElementById('marginBottom').value = 38.1;
-                document.getElementById('marginLeft').value = 38.1;
-                document.getElementById('marginRight').value = 38.1;
-                saveParagraphFormatToHidden();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Margin Lebar',
-                    text: 'Top/Bottom/Left/Right: 3.81 cm',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            });
 
             // ============================================
             // EDIT TEMPLATE - Event Delegation
@@ -1049,11 +768,8 @@
                 const logoPath = this.dataset.logo;
                 const kopPath = this.dataset.kop;
 
-                // Load format paragraf dari template
-                loadParagraphFormat(template);
-
-                // Clean template dari komentar format untuk editor
-                const cleanTemplate = template.replace(/<!--PARAGRAPH_FORMAT:.*?-->\s*/, '');
+                // Clean template untuk editor
+                let cleanTemplate = template;
 
                 // Reset form
                 const logoPathInput = document.getElementById('logo_path');
@@ -1383,7 +1099,6 @@
                     document.getElementById('leftIndent').value = 0;
                     document.getElementById('firstLineIndent').value = 48;
                     document.getElementById('lineSpacing').value = 1.5;
-                    saveParagraphFormatToHidden();
 
                     Swal.fire({
                         icon: 'success',
@@ -1441,24 +1156,64 @@
 
                     // ============================================
                     // TERAPKAN STYLE KE CKEDITOR
-                    // Style akan tersimpan di HTML sebagai inline style
                     // ============================================
                     paragraph.setStyle('margin-left', margin + 'px');
                     paragraph.setStyle('padding-left', indent + 'px');
                     paragraph.setStyle('text-indent', firstIndent + 'px');
                     paragraph.setStyle('line-height', spacing);
-                    paragraph.setStyle('text-align', 'justify');
 
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil',
-                        text: 'Format paragraf berhasil diterapkan',
+                        text: 'Format paragraf berhasil diterapkan ke CKEditor',
                         timer: 1500,
                         showConfirmButton: false
                     });
                 });
             }
+            // ============================================
+            // TERAPKAN MARGIN KE TEMPLATE
+            // ============================================
+            document.getElementById('applyMarginBtn')?.addEventListener('click', function() {
+                if (!editor) {
+                    Swal.fire('Error', 'Editor belum siap', 'error');
+                    return;
+                }
 
+                const marginTop = document.getElementById('marginTop')?.value || 20;
+                const marginBottom = document.getElementById('marginBottom')?.value || 20;
+                const marginLeft = document.getElementById('marginLeft')?.value || 20;
+                const marginRight = document.getElementById('marginRight')?.value || 20;
+
+                // Ambil semua konten editor
+                let content = editor.getData();
+
+                // Cek apakah sudah ada wrapper dengan class 'surat-wrapper'
+                const wrapperRegex = /<div class="surat-wrapper"[^>]*>([\s\S]*?)<\/div>/;
+                const match = content.match(wrapperRegex);
+
+                if (match) {
+                    // Update wrapper yang sudah ada
+                    const newWrapper =
+                        `<div class="surat-wrapper" style="padding: ${marginTop}mm ${marginRight}mm ${marginBottom}mm ${marginLeft}mm; max-width: 210mm; margin: 0 auto;">${match[1]}</div>`;
+                    content = content.replace(wrapperRegex, newWrapper);
+                } else {
+                    // Bungkus dengan wrapper baru
+                    content =
+                        `<div class="surat-wrapper" style="padding: ${marginTop}mm ${marginRight}mm ${marginBottom}mm ${marginLeft}mm; max-width: 210mm; margin: 0 auto;">${content}</div>`;
+                }
+
+                // Set ke editor
+                editor.setData(content);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Margin Diterapkan',
+                    text: `Margin: Top ${marginTop}mm, Bottom ${marginBottom}mm, Left ${marginLeft}mm, Right ${marginRight}mm`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
             // ============================================
             // PREVIEW
             // ============================================
@@ -1472,7 +1227,9 @@
 
                     let content = editor.getData();
 
-                    // Data preview statis
+                    // ============================================
+                    // GANTI VARIABEL DENGAN DATA PREVIEW
+                    // ============================================
                     const previewData = {
                         nama_mahasiswa: 'Nuni Lestari',
                         npm: '10050022094',
@@ -1490,18 +1247,25 @@
                         pangkat_orangtua: 'Golongan VII',
                         instansi_orangtua: 'TNI',
                         alamat_kantor: 'Bandung',
-                        kop_surat: content.includes('{kop_surat}') ?
-                            '<div style="text-align:center; padding:10px; background:#f0f0f0; border:1px dashed #999; margin-bottom:15px; font-size:14pt; font-weight:bold; color:#6f42c1;">[KOP SURAT - PREVIEW]</div>' :
-                            ''
                     };
 
-                    // Replace variabel
+                    // Ganti {kop_surat} dengan preview placeholder
+                    const hasKopSurat = content.includes('{kop_surat}');
+                    if (hasKopSurat) {
+                        content = content.replace(
+                            /\{kop_surat\}/g,
+                            '<div style="text-align:center; padding:15px 0; background:#f5f0ff; border:2px dashed #6f42c1; margin:0; font-size:16pt; font-weight:bold; color:#6f42c1; width:100%;">[KOP SURAT - PREVIEW]</div>'
+                        );
+                    }
+
+                    // Replace semua variabel
                     for (const key in previewData) {
-                        content = content.replace(new RegExp(`\\{${key}\\}`, 'g'), previewData[key]);
+                        const regex = new RegExp(`\\{${key}\\}`, 'g');
+                        content = content.replace(regex, previewData[key]);
                     }
 
                     // ============================================
-                    // HANYA CSS LAYOUT, TIDAK ADA FORMAT PARAGRAF
+                    // TAMPILKAN DI PREVIEW PAPER
                     // ============================================
                     const previewHtml = `
         <!DOCTYPE html>
@@ -1510,55 +1274,22 @@
             <meta charset="UTF-8">
             <title>Preview Surat</title>
             <style>
-                @page { size: A4; margin: 20mm 20mm 20mm 20mm; }
-                body { 
-                    font-family: "Times New Roman", Times, serif; 
-                    font-size: 12pt; 
-                    background: white; 
-                    margin: 0; 
-                    padding: 0; 
-                }
+                @page { size: A4; margin: 0; }
+                body { font-family: "Times New Roman", Times, serif; font-size: 12pt; background: white; margin: 0; padding: 0; }
                 .kop-surat { margin: 0; padding: 0; width: 100%; }
-                .kop-surat img { width: 100%; max-width: 100%; height: auto; display: block; margin: 0; }
-                .surat-container { max-width: 210mm; margin: 0 auto; background: white; }
-                .surat-content { padding-top: 5mm; }
-                table { width: 100%; border-collapse: collapse; }
-                td { padding: 3px 0; vertical-align: top; border: none; }
-                .label-col { width: 120px; }
-                .text-center { text-align: center; }
-                .text-right { text-align: right; }
-                .text-left { text-align: left; }
-                .text-justify { text-align: justify; }
-                .surat-title { font-size: 14pt; font-weight: bold; text-align: center; margin: 8px 0 4px; }
-                .surat-nomor { font-weight: bold; text-align: center; margin-bottom: 12px; }
-                .ttd-area { margin-top: 35px; text-align: right; }
-                .ttd-image { max-width: 150px; height: auto; margin-top: 5px; }
-                img { max-width: 100%; height: auto; }
-                @media print { body { margin: 0; padding: 0; } }
-                
-                /* ============================================ */
-                /* TIDAK ADA FORMAT PARAGRAF DI SINI */
-                /* Semua format paragraf dari CKEditor */
-                /* ============================================ */
+                .kop-surat img { width: 100%; max-width: 100%; height: auto; display: block; margin: 0; padding: 0; }
             </style>
         </head>
         <body>
             <div class="kop-surat">
-                ${previewData.kop_surat}
+                ${hasKopSurat ? previewData.kop_surat : ''}
             </div>
-            <div class="surat-container">
-                <div class="surat-content">
-                    ${content}
-                </div>
-            </div>
+            ${content}
         </body>
         </html>
         `;
 
-                    const previewPaper = document.getElementById('previewPaper');
-                    if (previewPaper) {
-                        previewPaper.innerHTML = previewHtml;
-                    }
+                    document.getElementById('previewPaper').innerHTML = previewHtml;
                     $('#previewModal').modal('show');
                 });
             }
