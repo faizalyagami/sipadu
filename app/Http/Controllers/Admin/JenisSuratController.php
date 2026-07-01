@@ -128,11 +128,56 @@ class JenisSuratController extends Controller
             $jenisSurat->kop_surat_path = null;
         }
 
+        // ============================================
+        // SIMPAN TEMPLATE - LANGSUNG TANPA FORMAT KOMPENTAR
+        // ============================================
         $jenisSurat->template_content = $request->template_content;
         $jenisSurat->save();
 
         return redirect()->route('admin.jenis-surat.index')
             ->with('success', 'Template surat berhasil disimpan');
+    }
+
+    public static function extractParagraphFormat($templateContent)
+    {
+        $default = [
+            'left_margin' => 0,
+            'left_indent' => 0,
+            'first_line_indent' => 48,
+            'line_spacing' => 1.5,
+            // Page Setup
+            'margin_top' => 20,
+            'margin_bottom' => 20,
+            'margin_left' => 20,
+            'margin_right' => 20,
+        ];
+
+        if (empty($templateContent)) {
+            return $default;
+        }
+
+        preg_match('/<!--PARAGRAPH_FORMAT:(.*?)-->/', $templateContent, $matches);
+
+        if (isset($matches[1])) {
+            try {
+                $format = json_decode($matches[1], true);
+                if (is_array($format)) {
+                    return array_merge($default, $format);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error parsing paragraph format: ' . $e->getMessage());
+            }
+        }
+
+        return $default;
+    }
+
+    /**
+     * Clean template dari komentar format
+     */
+    public static function cleanTemplate($templateContent)
+    {
+        return preg_replace('/<!--PARAGRAPH_FORMAT:.*?-->\s*/', '', $templateContent);
     }
 
     public function uploadLogo(Request $request)

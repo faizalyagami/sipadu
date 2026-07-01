@@ -26,50 +26,6 @@
             </div>
         </div>
 
-        <!-- Statistik -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3 col-6">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <h6 class="text-muted mb-1">Total</h6>
-                        <h3 class="mb-0 fw-bold text-primary">
-                            {{ $surats->count() }}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <h6 class="text-muted mb-1">Menunggu</h6>
-                        <h3 class="mb-0 fw-bold text-warning">
-                            {{ $surats->where('status', 'pending')->count() }}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <h6 class="text-muted mb-1">Disetujui</h6>
-                        <h3 class="mb-0 fw-bold text-success">
-                            {{ $surats->where('status', 'approved')->count() }}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <h6 class="text-muted mb-1">Ditolak</h6>
-                        <h3 class="mb-0 fw-bold text-danger">
-                            {{ $surats->where('status', 'rejected')->count() }}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Filter -->
         <div class="row mb-3">
             <div class="col-12">
@@ -524,8 +480,8 @@
 @push('styles')
     <style>
         /* ============================================
-                                                                       TABLE STYLES
-                                                                    ============================================ */
+                                                                           TABLE STYLES
+                                                                        ============================================ */
         .table-hover tbody tr:hover {
             background-color: rgba(111, 66, 193, 0.05);
             cursor: pointer;
@@ -533,8 +489,8 @@
         }
 
         /* ============================================
-                                                                       BADGE STYLES
-                                                                    ============================================ */
+                                                                           BADGE STYLES
+                                                                        ============================================ */
         .badge {
             font-size: 0.75rem;
             padding: 0.35rem 0.65rem;
@@ -558,8 +514,8 @@
         }
 
         /* ============================================
-                                                                       BUTTON GROUP STYLES
-                                                                    ============================================ */
+                                                                           BUTTON GROUP STYLES
+                                                                        ============================================ */
         .btn-group .btn {
             padding: 0.25rem 0.5rem;
             font-size: 0.8rem;
@@ -576,8 +532,8 @@
         }
 
         /* ============================================
-                                                                       DOWNLOAD BUTTON
-                                                                    ============================================ */
+                                                                           DOWNLOAD BUTTON
+                                                                        ============================================ */
         .download-btn {
             transition: all 0.3s ease;
         }
@@ -593,8 +549,8 @@
         }
 
         /* ============================================
-                                                                       SPINNER
-                                                                    ============================================ */
+                                                                           SPINNER
+                                                                        ============================================ */
         .spinner-border-sm {
             width: 1rem;
             height: 1rem;
@@ -602,8 +558,8 @@
         }
 
         /* ============================================
-                                                                       POPOVER
-                                                                    ============================================ */
+                                                                           POPOVER
+                                                                        ============================================ */
         .popover {
             max-width: 300px;
             border: none;
@@ -626,8 +582,8 @@
         }
 
         /* ============================================
-                                                                       FIX MODAL KEDIP
-                                                                    ============================================ */
+                                                                           FIX MODAL KEDIP
+                                                                        ============================================ */
         .modal {
             background-color: rgba(0, 0, 0, 0.5);
         }

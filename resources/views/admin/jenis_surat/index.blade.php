@@ -461,18 +461,69 @@
                                 </h6>
                                 <div class="card mb-3">
                                     <div class="card-body p-2">
+                                        <!-- ============================================ -->
+                                        <!-- PAGE SETUP - MARGIN -->
+                                        <!-- ============================================ -->
                                         <div class="mb-2">
-                                            <label class="form-label small fw-bold">Left Margin</label>
+                                            <label class="form-label small fw-bold text-primary">
+                                                <i class="bi bi-layout-text-window"></i> Page Setup (Margin)
+                                            </label>
+                                            <div class="row g-1">
+                                                <div class="col-6">
+                                                    <label class="form-label small">Top (mm)</label>
+                                                    <input type="number" id="marginTop"
+                                                        class="form-control form-control-sm" value="20"
+                                                        min="0" max="50">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small">Bottom (mm)</label>
+                                                    <input type="number" id="marginBottom"
+                                                        class="form-control form-control-sm" value="20"
+                                                        min="0" max="50">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small">Left (mm)</label>
+                                                    <input type="number" id="marginLeft"
+                                                        class="form-control form-control-sm" value="20"
+                                                        min="0" max="50">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small">Right (mm)</label>
+                                                    <input type="number" id="marginRight"
+                                                        class="form-control form-control-sm" value="20"
+                                                        min="0" max="50">
+                                                </div>
+                                            </div>
+                                            <div class="mt-1">
+                                                <button type="button" class="btn btn-xs btn-outline-secondary"
+                                                    id="presetMarginNormal">
+                                                    <i class="bi bi-check2"></i> Normal (2.54 cm)
+                                                </button>
+                                                <button type="button" class="btn btn-xs btn-outline-secondary"
+                                                    id="presetMarginNarrow">
+                                                    <i class="bi bi-check2"></i> Sempit (1.27 cm)
+                                                </button>
+                                                <button type="button" class="btn btn-xs btn-outline-secondary"
+                                                    id="presetMarginWide">
+                                                    <i class="bi bi-check2"></i> Lebar (3.81 cm)
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-2">
+
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Left Margin (px)</label>
                                             <input type="number" id="leftMargin" class="form-control form-control-sm"
                                                 value="0">
                                         </div>
                                         <div class="mb-2">
-                                            <label class="form-label small fw-bold">Left Indent</label>
+                                            <label class="form-label small fw-bold">Left Indent (px)</label>
                                             <input type="number" id="leftIndent" class="form-control form-control-sm"
                                                 value="0">
                                         </div>
                                         <div class="mb-2">
-                                            <label class="form-label small fw-bold">First Line Indent</label>
+                                            <label class="form-label small fw-bold">First Line Indent (px)</label>
                                             <input type="number" id="firstLineIndent"
                                                 class="form-control form-control-sm" value="48">
                                         </div>
@@ -483,9 +534,11 @@
                                                 <option value="1.15">1.15</option>
                                                 <option value="1.5" selected>1.5</option>
                                                 <option value="2">2.0</option>
+                                                <option value="2.5">2.5</option>
+                                                <option value="3">3.0</option>
                                             </select>
                                         </div>
-                                        <div class="d-grid gap-2">
+                                        <div class="d-grid gap-2 mt-2">
                                             <button type="button" class="btn btn-sm btn-outline-primary"
                                                 id="formatSuratResmi">
                                                 <i class="bi bi-file-earmark-text"></i> Format Surat Resmi
@@ -660,7 +713,7 @@
                 Swal.fire({
                     title: 'Apakah anda yakin?',
                     html: `Jenis surat <strong>"${nama}"</strong> akan dihapus permanen!<br>
-                   <small class="text-danger">Data template surat juga akan terhapus.</small>`,
+                       <small class="text-danger">Data template surat juga akan terhapus.</small>`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
@@ -704,7 +757,7 @@
                         pageLength: 10,
                         columnDefs: [{
                             orderable: false,
-                            targets: [3, 4, 5]
+                            targets: [3, 4, 5, 6]
                         }],
                         order: [
                             [0, 'asc']
@@ -742,6 +795,249 @@
             });
 
             // ============================================
+            // FUNGSI: Ambil Format dari Form
+            // ============================================
+            function getFormatFromForm() {
+                return {
+                    left_margin: parseInt(document.getElementById('leftMargin')?.value) || 0,
+                    left_indent: parseInt(document.getElementById('leftIndent')?.value) || 0,
+                    first_line_indent: parseInt(document.getElementById('firstLineIndent')?.value) || 48,
+                    line_spacing: parseFloat(document.getElementById('lineSpacing')?.value) || 1.5,
+                    margin_top: parseInt(document.getElementById('marginTop')?.value) || 20,
+                    margin_bottom: parseInt(document.getElementById('marginBottom')?.value) || 20,
+                    margin_left: parseInt(document.getElementById('marginLeft')?.value) || 20,
+                    margin_right: parseInt(document.getElementById('marginRight')?.value) || 20,
+                };
+            }
+
+            // ============================================
+            // FUNGSI: Generate CSS dari Format
+            // ============================================
+            function generateSuratCss(format) {
+                const leftMargin = format.left_margin || 0;
+                const leftIndent = format.left_indent || 0;
+                const firstLineIndent = format.first_line_indent || 48;
+                const lineSpacing = format.line_spacing || 1.5;
+                const marginTop = format.margin_top || 20;
+                const marginBottom = format.margin_bottom || 20;
+                const marginLeft = format.margin_left || 20;
+                const marginRight = format.margin_right || 20;
+
+                return `
+                <style>
+                    @page { 
+                        size: A4; 
+                        margin: ${marginTop}mm ${marginRight}mm ${marginBottom}mm ${marginLeft}mm;
+                    }
+                    
+                    body { 
+                        font-family: "Times New Roman", Times, serif; 
+                        font-size: 12pt; 
+                        background: white; 
+                        margin: 0; 
+                        padding: 0; 
+                    }
+                    
+                    .kop-surat { 
+                        margin: 0; 
+                        padding: 0; 
+                        width: 100%; 
+                    }
+                    
+                    .kop-surat img { 
+                        width: 100%; 
+                        max-width: 100%; 
+                        height: auto; 
+                        display: block; 
+                        margin: 0; 
+                    }
+                    
+                    .surat-container {
+                        max-width: 210mm;
+                        margin: 0 auto;
+                        background: white;
+                    }
+                    
+                    .surat-content {
+                        padding-top: 5mm;
+                    }
+                    
+                    p {
+                        margin-left: ${leftMargin}px;
+                        padding-left: ${leftIndent}px;
+                        text-indent: ${firstLineIndent}px;
+                        line-height: ${lineSpacing};
+                        margin-top: 0;
+                        margin-bottom: 6px;
+                        text-align: justify;
+                    }
+                    
+                    table { 
+                        width: 100%; 
+                        border-collapse: collapse; 
+                    }
+                    
+                    td { 
+                        padding: 3px 0; 
+                        vertical-align: top; 
+                        border: none; 
+                    }
+                    
+                    .label-col { 
+                        width: 120px; 
+                    }
+                    
+                    .text-center { text-align: center; }
+                    .text-right { text-align: right; }
+                    .text-justify { text-align: justify; }
+                    
+                    .surat-title { 
+                        font-size: 14pt; 
+                        font-weight: bold; 
+                        text-align: center; 
+                        margin: 8px 0 4px; 
+                    }
+                    
+                    .surat-nomor { 
+                        font-weight: bold; 
+                        text-align: center; 
+                        margin-bottom: 12px; 
+                    }
+                    
+                    .ttd-area { 
+                        margin-top: 35px; 
+                        text-align: right; 
+                    }
+                    
+                    .ttd-image { 
+                        max-width: 150px; 
+                        height: auto; 
+                        margin-top: 5px; 
+                    }
+                    
+                    img { 
+                        max-width: 100%; 
+                        height: auto; 
+                    }
+                    
+                    @media print { 
+                        body { margin: 0; padding: 0; } 
+                    }
+                </style>`;
+            }
+
+            // ============================================
+            // FUNGSI: Load Format dari Template
+            // ============================================
+            function loadParagraphFormat(template) {
+                const match = template.match(/<!--PARAGRAPH_FORMAT:(.*?)-->/);
+                if (match && match[1]) {
+                    try {
+                        const format = JSON.parse(match[1]);
+
+                        // Paragraph Format
+                        document.getElementById('leftMargin').value = format.left_margin || 0;
+                        document.getElementById('leftIndent').value = format.left_indent || 0;
+                        document.getElementById('firstLineIndent').value = format.first_line_indent || 48;
+                        document.getElementById('lineSpacing').value = format.line_spacing || 1.5;
+
+                        // Page Setup
+                        document.getElementById('marginTop').value = format.margin_top || 20;
+                        document.getElementById('marginBottom').value = format.margin_bottom || 20;
+                        document.getElementById('marginLeft').value = format.margin_left || 20;
+                        document.getElementById('marginRight').value = format.margin_right || 20;
+
+                        // Hidden Fields
+                        document.getElementById('hiddenLeftMargin').value = format.left_margin || 0;
+                        document.getElementById('hiddenLeftIndent').value = format.left_indent || 0;
+                        document.getElementById('hiddenFirstLineIndent').value = format.first_line_indent || 48;
+                        document.getElementById('hiddenLineSpacing').value = format.line_spacing || 1.5;
+
+                        document.getElementById('hiddenMarginTop').value = format.margin_top || 20;
+                        document.getElementById('hiddenMarginBottom').value = format.margin_bottom || 20;
+                        document.getElementById('hiddenMarginLeft').value = format.margin_left || 20;
+                        document.getElementById('hiddenMarginRight').value = format.margin_right || 20;
+
+                    } catch (e) {
+                        console.log('Error parsing format:', e);
+                    }
+                }
+            }
+
+            // ============================================
+            // FUNGSI: Simpan Format ke Hidden Fields
+            // ============================================
+            function saveParagraphFormatToHidden() {
+                // Paragraph Format
+                document.getElementById('hiddenLeftMargin').value = parseInt(document.getElementById('leftMargin')
+                    .value) || 0;
+                document.getElementById('hiddenLeftIndent').value = parseInt(document.getElementById('leftIndent')
+                    .value) || 0;
+                document.getElementById('hiddenFirstLineIndent').value = parseInt(document.getElementById(
+                    'firstLineIndent').value) || 48;
+                document.getElementById('hiddenLineSpacing').value = parseFloat(document.getElementById(
+                    'lineSpacing').value) || 1.5;
+
+                // Page Setup
+                document.getElementById('hiddenMarginTop').value = parseInt(document.getElementById('marginTop')
+                    .value) || 20;
+                document.getElementById('hiddenMarginBottom').value = parseInt(document.getElementById(
+                    'marginBottom').value) || 20;
+                document.getElementById('hiddenMarginLeft').value = parseInt(document.getElementById('marginLeft')
+                    .value) || 20;
+                document.getElementById('hiddenMarginRight').value = parseInt(document.getElementById('marginRight')
+                    .value) || 20;
+            }
+
+            // ============================================
+            // PRESET MARGIN
+            // ============================================
+            document.getElementById('presetMarginNormal')?.addEventListener('click', function() {
+                document.getElementById('marginTop').value = 25.4;
+                document.getElementById('marginBottom').value = 25.4;
+                document.getElementById('marginLeft').value = 25.4;
+                document.getElementById('marginRight').value = 25.4;
+                saveParagraphFormatToHidden();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Margin Normal',
+                    text: 'Top/Bottom/Left/Right: 2.54 cm',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+
+            document.getElementById('presetMarginNarrow')?.addEventListener('click', function() {
+                document.getElementById('marginTop').value = 12.7;
+                document.getElementById('marginBottom').value = 12.7;
+                document.getElementById('marginLeft').value = 12.7;
+                document.getElementById('marginRight').value = 12.7;
+                saveParagraphFormatToHidden();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Margin Sempit',
+                    text: 'Top/Bottom/Left/Right: 1.27 cm',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+
+            document.getElementById('presetMarginWide')?.addEventListener('click', function() {
+                document.getElementById('marginTop').value = 38.1;
+                document.getElementById('marginBottom').value = 38.1;
+                document.getElementById('marginLeft').value = 38.1;
+                document.getElementById('marginRight').value = 38.1;
+                saveParagraphFormatToHidden();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Margin Lebar',
+                    text: 'Top/Bottom/Left/Right: 3.81 cm',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+
+            // ============================================
             // EDIT TEMPLATE - Event Delegation
             // ============================================
             $(document).on('click', '.edit-template', function(e) {
@@ -753,7 +1049,13 @@
                 const logoPath = this.dataset.logo;
                 const kopPath = this.dataset.kop;
 
-                // Reset form dengan pengecekan element
+                // Load format paragraf dari template
+                loadParagraphFormat(template);
+
+                // Clean template dari komentar format untuk editor
+                const cleanTemplate = template.replace(/<!--PARAGRAPH_FORMAT:.*?-->\s*/, '');
+
+                // Reset form
                 const logoPathInput = document.getElementById('logo_path');
                 const kopPathInput = document.getElementById('kop_surat_path');
                 const logoInput = document.getElementById('logoInput');
@@ -825,7 +1127,7 @@
                 }
 
                 // Initialize CKEditor
-                initCKEditor(template);
+                initCKEditor(cleanTemplate);
 
                 $('#editTemplateModal').modal('show');
             });
@@ -898,7 +1200,7 @@
             }
 
             // ============================================
-            // INSERT KOP
+            // INSERT KOP - Sisipkan {kop_surat}
             // ============================================
             const btnInsertKop = document.getElementById('btnInsertKop');
             if (btnInsertKop) {
@@ -908,9 +1210,6 @@
                         return;
                     }
 
-                    // ============================================
-                    // SISIPKAN {kop_surat} BUKAN GAMBAR URL
-                    // ============================================
                     editor.insertText('{kop_surat}');
                     editor.focus();
 
@@ -1075,20 +1374,16 @@
             });
 
             // ============================================
-            // FORMAT PRESET
+            // FORMAT PRESET - Surat Resmi
             // ============================================
             const formatSuratResmi = document.getElementById('formatSuratResmi');
             if (formatSuratResmi) {
                 formatSuratResmi.addEventListener('click', function() {
-                    const leftMargin = document.getElementById('leftMargin');
-                    const leftIndent = document.getElementById('leftIndent');
-                    const firstLineIndent = document.getElementById('firstLineIndent');
-                    const lineSpacing = document.getElementById('lineSpacing');
-
-                    if (leftMargin) leftMargin.value = 0;
-                    if (leftIndent) leftIndent.value = 0;
-                    if (firstLineIndent) firstLineIndent.value = 48;
-                    if (lineSpacing) lineSpacing.value = 1.5;
+                    document.getElementById('leftMargin').value = 0;
+                    document.getElementById('leftIndent').value = 0;
+                    document.getElementById('firstLineIndent').value = 48;
+                    document.getElementById('lineSpacing').value = 1.5;
+                    saveParagraphFormatToHidden();
 
                     Swal.fire({
                         icon: 'success',
@@ -1116,10 +1411,10 @@
                     const firstLineIndent = document.getElementById('firstLineIndent');
                     const lineSpacing = document.getElementById('lineSpacing');
 
-                    const margin = leftMargin ? leftMargin.value : 0;
-                    const indent = leftIndent ? leftIndent.value : 0;
-                    const firstIndent = firstLineIndent ? firstLineIndent.value : 0;
-                    const spacing = lineSpacing ? lineSpacing.value : 1.5;
+                    const margin = leftMargin ? parseInt(leftMargin.value) || 0 : 0;
+                    const indent = leftIndent ? parseInt(leftIndent.value) || 0 : 0;
+                    const firstIndent = firstLineIndent ? parseInt(firstLineIndent.value) || 0 : 48;
+                    const spacing = lineSpacing ? parseFloat(lineSpacing.value) || 1.5 : 1.5;
 
                     editor.focus();
 
@@ -1144,10 +1439,15 @@
                         }
                     }
 
+                    // ============================================
+                    // TERAPKAN STYLE KE CKEDITOR
+                    // Style akan tersimpan di HTML sebagai inline style
+                    // ============================================
                     paragraph.setStyle('margin-left', margin + 'px');
                     paragraph.setStyle('padding-left', indent + 'px');
                     paragraph.setStyle('text-indent', firstIndent + 'px');
                     paragraph.setStyle('line-height', spacing);
+                    paragraph.setStyle('text-align', 'justify');
 
                     Swal.fire({
                         icon: 'success',
@@ -1171,6 +1471,8 @@
                     }
 
                     let content = editor.getData();
+
+                    // Data preview statis
                     const previewData = {
                         nama_mahasiswa: 'Nuni Lestari',
                         npm: '10050022094',
@@ -1182,16 +1484,80 @@
                         tanggal_surat: '29 April 2026',
                         perihal: 'SURAT KETERANGAN AKTIF KULIAH',
                         dekan: 'Dr. Oki Mardiawan, M.Psi., Psikolog.',
-                        nip_dekan: 'D.07.0.464'
+                        nip_dekan: 'D.07.0.464',
+                        nama_orangtua: 'H. M. Nurdin',
+                        nrp_nik_nip: '32104330107920069',
+                        pangkat_orangtua: 'Golongan VII',
+                        instansi_orangtua: 'TNI',
+                        alamat_kantor: 'Bandung',
+                        kop_surat: content.includes('{kop_surat}') ?
+                            '<div style="text-align:center; padding:10px; background:#f0f0f0; border:1px dashed #999; margin-bottom:15px; font-size:14pt; font-weight:bold; color:#6f42c1;">[KOP SURAT - PREVIEW]</div>' :
+                            ''
                     };
 
+                    // Replace variabel
                     for (const key in previewData) {
                         content = content.replace(new RegExp(`\\{${key}\\}`, 'g'), previewData[key]);
                     }
 
+                    // ============================================
+                    // HANYA CSS LAYOUT, TIDAK ADA FORMAT PARAGRAF
+                    // ============================================
+                    const previewHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Preview Surat</title>
+            <style>
+                @page { size: A4; margin: 20mm 20mm 20mm 20mm; }
+                body { 
+                    font-family: "Times New Roman", Times, serif; 
+                    font-size: 12pt; 
+                    background: white; 
+                    margin: 0; 
+                    padding: 0; 
+                }
+                .kop-surat { margin: 0; padding: 0; width: 100%; }
+                .kop-surat img { width: 100%; max-width: 100%; height: auto; display: block; margin: 0; }
+                .surat-container { max-width: 210mm; margin: 0 auto; background: white; }
+                .surat-content { padding-top: 5mm; }
+                table { width: 100%; border-collapse: collapse; }
+                td { padding: 3px 0; vertical-align: top; border: none; }
+                .label-col { width: 120px; }
+                .text-center { text-align: center; }
+                .text-right { text-align: right; }
+                .text-left { text-align: left; }
+                .text-justify { text-align: justify; }
+                .surat-title { font-size: 14pt; font-weight: bold; text-align: center; margin: 8px 0 4px; }
+                .surat-nomor { font-weight: bold; text-align: center; margin-bottom: 12px; }
+                .ttd-area { margin-top: 35px; text-align: right; }
+                .ttd-image { max-width: 150px; height: auto; margin-top: 5px; }
+                img { max-width: 100%; height: auto; }
+                @media print { body { margin: 0; padding: 0; } }
+                
+                /* ============================================ */
+                /* TIDAK ADA FORMAT PARAGRAF DI SINI */
+                /* Semua format paragraf dari CKEditor */
+                /* ============================================ */
+            </style>
+        </head>
+        <body>
+            <div class="kop-surat">
+                ${previewData.kop_surat}
+            </div>
+            <div class="surat-container">
+                <div class="surat-content">
+                    ${content}
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+
                     const previewPaper = document.getElementById('previewPaper');
                     if (previewPaper) {
-                        previewPaper.innerHTML = content;
+                        previewPaper.innerHTML = previewHtml;
                     }
                     $('#previewModal').modal('show');
                 });
@@ -1210,13 +1576,13 @@
                     const win = window.open('', '_blank');
                     if (win) {
                         win.document.write(`<html><head><title>Print Surat</title>
-                    <style>
-                        @page { size: A4; margin: 15mm; }
-                        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; }
-                        table { border-collapse: collapse; width: 100%; }
-                        table td { padding: 4px 0; }
-                    </style>
-                    </head><body>${printContent}</body></html>`);
+                            <style>
+                                @page { size: A4; margin: 15mm; }
+                                body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; }
+                                table { border-collapse: collapse; width: 100%; }
+                                table td { padding: 4px 0; }
+                            </style>
+                        </head><body>${printContent}</body></html>`);
                         win.document.close();
                         win.print();
                     }
@@ -1233,8 +1599,8 @@
                 if (typeof CKEDITOR === 'undefined') {
                     console.error('CKEditor tidak ditemukan!');
                     templateEditor.innerHTML = `
-                <textarea class="form-control" style="height:600px; font-family: 'Times New Roman', Times, serif;">${content || getDefaultTemplate()}</textarea>
-            `;
+                        <textarea class="form-control" style="height:600px; font-family: 'Times New Roman', Times, serif;">${content || getDefaultTemplate()}</textarea>
+                    `;
                     return;
                 }
 
@@ -1319,8 +1685,8 @@
 
                 CKEDITOR.instances.templateEditor.on('error', function() {
                     templateEditor.innerHTML = `
-                <textarea class="form-control" style="height:600px; font-family: 'Times New Roman', Times, serif;">${content || getDefaultTemplate()}</textarea>
-            `;
+                        <textarea class="form-control" style="height:600px; font-family: 'Times New Roman', Times, serif;">${content || getDefaultTemplate()}</textarea>
+                    `;
                 });
             }
 
@@ -1329,41 +1695,41 @@
             // ============================================
             function getDefaultTemplate() {
                 return `<div style="font-family:'Times New Roman', Times, serif; font-size:12pt;">
-            <div style="text-align:center; margin-bottom:20px;">
-                <img src="{kop_surat}" style="width:80%; max-width:100%; height:auto;">
-            </div>
-            <div style="text-align:center; margin:20px 0;">
-                <strong style="font-size:14pt;">SURAT KETERANGAN AKTIF KULIAH</strong><br>
-                <strong>Nomor : {nomor_surat}</strong>
-            </div>
-            <div style="text-align:justify;">
-                <p>Yang bertanda tangan di bawah ini:</p>
-                <table style="width:100%; border:none;">
-                    <tr><td style="width:120px;">Nama</td><td>: {dekan}</td></tr>
-                    <tr><td>NIP</td><td>: {nip_dekan}</td></tr>
-                    <tr><td>Jabatan</td><td>: Dekan Fakultas</td></tr>
-                </table>
-                <p>Menerangkan bahwa mahasiswa:</p>
-                <table style="width:100%; border:none;">
-                    <tr><td style="width:120px;">Nama</td><td>: {nama_mahasiswa}</td></tr>
-                    <tr><td>NPM</td><td>: {npm}</td></tr>
-                    <tr><td>Fakultas</td><td>: {fakultas}</td></tr>
-                    <tr><td>Program Studi</td><td>: {prodi}</td></tr>
-                    <tr><td>Semester</td><td>: {semester}</td></tr>
-                    <tr><td>Alamat</td><td>: {alamat}</td></tr>
-                </table>
-                <p>Adalah benar-benar mahasiswa aktif Universitas pada semester yang tertera.</p>
-                <p>Surat keterangan ini dibuat untuk memenuhi persyaratan administrasi.</p>
-                <p>Demikian surat ini dibuat dengan sebenarnya dan dapat dipergunakan sebagaimana mestinya.</p>
-            </div>
-            <div style="margin-top:50px; text-align:right;">
-                <p>Bandung, {tanggal_surat}</p>
-                <p>Dekan Fakultas,</p>
-                <br><br>
-                <p><strong><u>{dekan}</u></strong></p>
-                <p>{nip_dekan}</p>
-            </div>
-        </div>`;
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <img src="{kop_surat}" style="width:80%; max-width:100%; height:auto;">
+                    </div>
+                    <div style="text-align:center; margin:20px 0;">
+                        <strong style="font-size:14pt;">SURAT KETERANGAN AKTIF KULIAH</strong><br>
+                        <strong>Nomor : {nomor_surat}</strong>
+                    </div>
+                    <div style="text-align:justify;">
+                        <p>Yang bertanda tangan di bawah ini:</p>
+                        <table style="width:100%; border:none;">
+                            <tr><td style="width:120px;">Nama</td><td>: {dekan}</td></tr>
+                            <tr><td>NIP</td><td>: {nip_dekan}</td></tr>
+                            <tr><td>Jabatan</td><td>: Dekan Fakultas</td></tr>
+                        </table>
+                        <p>Menerangkan bahwa mahasiswa:</p>
+                        <table style="width:100%; border:none;">
+                            <tr><td style="width:120px;">Nama</td><td>: {nama_mahasiswa}</td></tr>
+                            <tr><td>NPM</td><td>: {npm}</td></tr>
+                            <tr><td>Fakultas</td><td>: {fakultas}</td></tr>
+                            <tr><td>Program Studi</td><td>: {prodi}</td></tr>
+                            <tr><td>Semester</td><td>: {semester}</td></tr>
+                            <tr><td>Alamat</td><td>: {alamat}</td></tr>
+                        </table>
+                        <p>Adalah benar-benar mahasiswa aktif Universitas pada semester yang tertera.</p>
+                        <p>Surat keterangan ini dibuat untuk memenuhi persyaratan administrasi.</p>
+                        <p>Demikian surat ini dibuat dengan sebenarnya dan dapat dipergunakan sebagaimana mestinya.</p>
+                    </div>
+                    <div style="margin-top:50px; text-align:right;">
+                        <p>Bandung, {tanggal_surat}</p>
+                        <p>Dekan Fakultas,</p>
+                        <br><br>
+                        <p><strong><u>{dekan}</u></strong></p>
+                        <p>{nip_dekan}</p>
+                    </div>
+                </div>`;
             }
 
             // ============================================

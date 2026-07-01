@@ -207,6 +207,7 @@
                 let selectedSuratData = null;
                 let isProcessing = false;
                 let currentModal = null;
+                let pendingSuratId = null; // Untuk menyimpan ID saat transisi modal
 
                 // ============================================
                 // 1. OPEN REJECT MODAL
@@ -486,16 +487,17 @@
 
                     console.log('openReviewModal called with id:', id);
                     selectedSuratId = id;
+                    pendingSuratId = id;
 
                     $('#reviewModalBody').html(`
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Memuat data surat...</p>
+                            <p class="text-muted small">ID: ${id}</p>
                         </div>
-                        <p class="mt-2 text-muted">Memuat data surat...</p>
-                        <p class="text-muted small">ID: ${id}</p>
-                    </div>
-                `);
+                    `);
 
                     currentModal = 'review';
                     $('#reviewModal').modal('show');
@@ -503,7 +505,7 @@
                 };
 
                 // ============================================
-                // 8. LOAD SURAT DATA - DIPERBAIKI
+                // 8. LOAD SURAT DATA
                 // ============================================
                 function loadSuratData(id) {
                     console.log('=== loadSuratData called with id:', id);
@@ -522,10 +524,7 @@
                                 console.log('Nama mahasiswa:', response.data.mahasiswa_nama);
                                 console.log('Nama orang tua:', response.data.nama_ortu);
 
-                                // Simpan data
                                 selectedSuratData = response.data;
-
-                                // Render modal
                                 renderReviewModal(response.data);
                             } else {
                                 console.error('Response tidak valid:', response);
@@ -552,7 +551,7 @@
                 }
 
                 // ============================================
-                // 9. RENDER REVIEW MODAL - DIPERBAIKI
+                // 9. RENDER REVIEW MODAL
                 // ============================================
                 function renderReviewModal(data) {
                     console.log('=== renderReviewModal called ===');
@@ -591,124 +590,123 @@
                     // BUILD HTML
                     // ============================================
                     let html = `
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="text-muted small">Mahasiswa</label>
-                            <p class="fw-semibold">${data.mahasiswa_nama || '-'}</p>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="text-muted small">Mahasiswa</label>
+                                <p class="fw-semibold">${data.mahasiswa_nama || '-'}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="text-muted small">NPM</label>
+                                <p class="fw-semibold">${data.mahasiswa_npm || '-'}</p>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="text-muted small">Tanggal Pengajuan</label>
+                                <p class="fw-semibold">${data.tanggal_pengajuan || '-'}</p>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="text-muted small">NPM</label>
-                            <p class="fw-semibold">${data.mahasiswa_npm || '-'}</p>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small">Jenis Surat</label>
+                                <p class="fw-semibold">${data.jenis_surat || '-'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small">Fakultas</label>
+                                <p class="fw-semibold">${data.fakultas || '-'}</p>
+                            </div>
                         </div>
-                        <div class="col-md-5">
-                            <label class="text-muted small">Tanggal Pengajuan</label>
-                            <p class="fw-semibold">${data.tanggal_pengajuan || '-'}</p>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="text-muted small">Jenis Surat</label>
-                            <p class="fw-semibold">${data.jenis_surat || '-'}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="text-muted small">Fakultas</label>
-                            <p class="fw-semibold">${data.fakultas || '-'}</p>
-                        </div>
-                    </div>
-                `;
+                    `;
 
                     // Data Orang Tua
                     if (hasOrangTua) {
                         html += `
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="card border-primary bg-light">
-                                    <div class="card-header bg-primary text-white">
-                                        <i class="bi bi-people me-2"></i> Data Orang Tua / Wali Mahasiswa
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label class="text-muted small">Nama Orang Tua</label>
-                                                <p class="fw-semibold">${data.nama_ortu || '-'}</p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="text-muted small">NRP/NIK/NIP</label>
-                                                <p class="fw-semibold">${data.nik_ortu || '-'}</p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="text-muted small">Pangkat/Golongan</label>
-                                                <p class="fw-semibold">${data.pangkat_ortu || '-'}</p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="text-muted small">Instansi</label>
-                                                <p class="fw-semibold">${data.instansi_ortu || '-'}</p>
-                                            </div>
-                                            <div class="col-12">
-                                                <label class="text-muted small">Alamat Kantor</label>
-                                                <p class="fw-semibold">${data.alamat_kantor_ortu || '-'}</p>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="card border-primary bg-light">
+                                        <div class="card-header bg-primary text-white">
+                                            <i class="bi bi-people me-2"></i> Data Orang Tua / Wali Mahasiswa
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label class="text-muted small">Nama Orang Tua</label>
+                                                    <p class="fw-semibold">${data.nama_ortu || '-'}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="text-muted small">NRP/NIK/NIP</label>
+                                                    <p class="fw-semibold">${data.nik_ortu || '-'}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="text-muted small">Pangkat/Golongan</label>
+                                                    <p class="fw-semibold">${data.pangkat_ortu || '-'}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="text-muted small">Instansi</label>
+                                                    <p class="fw-semibold">${data.instansi_ortu || '-'}</p>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="text-muted small">Alamat Kantor</label>
+                                                    <p class="fw-semibold">${data.alamat_kantor_ortu || '-'}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                     } else {
                         html += `
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>
-                                    <strong>Perhatian:</strong> Data orang tua/wali mahasiswa belum lengkap.
-                                    <br><small class="text-muted">Nama: ${data.nama_ortu || 'Kosong'} | Instansi: ${data.instansi_ortu || 'Kosong'}</small>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <strong>Perhatian:</strong> Data orang tua/wali mahasiswa belum lengkap.
+                                        <br><small class="text-muted">Nama: ${data.nama_ortu || 'Kosong'} | Instansi: ${data.instansi_ortu || 'Kosong'}</small>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                     }
 
                     // Keperluan
                     html += `
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <label class="text-muted small">Keperluan</label>
-                            <div class="p-3 bg-light rounded">${data.keperluan || '-'}</div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="text-muted small">Keperluan</label>
+                                <div class="p-3 bg-light rounded">${data.keperluan || '-'}</div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
 
                     // File Pendukung
                     if (data.file_ktm || data.bukti_pembayaran || data.file_pendukung) {
                         html += `
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <h6 class="fw-bold"><i class="bi bi-files me-2"></i>File Pendukung</h6>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    ${data.file_ktm ? `<a href="/storage/${data.file_ktm}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-pdf me-1"></i> KTM</a>` : ''}
-                                    ${data.bukti_pembayaran ? `<a href="/storage/${data.bukti_pembayaran}" target="_blank" class="btn btn-sm btn-outline-success"><i class="bi bi-file-pdf me-1"></i> Bukti Pembayaran</a>` : ''}
-                                    ${data.file_pendukung ? `<a href="/storage/${data.file_pendukung}" target="_blank" class="btn btn-sm btn-outline-warning"><i class="bi bi-file-pdf me-1"></i> File Pendukung</a>` : ''}
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <h6 class="fw-bold"><i class="bi bi-files me-2"></i>File Pendukung</h6>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        ${data.file_ktm ? `<a href="/storage/${data.file_ktm}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-pdf me-1"></i> KTM</a>` : ''}
+                                        ${data.bukti_pembayaran ? `<a href="/storage/${data.bukti_pembayaran}" target="_blank" class="btn btn-sm btn-outline-success"><i class="bi bi-file-pdf me-1"></i> Bukti Pembayaran</a>` : ''}
+                                        ${data.file_pendukung ? `<a href="/storage/${data.file_pendukung}" target="_blank" class="btn btn-sm btn-outline-warning"><i class="bi bi-file-pdf me-1"></i> File Pendukung</a>` : ''}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                     }
 
                     // Preview Surat
                     html += `
-                    <div class="row">
-                        <div class="col-12">
-                            <h6 class="fw-bold"><i class="bi bi-file-text me-2"></i>Preview Surat</h6>
-                            <div class="border rounded p-0" style="max-height: 600px; overflow-y: auto; background: #f5f5f5;">
-                                <div style="max-width: 210mm; margin: 0 auto; padding: 15mm; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.05); font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5;">
-                                    ${data.content || '<p class="text-muted text-center">Tidak ada konten surat</p>'}
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="fw-bold"><i class="bi bi-file-text me-2"></i>Preview Surat</h6>
+                                <div class="border rounded p-0" style="max-height: 600px; overflow-y: auto; background: #f5f5f5;">
+                                    <div style="max-width: 210mm; margin: 0 auto; padding: 15mm; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.05); font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5;">
+                                        ${data.content || '<p class="text-muted text-center">Tidak ada konten surat</p>'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
 
-                    // Masukkan ke modal
                     $('#reviewModalBody').html(html);
                     $('#reviewModalBody').scrollTop(0);
 
@@ -717,71 +715,78 @@
 
                 function showError(message) {
                     $('#reviewModalBody').html(`
-                    <div class="alert alert-danger m-3">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        ${message}
-                        <br><br>
-                        <button class="btn btn-sm btn-primary" onclick="openReviewModal(${selectedSuratId})">
-                            <i class="bi bi-arrow-repeat me-1"></i> Coba Lagi
-                        </button>
-                    </div>
-                `);
+                        <div class="alert alert-danger m-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            ${message}
+                            <br><br>
+                            <button class="btn btn-sm btn-primary" onclick="openReviewModal(${selectedSuratId})">
+                                <i class="bi bi-arrow-repeat me-1"></i> Coba Lagi
+                            </button>
+                        </div>
+                    `);
                 }
 
                 // ============================================
-                // 10. REVIEW APPROVE
+                // 10. REVIEW APPROVE - PERBAIKI
                 // ============================================
                 $('#reviewApproveBtn').on('click', function() {
+                    // Simpan ID sebelum modal ditutup
+                    const suratId = selectedSuratId || pendingSuratId;
 
-                    if (!selectedSuratId) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'ID surat tidak ditemukan'
-                        });
-                        return;
-                    }
+                    console.log('reviewApproveBtn clicked, selectedSuratId:', suratId);
 
-                    const suratId = selectedSuratId;
-
-                    $('#reviewModal').modal('hide');
-
-                    setTimeout(function() {
-                        confirmApprove(suratId);
-                    }, 300);
-                });
-
-                // ============================================
-                // 11. REVIEW REJECT
-                // ============================================
-                $('#reviewRejectBtn').on('click', function() {
-                    console.log('reviewRejectBtn clicked, selectedSuratId:', selectedSuratId);
-
-                    if (selectedSuratId) {
-                        $('#reviewModal').modal('hide');
-                        setTimeout(function() {
-                            openRejectModal(selectedSuratId);
-                        }, 300);
-                    } else {
+                    if (!suratId) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
                             text: 'ID surat tidak ditemukan. Silakan buka ulang review.',
                             confirmButtonColor: '#6f42c1'
                         });
+                        return;
                     }
+
+                    // Tutup modal review
+                    $('#reviewModal').modal('hide');
+
+                    // Buka modal approve setelah delay
+                    setTimeout(function() {
+                        confirmApprove(suratId);
+                    }, 400);
+                });
+
+                // ============================================
+                // 11. REVIEW REJECT
+                // ============================================
+                $('#reviewRejectBtn').on('click', function() {
+                    const suratId = selectedSuratId || pendingSuratId;
+
+                    console.log('reviewRejectBtn clicked, selectedSuratId:', suratId);
+
+                    if (!suratId) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'ID surat tidak ditemukan. Silakan buka ulang review.',
+                            confirmButtonColor: '#6f42c1'
+                        });
+                        return;
+                    }
+
+                    $('#reviewModal').modal('hide');
+                    setTimeout(function() {
+                        openRejectModal(suratId);
+                    }, 400);
                 });
 
                 // ============================================
                 // 12. RESET REVIEW MODAL
                 // ============================================
                 $('#reviewModal').on('hidden.bs.modal', function() {
-
                     if (currentModal !== 'approve' && currentModal !== 'reject') {
                         selectedSuratId = null;
                         selectedSuratData = null;
+                        pendingSuratId = null;
                     }
-
                 });
 
                 // ============================================
@@ -801,6 +806,18 @@
                     $('body').removeClass('modal-open');
                     $('body').css('overflow', '');
                     $('body').css('padding-right', '');
+                });
+
+                // ============================================
+                // 15. FIX: Modal focus issue
+                // ============================================
+                $('#reviewModal, #approveConfirmModal, #rejectModal').on('shown.bs.modal', function() {
+                    var $firstFocusable = $(this).find('.btn-close:first, .modal-footer button:first');
+                    if ($firstFocusable.length) {
+                        setTimeout(function() {
+                            $firstFocusable.trigger('focus');
+                        }, 100);
+                    }
                 });
             });
         </script>

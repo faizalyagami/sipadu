@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\Log;
 
 class SuratHtmlGenerator
 {
-    /**
-     * Generate HTML surat - SEDERHANA
-     */
     public function generate(Surat $surat): string
     {
         $surat->loadMissing(['mahasiswa.prodi.fakultas', 'jenisSurat.kategoriSurat']);
@@ -17,91 +14,38 @@ class SuratHtmlGenerator
         $mahasiswa = $surat->mahasiswa;
         $jenisSurat = $surat->jenisSurat;
 
-        // Ambil template dari database
         $templateContent = $jenisSurat->template_content ?? $this->getDefaultTemplate();
 
-        // Prepare data untuk replace
         $data = $this->prepareData($surat, $mahasiswa);
 
-        // Replace semua variabel
         $htmlContent = strtr($templateContent, $data);
 
-        $html = '
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Surat Keterangan</title>
-        <style>
-            @page { size: A4; margin: 0; }
-            body { 
-                font-family: "Times New Roman", Times, serif; 
-                font-size: 12pt; 
-                line-height: 1.5; 
-                background: white; 
-                margin: 0; 
-                padding: 0; 
-            }
-            .kop-surat { 
-                margin: 0; 
-                padding: 0; 
-                width: 100%; 
-            }
-            .kop-surat img { 
-                width: 100%; 
-                max-width: 100%; 
-                height: auto; 
-                display: block; 
-                margin: 0; 
-            }
-            .surat-container {
-                max-width: 210mm;
-                margin: 0 auto;
-                padding: 0 20mm 20mm 20mm;
-                background: white;
-            }
-            .surat-content {
-                padding-top: 8mm;
-            }
-            table { width: 100%; border-collapse: collapse; }
-            td { padding: 3px 0; vertical-align: top; border: none; }
-            img { max-width: 100%; height: auto; }
-            .text-center { text-align: center; }
-            .text-right { text-align: right; }
-            .text-justify { text-align: justify; }
-            .surat-title { 
-                font-size: 14pt; 
-                font-weight: bold; 
-                text-align: center; 
-                margin: 8px 0 4px; 
-            }
-            .surat-nomor { 
-                font-weight: bold; 
-                text-align: center; 
-                margin-bottom: 12px; 
-            }
-            .label-col { width: 120px; }
-            .ttd-area { margin-top: 35px; text-align: right; }
-            .ttd-image { max-width: 150px; height: auto; margin-top: 5px; }
-            @media print { body { margin: 0; padding: 0; } }
-        </style>
-    </head>
-    <body>
-        <!-- KOP SURAT FULL WIDTH -->
-        <div class="kop-surat">
-            ' . $data['{kop_surat}'] . '
-        </div>
-        
-        <!-- ISI SURAT -->
-        <div class="surat-container">
-            <div class="surat-content">
-                ' . $htmlContent . '
-            </div>
-        </div>
-    </body>
-    </html>';
+        $css = SuratCssGenerator::generateCss();
 
-        // Debug
+        // ============================================
+        // HTML LENGKAP
+        // ============================================
+        $html = '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Surat Keterangan</title>
+            ' . $css . '
+        </head>
+        <body>
+            <div class="kop-surat">
+                ' . $data['{kop_surat}'] . '
+            </div>
+            
+            <div class="surat-container">
+                <div class="surat-content">
+                    ' . $htmlContent . '
+                </div>
+            </div>
+        </body>
+        </html>';
+
         Log::info('HTML size: ' . strlen($html) . ' bytes');
         file_put_contents(storage_path('app/debug_final_' . $surat->id . '.html'), $html);
 
@@ -151,14 +95,8 @@ class SuratHtmlGenerator
             '{instansi_orangtua}' => $surat->instansi_ortu ?? '-',
             '{alamat_kantor}' => $surat->alamat_kantor_ortu ?? '-',
 
-            // ============================================
-            // KOP SURAT - LANGSUNG BASE64
-            // ============================================
+            // Kop Surat & TTD
             '{kop_surat}' => $this->getKopSuratBase64($surat),
-
-            // ============================================
-            // TTD - LANGSUNG BASE64
-            // ============================================
             '{ttd_elektronik}' => $this->getTTDImageBase64(),
         ];
 
@@ -193,8 +131,6 @@ class SuratHtmlGenerator
                         $base64 = base64_encode($imageData);
                         $mimeType = mime_content_type($path);
 
-                        Log::info('Kop Base64 length: ' . strlen($base64));
-
                         return '<img src="data:' . $mimeType . ';base64,' . $base64 . '" style="width:100%; max-width:100%; height:auto;" alt="Kop Surat">';
                     } catch (\Exception $e) {
                         Log::error('Error loading kop surat: ' . $e->getMessage());
@@ -223,8 +159,6 @@ class SuratHtmlGenerator
                     $imageData = file_get_contents($path);
                     $base64 = base64_encode($imageData);
                     $mimeType = mime_content_type($path);
-
-                    Log::info('TTD Base64 length: ' . strlen($base64));
 
                     return '<img src="data:' . $mimeType . ';base64,' . $base64 . '" style="max-width:150px; height:auto; margin-top:5px;" alt="TTD dan Cap">';
                 } catch (\Exception $e) {
@@ -321,117 +255,5 @@ class SuratHtmlGenerator
                 <p>{nip_dekan}</p>
             </div>
         </div>';
-    }
-
-    /**
-     * Add CSS styles
-     */
-    private function addStyles(string $html): string
-    {
-        $styles = '
-    <style>
-        @page { 
-            size: A4; 
-            margin: 0; /* Hapus margin untuk kop full */
-        }
-        
-        body { 
-            font-family: "Times New Roman", Times, serif; 
-            font-size: 12pt; 
-            line-height: 1.5; 
-            background: white; 
-            margin: 0; 
-            padding: 0; 
-        }
-        
-        /* ============================================ */
-        /* KOP SURAT - FULL WIDTH */
-        /* ============================================ */
-        .kop-surat {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            position: relative;
-        }
-        
-        .kop-surat img {
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0;
-        }
-        
-        /* ============================================ */
-        /* KONTEN SURAT - DENGAN MARGIN */
-        /* ============================================ */
-        .surat-container {
-            max-width: 210mm;
-            margin: 0 auto;
-            padding: 0 20mm 20mm 20mm; /* Top:0, Left/Right/Bottom:20mm */
-            background: white;
-            position: relative;
-        }
-        
-        /* Jika kop surat sudah di dalam container, atur jarak */
-        .surat-content {
-            padding-top: 10mm; /* Jarak dari kop ke isi surat */
-        }
-        
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-        
-        td { 
-            padding: 3px 0; 
-            vertical-align: top; 
-            border: none; 
-        }
-        
-        img { 
-            max-width: 100%; 
-            height: auto; 
-        }
-        
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .text-justify { text-align: justify; }
-        .mt-30 { margin-top: 30px; }
-        .mb-10 { margin-bottom: 10px; }
-        
-        .surat-title { 
-            font-size: 14pt; 
-            font-weight: bold; 
-            text-align: center; 
-            margin: 10px 0 5px; 
-        }
-        
-        .surat-nomor { 
-            font-weight: bold; 
-            text-align: center; 
-            margin-bottom: 15px; 
-        }
-        
-        .label-col { width: 120px; }
-        
-        .ttd-area { 
-            margin-top: 40px; 
-            text-align: right; 
-        }
-        
-        .ttd-image { 
-            max-width: 150px; 
-            height: auto; 
-            margin-top: 5px; 
-        }
-        
-        @media print { 
-            body { margin: 0; padding: 0; } 
-        }
-    </style>
-    ';
-
-        return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Surat</title>' . $styles . '</head><body>' . $html . '</body></html>';
     }
 }
